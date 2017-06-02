@@ -1,7 +1,7 @@
 import config
 
 from flask import Flask, request, render_template, render_template_string, Response, make_response
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 
 from temp_log import *
 
@@ -19,6 +19,7 @@ import os.path
 app = Flask("Thermometry", static_url_path="/static")
 app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = config.db
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = config.track_modifications
 
 db.init_app(app)
 
@@ -84,7 +85,7 @@ def get_data(fridge_name, data_type, sensor):
                 return Response(render_template("data_legacy.csv", data=data), mimetype='text/plain')
             else:
                 return Response(render_template("data_single.csv", data=data), mimetype='text/plain')
-        except Exception, e:
+        except Exception as e:
             return repr(e)
     elif 'sensors' in request.args:
         data = [{'name': x.name, 'column_name': x.column_name} for x in source.sensors.filter_by(visible=1).order_by("view_order")]
@@ -114,7 +115,7 @@ def get_data(fridge_name, data_type, sensor):
             for key in data.keys():
                 if isinstance(data[key], float) and (isinf(data[key]) or isnan(data[key])):
                     data[key] = None
-        except Exception, e:
+        except Exception as e:
             response = make_response(repr(e))
             return response
     else:
@@ -142,7 +143,7 @@ def get_data(fridge_name, data_type, sensor):
                 data = [(mktime(x[time_name].timetuple())*1000, x[sensor] if 0 < x[sensor] < 1000000 else None) for x in data_raw]
             else:
                 return Response("Sensor not found.")
-        except Exception, e:
+        except Exception as e:
             import traceback
             response = make_response(traceback.format_exc())
             return response
@@ -162,6 +163,6 @@ def insert_data(fridge, sup=None):
         else:
             fridge.append(**data)
         return 'OK'
-    except Exception, e:
+    except Exception as e:
         import traceback
         return traceback.format_exc()

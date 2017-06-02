@@ -1,9 +1,9 @@
 import config
 
 from flask import Flask
-from flask.ext.sqlalchemy import SQLAlchemy
-import flask.ext.sqlalchemy
-sa = flask.ext.sqlalchemy.sqlalchemy
+from flask_sqlalchemy import SQLAlchemy
+import flask_sqlalchemy
+sa = flask_sqlalchemy.sqlalchemy
 
 db = SQLAlchemy()
 
@@ -70,8 +70,7 @@ class SensTable(object):
         if key >= len(self):
             raise IndexError('List index out of range')
         res = self[key]
-        stmt = self._table().update().where(self._table().c.Time==res['Time']).\
-                values(**value)
+        stmt = self._table().update().where(self._table().c.Time==res['Time']).values(**value)
         db.session.execute(stmt)
         db.session.commit()
 
@@ -232,13 +231,11 @@ class Fridges_Supplementary(db.Model, SensTable):
         if self.table_name in db.metadata.tables:
             return db.metadata.tables[self.table_name]
         elif not hasattr(self, '_suppl_table') or self._suppl_table is None:
-            tbl = db.Table(self.table_name, db.metadata,
-                           db.Column('Time', db.DateTime, primary_key=True),
-                           *[db.Column(sensor.column_name, db.Float) for sensor in self.sensors])
-            self._suppl_table = tbl
-            return tbl
-        else:
+            self._suppl_table = db.Table(self.table_name, db.metadata,
+                                         db.Column('Time', db.DateTime, primary_key=True),
+                                         *[db.Column(sensor.column_name, db.Float) for sensor in self.sensors])
             return self._suppl_table
+
     _table=suppl_table
 
 class Fridges(db.Model, SensTable):
@@ -249,6 +246,9 @@ class Fridges(db.Model, SensTable):
     supplementary = db.relationship('Fridges_Supplementary', backref='fridge', lazy='dynamic')
     get_sensor = Sensors.get_sensor
     __tablename__ = "Fridges"
+
+    # Cache of existing table definitions
+    __tables__ = {}
 
     def __init__(self, name, sensors, comment=None):
         self.name = name
@@ -262,15 +262,15 @@ class Fridges(db.Model, SensTable):
 
     def fridge_table(self):
         # Sanitize name by replacing all spacial characters
-        if not hasattr(self, '_fridge_table') or self._fridge_table is None:
-            name = "".join(c if c in string.letters+string.digits else "_" for c in self.name)
-            tbl = db.Table(name, db.metadata,
-                           db.Column('Time', db.DateTime, primary_key=True),
-                           *[db.Column(therm.column_name, db.Float) for therm in self.sensors])
-            self._fridge_table = tbl
-            return tbl
-        else:
+        if self.table_name in db.metadata.tables:
+            return db.metadata.tables[self.table_name]
+        elif not hasattr(self, '_fridge_table') or self._fridge_table is None:
+            name = "".join(c if c in string.ascii_letters+string.digits else "_" for c in self.name)
+            self._fridge_table = db.Table(name, db.metadata,
+                                          db.Column('Time', db.DateTime, primary_key=True),
+                                          *[db.Column(therm.column_name, db.Float) for therm in self.sensors])
             return self._fridge_table
+
     _table = fridge_table
 
 if __name__ == "__main__":
@@ -283,8 +283,8 @@ if __name__ == "__main__":
     db.create_all()
 
     # Generate a default list of fridges, and thermometers on those fridges
-    thermometers = ["MC_RuO", "MC_PT", "MC_Speer", "50mK_RuO", "Still_RuO", "4K_RuO"]
-    fridges = ["Big_Fridge_Probe"]
+    thermometers = ["MC_PT", "MC_Speer", "50mK_RuO", "Still_RuO", "4K_RuO"]
+    fridges = ["Big_Fridge"]
     fridge_models = []
 
     # Create tables for those fridges

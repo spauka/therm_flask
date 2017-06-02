@@ -8,5 +8,5 @@ import sys
 
 try:
     CGIHandler().run(app)
-except Exception, e:
+except Exception as e:
     print e
