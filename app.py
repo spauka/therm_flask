@@ -1,7 +1,7 @@
 import config
 
 from flask import Flask, request, render_template, render_template_string, Response, make_response
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy, get_debug_queries
 
 from temp_log import *
 
@@ -14,8 +14,15 @@ app = Flask("Thermometry", static_url_path="/static")
 app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = config.db
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = config.track_modifications
+app.config['SQLALCHEMY_RECORD_QUERIES'] = True
 
 db.init_app(app)
+
+@app.after_request
+def after_request(response):
+    for query in get_debug_queries():
+        print("Query: %s\n\tParameters: %s\n\tDuration: %fs\n\tContext: %s\n" % (query.statement, query.parameters, query.duration, query.context))
+    return response
 
 @app.route('/')
 def index():
@@ -25,22 +32,21 @@ def index():
 @app.route('/<fridge_name>/<data_type>/<sensor>')
 def get_data(fridge_name, data_type, sensor):
     # First pull up the relevant fridge
-    fridge_name = fridge_name.replace('_', ' ')
-    fridge = Fridges.query.filter_by(name=fridge_name)
-    if fridge.count() == 0:
-        r = Response(render_template_string('Unable to find fridge {{fridge}}.', fridge=fridge))
+    try:
+        fridge = Fridges.get_fridge(fridge_name)
+    except KeyError:
+        r = Response(render_template_string("Unable to find fridge {{fridge}}.", fridge=fridge_name))
         r.status_code = 404
         return r
-    fridge = fridge.first()
 
     # Are we looking for a supplementary field?
     if data_type != 'data':
         sup = fridge.supplementary.filter_by(name=data_type)
-        if sup.count() == 0:
+        sup = sup.first()
+        if sup is None:
             r = Response(render_template_string('Unable to find supplementary set {{suppl}}.', suppl=data_type))
             r.status_code = 404
             return r
-        sup = sup.first()
         source = sup
     else:
         sup = None
@@ -130,7 +136,7 @@ def get_data(fridge_name, data_type, sensor):
     return response
 
 def insert_data(fridge, sup=None):
-    data = {x: y for x, y in request.form.iteritems()}
+    data = {x: y for x, y in request.form.items()}
     if 'Time' in data:
         data['Time'] = datetime.fromtimestamp(float(data['Time']))
     if sup is not None:

@@ -17,7 +17,6 @@ class SensTable(object):
         return db.session.execute(cnt).first()[0]
 
     def __getitem__(self, key):
-        count = len(self)
         if isinstance(key, slice):
             if (key.start is not None and not isinstance(key.start, int)) \
                or (key.stop is not None and not isinstance(key.stop, int)):
@@ -29,8 +28,10 @@ class SensTable(object):
             limit = None
 
             if start is not None and start < 0:
+                count = len(self)
                 start = count+start
             if stop is not None and stop < 0:
+                count = len(self)
                 stop = count+stop-1
             if start is not None and stop is not None:
                 limit = stop-start
@@ -51,13 +52,16 @@ class SensTable(object):
                 res = db.session.execute(res)
                 return islice(res, None, None, step)
         elif isinstance(key, int):
-            if key >= count:
-                raise IndexError('List index out of range')
             if key < 0:
-                key = count + key
-            res = self._table().select(offset=key, limit=1).order_by(self._table().c.Time.asc())
+                key = abs(key) - 1
+            res = self._table().select(offset=key, limit=1)
+            if key > 0:
+                res = res.order_by(self._table().c.Time.asc())
+            else:
+                res = res.order_by(self._table().c.Time.desc())
             res = db.session.execute(res)
-            return res.first()
+            res = res.first()
+            return res
         else:
             raise TypeError('List indices must be int')
 
@@ -98,11 +102,16 @@ class SensTable(object):
             time = datetime.now()
 
         # Ensure we are adding only to valid thermometers
-        for therm, value in values.iteritems():
-            therm_s = self.get_sensor(therm, self)
-        ins = self._table().insert().values(Time=time, **values)
-        db.session.execute(ins)
-        db.session.commit()
+        sensors = {x.column_name for x in list(self.sensors)}
+        for therm, value in values.items():
+            if therm not in sensors:
+                raise KeyError("Invalid Sensor in list")
+        try:
+            ins = self._table().insert().values(Time=time, **values)
+            db.session.execute(ins)
+            db.session.commit()
+        except sa.exc.IntegrityError:
+            return False
 
     def remove(self):
         stmt = self._table().delete().where(fridge.table().c.Time == i['Time'])
@@ -260,14 +269,23 @@ class Fridges(db.Model, SensTable):
 
     def fridge_table(self):
         # Sanitize name by replacing all spacial characters
-        if self.table_name in db.metadata.tables:
-            return db.metadata.tables[self.table_name]
+        name = "".join(c if c in string.ascii_letters+string.digits else "_" for c in self.name)
+        if name in db.metadata.tables:
+            return db.metadata.tables[name]
         elif not hasattr(self, '_fridge_table') or self._fridge_table is None:
-            name = "".join(c if c in string.ascii_letters+string.digits else "_" for c in self.name)
             self._fridge_table = db.Table(name, db.metadata,
-                                          db.Column('Time', db.DateTime, primary_key=True),
-                                          *[db.Column(therm.column_name, db.Float) for therm in self.sensors])
-            return self._fridge_table
+                                   db.Column('Time', db.DateTime, primary_key=True),
+                                   *[db.Column(therm.column_name, db.Float) for therm in self.sensors])
+        return self._fridge_table
+
+    @classmethod
+    def get_fridge(cls, name):
+        # Sanitize name by replacing all spacial characters
+        name = "".join(c if c in string.ascii_letters+string.digits else " " for c in name)
+        res = Fridges.query.filter(Fridges.name==name).first()
+        if res is None:
+            raise KeyError("Unable to find fridge")
+        return res
 
     _table = fridge_table
 
