@@ -5,16 +5,10 @@ from flask_sqlalchemy import SQLAlchemy
 
 from temp_log import *
 
-import logging
-from logging import FileHandler
 import json
 from time import mktime, gmtime
 from datetime import datetime, timedelta
 from math import isnan, isinf
-
-import os
-from os import listdir
-import os.path
 
 app = Flask("Thermometry", static_url_path="/static")
 app.debug = True
@@ -26,10 +20,6 @@ db.init_app(app)
 @app.route('/')
 def index():
     return app.send_static_file('index.html')
-
-#@app.route('/static/<path:static>/')
-#def static(static):
-#    return Response(static)
 
 @app.route('/<fridge_name>/<data_type>/', defaults={'sensor': None}, methods=['GET', 'POST'])
 @app.route('/<fridge_name>/<data_type>/<sensor>')
@@ -80,13 +70,10 @@ def get_data(fridge_name, data_type, sensor):
                          0, row["MC_PT"]))
             if 'single' in request.args:
                 data[-1] = data[-1] + (0, row["four_K_PT_front"])
-        try:
-            if 'legacy' in request.args:
-                return Response(render_template("data_legacy.csv", data=data), mimetype='text/plain')
-            else:
-                return Response(render_template("data_single.csv", data=data), mimetype='text/plain')
-        except Exception as e:
-            return repr(e)
+        if 'legacy' in request.args:
+            return Response(render_template("data_legacy.csv", data=data), mimetype='text/plain')
+        else:
+            return Response(render_template("data_single.csv", data=data), mimetype='text/plain')
     elif 'sensors' in request.args:
         data = [{'name': x.name, 'column_name': x.column_name} for x in source.sensors.filter_by(visible=1).order_by("view_order")]
     elif 'summary' in request.args:
@@ -108,45 +95,34 @@ def get_data(fridge_name, data_type, sensor):
                 else:
                     data.append(row['Four_K_Pt'])
     elif 'current' in request.args:
-        try:
-            data = source[-1]
-            data = dict(data)
-            data['Time'] = data['Time'].ctime()
-            for key in data.keys():
-                if isinstance(data[key], float) and (isinf(data[key]) or isnan(data[key])):
-                    data[key] = None
-        except Exception as e:
-            response = make_response(repr(e))
-            return response
+        data = source[-1]
+        data = dict(data)
+        data['Time'] = data['Time'].ctime()
+        for key in data.keys():
+            if isinstance(data[key], float) and (isinf(data[key]) or isnan(data[key])):
+                data[key] = None
     else:
-        try:
-            if 'hourly' in request.args:
-                try:
-                    data_raw = list(source.hourly_avg(sensor))
-                except KeyError:
-                    return Response("Sensor not found.")
-            elif 'start' in request.args or 'stop' in request.args:
-                start = datetime.fromtimestamp(float(request.args['start'])/1000)
-                stop = datetime.fromtimestamp(float(request.args['stop'])/1000)
-                stop += timedelta(1)
-                data_raw = list(source.range(start, stop))
-            else:
-                data_raw = list(source[-count:])
-            data = []
-            if not data_raw:
-                return Response("No data returned")
-            if sensor:
-                if 'time' in data_raw[0]:
-                    time_name = 'time'
-                else:
-                    time_name = 'Time'
-                data = [(mktime(x[time_name].timetuple())*1000, x[sensor] if 0 < x[sensor] < 1000000 else None) for x in data_raw]
-            else:
+        if 'hourly' in request.args:
+            try:
+                if not sensor:
+                    raise KeyError("Sensor not found")
+                data_raw = list(source.hourly_avg(sensor))
+            except KeyError:
                 return Response("Sensor not found.")
-        except Exception as e:
-            import traceback
-            response = make_response(traceback.format_exc())
-            return response
+        elif 'start' in request.args or 'stop' in request.args:
+            start = datetime.fromtimestamp(float(request.args['start'])/1000)
+            stop = datetime.fromtimestamp(float(request.args['stop'])/1000)
+            stop += timedelta(1)
+            data_raw = list(source.range(start, stop))
+        else:
+            data_raw = list(source[-count:])
+        data = []
+        if not data_raw:
+            return Response("No data returned")
+        if sensor:
+            data = [(mktime(x['Time'].timetuple())*1000, x[sensor] if x[sensor] and 0 < x[sensor] < 1000000 else None) for x in data_raw]
+        else:
+            return Response("Sensor not found.")
 
     response = make_response(json.dumps(data))
     response.mimetype = "application/json"
@@ -154,15 +130,11 @@ def get_data(fridge_name, data_type, sensor):
     return response
 
 def insert_data(fridge, sup=None):
-    try:
-        data = {x: y for x, y in request.form.iteritems()}
-        if 'Time' in data:
-            data['Time'] = datetime.fromtimestamp(float(data['Time']))
-        if sup is not None:
-            sup.append(**data)
-        else:
-            fridge.append(**data)
-        return 'OK'
-    except Exception as e:
-        import traceback
-        return traceback.format_exc()
+    data = {x: y for x, y in request.form.iteritems()}
+    if 'Time' in data:
+        data['Time'] = datetime.fromtimestamp(float(data['Time']))
+    if sup is not None:
+        sup.append(**data)
+    else:
+        fridge.append(**data)
+    return 'OK'

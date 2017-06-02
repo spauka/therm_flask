@@ -111,9 +111,7 @@ class SensTable(object):
 
     def hourly_avg(self, sensor):
         columns = self._table().columns
-        # TODO: Time should be capitalized, however a bug in the version of sqlalchemy on the
-        # server does now properly escape the name of the sort parameter hence this is wrong here.
-        dategroup = sa.func.date_trunc('hour', sa.func.timezone('UTC', columns.Time)).label("time")
+        dategroup = sa.func.date_trunc('hour', sa.func.timezone('UTC', columns.Time)).label("Time")
         dategroup.type = sa.DateTime()
         if sensor not in columns:
             raise KeyError("Sensor not found")
