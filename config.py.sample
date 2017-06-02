@@ -1,0 +1,2 @@
+# Add sqlalchemy connection string here
+db = '<database>://<path>'
