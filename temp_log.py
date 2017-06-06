@@ -12,8 +12,11 @@ from itertools import islice
 from datetime import datetime
 
 class SensTable(object):
+    def __init__(self):
+        pass
+
     def __len__(self):
-        cnt = self._table().count()
+        cnt = self.fridge_table().count()
         return db.session.execute(cnt).first()[0]
 
     def __getitem__(self, key):
@@ -24,43 +27,64 @@ class SensTable(object):
 
             start = key.start
             stop = key.stop
-            step = key.step
+            step = key.step if key.step else 1
+            if step < 0:
+                raise ValueError("Negative step sizes are not supported")
             limit = None
+            reverse = False
 
-            if start is not None and start < 0:
-                count = len(self)
-                start = count+start
-            if stop is not None and stop < 0:
-                count = len(self)
-                stop = count+stop-1
-            if start is not None and stop is not None:
-                limit = stop-start
-                if limit < 0:
-                    return iter([])
+            if start is None:
+                if stop is None:
+                  return self[0::step]
+                if stop < 0:
+                    count = len(self)
+                    stop = count+stop-1
+                return self[0:stop:step]
+            elif start < 0:
+                if stop is not None:
+                    count = len(self)
+                    start = count+start
+                    if stop < 0:
+                        stop = count+stop-1
+                    return self[start:stop:step]
 
-            res = self._table().select(offset=start, limit=limit)
-            if step is None:
-                res = res.order_by(self._table().c.Time.asc())
-                res = db.session.execute(res)
-                return iter(res)
-            else:
-                if step < 0:
-                    res = res.order_by(self._table().c.Time.desc())
-                    step = abs(step)
+                # Otherwise select in reverse order and swap order in python
+                res = self._table().select(limit=abs(start))
+                res = res.order_by(self._table().c.Time.desc())
+                reverse = True
+            else: # start > 0
+                if stop is None:
+                    pass # This is the same as limit=None
+                elif stop < 0:
+                    count = len(self)
+                    stop = count+stop-1
+                    return self[start:stop:step]
                 else:
-                    res = res.order_by(self._table().c.Time.asc())
-                res = db.session.execute(res)
-                return islice(res, None, None, step)
+                    limit = stop-start
+                    if limit < 0:
+                        return iter(())
+
+                res = self._table().select(offset=start, limit=limit)
+                res = res.order_by(self._table().c.Time.asc())
+
+            res = db.session.execute(res)
+
+            if reverse:
+                res = reversed(tuple(res))
+
+            return islice(res, None, None, step)
         elif isinstance(key, int):
             if key < 0:
                 key = abs(key) - 1
             res = self._table().select(offset=key, limit=1)
-            if key > 0:
+            if key >= 0:
                 res = res.order_by(self._table().c.Time.asc())
             else:
                 res = res.order_by(self._table().c.Time.desc())
             res = db.session.execute(res)
             res = res.first()
+            if res is None:
+                raise KeyError("Index out of range")
             return res
         else:
             raise TypeError('List indices must be int')
@@ -101,16 +125,15 @@ class SensTable(object):
         else:
             time = datetime.now()
 
-        # Ensure we are adding only to valid thermometers
-        sensors = {x.column_name for x in list(self.sensors)}
-        for therm, value in values.items():
-            if therm not in sensors:
-                raise KeyError("Invalid Sensor in list")
         try:
             ins = self._table().insert().values(Time=time, **values)
             db.session.execute(ins)
             db.session.commit()
+        except sa.exc.CompileError:
+            raise KeyError("Invalid column name")
         except sa.exc.IntegrityError:
+            # This occurs if we try and add a duplicate timestamp
+            # We can fail quietly here
             return False
 
     def remove(self):
