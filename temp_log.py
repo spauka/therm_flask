@@ -49,8 +49,8 @@ class SensTable(object):
                     return self[start:stop:step]
 
                 # Otherwise select in reverse order and swap order in python
-                res = self._table().select(limit=abs(start))
-                res = res.order_by(self._table().c.Time.desc())
+                res = self.fridge_table().select(limit=abs(start))
+                res = res.order_by(self.fridge_table().c.Time.desc())
                 reverse = True
             else: # start > 0
                 if stop is None:
@@ -64,8 +64,8 @@ class SensTable(object):
                     if limit < 0:
                         return iter(())
 
-                res = self._table().select(offset=start, limit=limit)
-                res = res.order_by(self._table().c.Time.asc())
+                res = self.fridge_table().select(offset=start, limit=limit)
+                res = res.order_by(self.fridge_table().c.Time.asc())
 
             res = db.session.execute(res)
 
@@ -76,11 +76,11 @@ class SensTable(object):
         elif isinstance(key, int):
             if key < 0:
                 key = abs(key) - 1
-            res = self._table().select(offset=key, limit=1)
+            res = self.fridge_table().select(offset=key, limit=1)
             if key >= 0:
-                res = res.order_by(self._table().c.Time.asc())
+                res = res.order_by(self.fridge_table().c.Time.asc())
             else:
-                res = res.order_by(self._table().c.Time.desc())
+                res = res.order_by(self.fridge_table().c.Time.desc())
             res = db.session.execute(res)
             res = res.first()
             if res is None:
@@ -98,7 +98,7 @@ class SensTable(object):
         if key >= len(self):
             raise IndexError('List index out of range')
         res = self[key]
-        stmt = self._table().update().where(self._table().c.Time==res['Time']).values(**value)
+        stmt = self.fridge_table().update().where(self.fridge_table().c.Time==res['Time']).values(**value)
         db.session.execute(stmt)
         db.session.commit()
 
@@ -108,7 +108,7 @@ class SensTable(object):
             items = [items]
         items = list(items)
         for i in items:
-            stmt = self._table().delete().where(self._table().c.Time==i['Time'])
+            stmt = self.fridge_table().delete().where(self.fridge_table().c.Time==i['Time'])
             db.session.execute(stmt)
         db.session.commit()
 
@@ -126,7 +126,7 @@ class SensTable(object):
             time = datetime.now()
 
         try:
-            ins = self._table().insert().values(Time=time, **values)
+            ins = self.fridge_table().insert().values(Time=time, **values)
             db.session.execute(ins)
             db.session.commit()
         except sa.exc.CompileError:
@@ -137,12 +137,12 @@ class SensTable(object):
             return False
 
     def remove(self):
-        stmt = self._table().delete().where(fridge.table().c.Time == i['Time'])
+        stmt = self.fridge_table().delete().where(fridge.table().c.Time == i['Time'])
         db.session.execute(stmt)
         db.session.commit()
 
     def hourly_avg(self, sensor):
-        columns = self._table().columns
+        columns = self.fridge_table().columns
         dategroup = sa.func.date_trunc('hour', sa.func.timezone('UTC', columns.Time)).label("Time")
         dategroup.type = sa.DateTime()
         if sensor not in columns:
@@ -152,7 +152,7 @@ class SensTable(object):
         return db.session.execute(query)
 
     def range(self, start, stop):
-        query = self._table().select().where(self._table().columns.Time.between(start, stop)).order_by(self._table().columns.Time.asc())
+        query = self.fridge_table().select().where(self.fridge_table().columns.Time.between(start, stop)).order_by(self.fridge_table().columns.Time.asc())
         return db.session.execute(query)
 
 class Sensors(db.Model):
@@ -190,7 +190,7 @@ class Sensors(db.Model):
             db.session.add(sensor)
             return sensor
         elif sensor.count() == 0 and not add:
-            return None
+            raise KeyError("Sensor not found")
         return sensor.first()
 
 class Sensors_Supplementary(db.Model):
@@ -231,7 +231,7 @@ class Sensors_Supplementary(db.Model):
             db.session.add(sensor)
             return sensor
         elif sensor.count() == 0 and not add:
-            return None
+            raise KeyError("Unknown Sensor")
         return sensor.first()
 
 class Fridges_Supplementary(db.Model, SensTable):
@@ -242,7 +242,6 @@ class Fridges_Supplementary(db.Model, SensTable):
     label = db.Column(db.String(1024))
     comment = db.Column(db.UnicodeText())
     sensors = db.relationship('Sensors_Supplementary', backref='fridge_suppl', lazy='dynamic')
-    get_sensor = Sensors_Supplementary.get_sensor
     __tablename__ = "Fridges_Supplementary"
 
     def __init__(self, name, table_name, label, sensors, comment=None):
@@ -253,10 +252,13 @@ class Fridges_Supplementary(db.Model, SensTable):
             self.sensors.append(Sensors_Supplementary.get_sensor(sensor, self, True))
         self.comment = comment
 
+    def get_sensor(self, sensor):
+        return Sensors_Supplementary.get_sensor(sensor, self, False)
+
     def __repr__(self):
         return "<Supplementary for %r: %r>" % (self.fridge, self.table_name)
 
-    def suppl_table(self):
+    def fridge_table(self):
         # Sanitize name by replacing all spacial characters
         if self.table_name in db.metadata.tables:
             return db.metadata.tables[self.table_name]
@@ -266,15 +268,12 @@ class Fridges_Supplementary(db.Model, SensTable):
                                          *[db.Column(sensor.column_name, db.Float) for sensor in self.sensors])
             return self._suppl_table
 
-    _table=suppl_table
-
 class Fridges(db.Model, SensTable):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(255), unique=True)
     comment = db.Column(db.UnicodeText())
     sensors = db.relationship('Sensors', backref='fridge', lazy='dynamic')
     supplementary = db.relationship('Fridges_Supplementary', backref='fridge', lazy='dynamic')
-    get_sensor = Sensors.get_sensor
     __tablename__ = "Fridges"
 
     # Cache of existing table definitions
@@ -289,6 +288,9 @@ class Fridges(db.Model, SensTable):
 
     def __repr__(self):
         return "<Fridge %r>" % self.name
+
+    def get_sensor(self, sensor):
+        return Sensors.get_sensor(sensor, self, False)
 
     def fridge_table(self):
         # Sanitize name by replacing all spacial characters
@@ -309,8 +311,6 @@ class Fridges(db.Model, SensTable):
         if res is None:
             raise KeyError("Unable to find fridge")
         return res
-
-    _table = fridge_table
 
 if __name__ == "__main__":
     from app import app
