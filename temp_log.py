@@ -1,11 +1,10 @@
 import config
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 import flask_sqlalchemy
 sa = flask_sqlalchemy.sqlalchemy
 
-db = SQLAlchemy()
+db = flask_sqlalchemy.SQLAlchemy()
 
 import string
 from itertools import islice
@@ -155,27 +154,32 @@ class SensTable(object):
         query = self.fridge_table().select().where(self.fridge_table().columns.Time.between(start, stop)).order_by(self.fridge_table().columns.Time.asc())
         return db.session.execute(query)
 
-class Sensors(db.Model):
+class SensorMeta(flask_sqlalchemy._BoundDeclarativeMeta, sa.sql.visitors.VisitableType):
+    pass
+
+class Sensors(db.Model, db.Column, metaclass=SensorMeta):
     id = db.Column(db.Integer(), primary_key=True)
     fridge_id = db.Column(db.Integer(), db.ForeignKey('Fridges.id'))
     column_name = db.Column(db.String(1024))
-    name = db.Column(db.String(1024))
+    display_name = db.Column("name", db.String(1024))
     view_order = db.Column(db.Integer())
     visible = db.Column(db.Integer())
     __tablename__ = "Sensors"
 
-    def __init__(self, name, fridge, view_order=1, visible=1):
+    def __init__(self, display_name, column_name, fridge, view_order=1, visible=1):
         if isinstance(fridge, Fridges):
             self.fridge_id = fridge.id
         else:
             self.fridge_id = int(fridge)
-        self.name = name
+        self.display_name = name
         self.column_name = name
         self.view_order = view_order
         self.visible = visible
 
+        db.Column.__init__(self, name, Float())
+
     def __repr__(self):
-        return "<Sensor %r>" % (self.name)
+        return "<Sensor %r>" % (self.display_name)
 
     @classmethod
     def get_sensor(cls, name, fridge, add=False):
