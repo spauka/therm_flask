@@ -74,8 +74,8 @@ class SensTable(object):
             return islice(res, None, None, step)
         elif isinstance(key, int):
             if key < 0:
-                key = abs(key) - 1
-            res = self.fridge_table().select(offset=key, limit=1)
+                offset = abs(key) - 1
+            res = self.fridge_table().select(offset=offset, limit=1)
             if key >= 0:
                 res = res.order_by(self.fridge_table().c.Time.asc())
             else:
