@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from math import isnan, isinf
 
 app = Flask("Thermometry", static_url_path="/static")
-app.debug = True
+app.debug = False
 app.config['SQLALCHEMY_DATABASE_URI'] = config.db
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = config.track_modifications
 app.config['SQLALCHEMY_RECORD_QUERIES'] = True
@@ -20,8 +20,9 @@ db.init_app(app)
 
 @app.after_request
 def after_request(response):
-    for query in get_debug_queries():
-        print("Query: %s\n\tParameters: %s\n\tDuration: %fs\n\tContext: %s\n" % (query.statement, query.parameters, query.duration, query.context))
+    if app.debug:
+        for query in get_debug_queries():
+            print("Query: %s\n\tParameters: %s\n\tDuration: %fs\n\tContext: %s\n" % (query.statement, query.parameters, query.duration, query.context))
     return response
 
 @app.route('/')
