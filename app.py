@@ -82,7 +82,7 @@ def get_data(fridge_name, data_type, sensor):
         else:
             return Response(render_template("data_single.csv", data=data), mimetype='text/plain')
     elif 'sensors' in request.args:
-        data = [{'name': x.name, 'column_name': x.column_name} for x in source.sensors.filter_by(visible=1).order_by("view_order")]
+        data = [{'name': x.display_name, 'column_name': x.column_name} for x in source.sensors.filter_by(visible=1).order_by("view_order")]
     elif 'summary' in request.args:
         data_raw = source[-30:]
         data = []
