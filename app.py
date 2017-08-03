@@ -90,7 +90,7 @@ def get_data(fridge_name, data_type, sensor):
             if 'MC_Pt' in row:
                 if row['MC_Pt'] > 20000 and row['MC_Pt'] < 500000:
                     data.append(row['MC_Pt'])
-                elif row['MC_Speer'] < 4000:
+                elif row['MC_Speer'] is not None and row['MC_Speer'] < 4000:
                     data.append(row['MC_Speer'])
                 else:
                     data.append(row['Four_K_RuO'])
