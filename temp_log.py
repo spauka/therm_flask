@@ -213,7 +213,7 @@ class Sensors_Supplementary(db.Model):
             self.fridge_suppl_id = fridge_suppl.id
         else:
             self.fridge_suppl_id = int(fridge_suppl)
-        self.name = name
+        self.column_name = name
         if column_name:
             self.column_name = column_name
         else:
