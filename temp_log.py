@@ -306,7 +306,7 @@ class Fridges(db.Model, SensTable):
         elif not hasattr(self, '_fridge_table') or self._fridge_table is None:
             self._fridge_table = db.Table(name, db.metadata,
                                    db.Column('Time', db.DateTime, primary_key=True),
-                                   *self.sensors)
+                                   *[db.Column(sensor.column_name, db.Float) for sensor in self.sensors])
         return self._fridge_table
 
     @classmethod
