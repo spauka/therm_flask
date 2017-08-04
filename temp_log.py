@@ -75,6 +75,8 @@ class SensTable(object):
         elif isinstance(key, int):
             if key < 0:
                 offset = abs(key) - 1
+            else:
+                offset = key
             res = self.fridge_table().select(offset=offset, limit=1)
             if key >= 0:
                 res = res.order_by(self.fridge_table().c.Time.asc())
@@ -175,8 +177,8 @@ class Sensors(db.Model, db.Column, metaclass=SensorMeta):
         self.column_name = name
         self.view_order = view_order
         self.visible = visible
-
-        db.Column.__init__(self, name, Float())
+        
+        db.Column.__init__(self, name, Float)
 
     def __repr__(self):
         return "<Sensor %r>" % (self.display_name)
@@ -201,7 +203,7 @@ class Sensors_Supplementary(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     fridge_suppl_id = db.Column(db.Integer(), db.ForeignKey('Fridges_Supplementary.id'))
     column_name = db.Column(db.String(1024))
-    name = db.Column(db.String(1024))
+    display_name = db.Column("name", db.String(1024))
     view_order = db.Column(db.Integer())
     visible = db.Column(db.Integer())
     __tablename__ = "Sensors_Supplementary"
@@ -304,7 +306,7 @@ class Fridges(db.Model, SensTable):
         elif not hasattr(self, '_fridge_table') or self._fridge_table is None:
             self._fridge_table = db.Table(name, db.metadata,
                                    db.Column('Time', db.DateTime, primary_key=True),
-                                   *[db.Column(therm.column_name, db.Float) for therm in self.sensors])
+                                   *self.sensors)
         return self._fridge_table
 
     @classmethod
