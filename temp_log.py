@@ -222,7 +222,7 @@ class Sensors_Supplementary(db.Model):
         self.visible = visible
 
     def __repr__(self):
-        return "<Supplementary_Sensor %r>" % (self.name)
+        return "<Supplementary_Sensor %r>" % (self.column_name)
 
     @classmethod
     def get_sensor(cls, name, fridge, add=False):
@@ -270,7 +270,7 @@ class Fridges_Supplementary(db.Model, SensTable):
             return db.metadata.tables[self.table_name]
         elif not hasattr(self, '_suppl_table') or self._suppl_table is None:
             self._suppl_table = db.Table(self.table_name, db.metadata,
-                                         db.Column('Time', db.DateTime, primary_key=True),
+                                         db.Column('Time', db.TIMESTAMP, primary_key=True),
                                          *[db.Column(sensor.column_name, db.Float) for sensor in self.sensors])
             return self._suppl_table
 
@@ -305,7 +305,7 @@ class Fridges(db.Model, SensTable):
             return db.metadata.tables[name]
         elif not hasattr(self, '_fridge_table') or self._fridge_table is None:
             self._fridge_table = db.Table(name, db.metadata,
-                                   db.Column('Time', db.DateTime, primary_key=True),
+                                   db.Column('Time', db.TIMESTAMP, primary_key=True),
                                    *[db.Column(sensor.column_name, db.Float) for sensor in self.sensors])
         return self._fridge_table
 

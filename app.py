@@ -127,7 +127,7 @@ def get_data(fridge_name, data_type, sensor):
         if not data_raw:
             return Response("No data returned")
         if sensor:
-            data = [(mktime(x['Time'].timetuple())*1000, x[sensor] if x[sensor] and 0 < x[sensor] < 1000000 else None) for x in data_raw]
+            data = [(mktime(x['Time'].timetuple().replace(tzinfo=None))*1000, x[sensor] if x[sensor] and 0 < x[sensor] < 1000000 else None) for x in data_raw]
         else:
             return Response("Sensor not found.")
 
