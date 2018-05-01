@@ -94,7 +94,7 @@ def get_data(fridge_name, data_type, sensor):
                     data.append(row['MC_Speer'])
                 else:
                     data.append(row['Four_K_RuO'])
-            if 'MC' in row:
+            elif 'MC' in row:
                 if isnan(row['MC']) or row['MC'] > 80000:
                     data.append(row['Still'])
                 elif 'Probe' in row and not isnan(row['Probe']):
