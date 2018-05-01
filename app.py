@@ -94,6 +94,13 @@ def get_data(fridge_name, data_type, sensor):
                     data.append(row['MC_Speer'])
                 else:
                     data.append(row['Four_K_RuO'])
+            if 'MC' in row:
+                if row['MC'] is None or row['MC'] > 80000:
+                    data.append(row['Still'])
+                elif 'Probe' in row and row['Probe'] is not None:
+                    data.append(row['Probe'])
+                else:
+                    data.append(row['MC')
             elif 'ProbeTemp' in row:
                 data.append(float(row['ProbeTemp'])*1000)
             else:
