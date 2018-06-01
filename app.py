@@ -87,23 +87,26 @@ def get_data(fridge_name, data_type, sensor):
         data_raw = source[-30:]
         data = []
         for row in data_raw:
-            if 'MC_Pt' in row:
+            if 'MC_Pt' in row: # Leiden Fridges
                 if row['MC_Pt'] > 20000 and row['MC_Pt'] < 500000:
                     data.append(row['MC_Pt'])
                 elif row['MC_Speer'] is not None and row['MC_Speer'] < 4000:
                     data.append(row['MC_Speer'])
                 else:
                     data.append(row['Four_K_RuO'])
-            elif 'MC' in row:
+            elif 'MC' in row: # Bluefors Fridges
                 if 'Probe' in row and not isnan(row['Probe']):
                     data.append(row['Probe'])
                 elif isnan(row['MC']) or row['MC'] > 80000:
-                    data.append(row['Still'])
+                    if 'Still' in row and row['Still'] < 1200:
+                        data.append(7.00)
+                    else:
+                        data.append(row['Still'])
                 else:
                     data.append(row['MC'])
-            elif 'ProbeTemp' in row:
+            elif 'ProbeTemp' in row: # NMR Cryostat
                 data.append(float(row['ProbeTemp'])*1000)
-            else:
+            else: # Also leiden
                 if row['Four_K_Pt'] is None or row['Four_K_Pt'] < 20000:
                     data.append(row['Four_K_RuO'])
                 else:
