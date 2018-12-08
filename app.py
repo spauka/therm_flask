@@ -29,6 +29,25 @@ def after_request(response):
 def index():
     return app.send_static_file('index.html')
 
+@app.route('/js/<path:path>')
+def send_js(path):
+    return send_from_directory('js', path)
+@app.route('/css/<path:path>')
+def send_css(path):
+    return send_from_directory('css', path)
+@app.route('/fonts/<path:path>')
+def send_fonts(path):
+    return send_from_directory('fonts', path)
+@app.route('/img/<path:path>')
+def send_img(path):
+    return send_from_directory('img', path)
+@app.route('/includes/<path:path>')
+def send_includes(path):
+    return send_from_directory('includes', path)
+@app.route('/views/<path:path>')
+def send_views(path):
+    return send_from_directory('views', path)
+
 @app.route('/<fridge_name>/<data_type>/', defaults={'sensor': None}, methods=['GET', 'POST'])
 @app.route('/<fridge_name>/<data_type>/<sensor>')
 def get_data(fridge_name, data_type, sensor):
@@ -69,7 +88,7 @@ def get_data(fridge_name, data_type, sensor):
         data_raw = fridge[-count:]
         data = []
         for row in data_raw:
-            data.append((row['Time'], 
+            data.append((row['Time'],
                          0, row["Four_K_RuO"],
                          0, row["Still_RuO"],
                          0, row["50mK_RuO"],
