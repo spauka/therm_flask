@@ -1,0 +1,15 @@
+/**
+ * Add padding to the titlebar
+*/
+
+#titlebar {
+  position: relative;
+  padding-left: 10px;
+  padding-top: 10px;
+  padding-right: 20px;
+}
+
+.therm_chart {
+  height: 400px;
+  min-width: 250px;
+}

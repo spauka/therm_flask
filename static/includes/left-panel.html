@@ -1,0 +1,63 @@
+      <!-- NAVIGATION : This navigation is also responsive
+
+      To make this navigation dynamic please make sure to link the node
+      (the reference to the nav > ul) after page load. Or the navigation
+      will not initialize.
+      -->
+
+      <navigation>
+        <nav:item data-view="/dashboard" data-icon="fa fa-lg fa-fw fa-home" title="Reilly Lab Thermometry" />
+        <nav:group data-icon="fa fa-lg fa-fw fa-area-chart" title="Blue Fridge" >
+          <nav:item data-view="/Blue_Fridge" title="Separate" />
+          <nav:item data-view="/Blue_Fridge/combined" title="Combined" />
+          <nav:item data-view="/Blue_Fridge/historic" title="Historic" />
+          <nav:item data-view="/Blue_Fridge/MaxiGauge" title="Blue Fridge MaxiGauge" />
+		  <nav:item data-view="/Blue_Fridge/FP" title="Blue Fridge Front Panel" />
+        </nav:group>
+        <nav:group data-icon="fa fa-lg fa-fw fa-area-chart" title="Red Fridge" >
+          <nav:item data-view="/Red_Fridge" title="Separate" />
+          <nav:item data-view="/Red_Fridge/combined" title="Combined" />
+          <nav:item data-view="/Red_Fridge/historic" title="Historic" />
+          <nav:item data-view="/Red_Fridge/FP" title="Red Fridge Front Panel" />
+        </nav:group>
+        <nav:group data-icon="fa fa-lg fa-fw fa-area-chart" title="Big Fridge" >
+          <nav:item data-view="/Big_Fridge" title="Separate" />
+          <nav:item data-view="/Big_Fridge/combined" title="Combined" />
+          <nav:item data-view="/Big_Fridge/historic" title="Historic" />
+<!--          <nav:item data-view="/Big_Fridge/Big_Fridge_Probe" title="Probe" /> -->
+          <nav:item data-view="/Big_Fridge/CMN" title="CMN" />
+          <nav:item data-view="/Big_Fridge/FP" title="Front Panel" />
+          <nav:item data-view="/Big_Fridge/FP/historic" title="Front Panel Historic" />
+          <nav:item data-view="/Big_Fridge/PV" title="Maxi Gauge" />
+          <nav:item data-view="/Big_Fridge/BP" title="Backing Pump" />
+        </nav:group>
+        <nav:group data-icon="fa fa-lg fa-fw fa-area-chart" title="Green Fridge" >
+          <nav:item data-view="/Green_Fridge" title="Separate" />
+          <nav:item data-view="/Green_Fridge/combined" title="Combined" />
+          <nav:item data-view="/Green_Fridge/historic" title="Historic" />
+        </nav:group>
+        <nav:group data-icon="fa fa-lg fa-fw fa-area-chart" title="Janis Cryostat" >
+          <nav:item data-view="/Janis_Cryostat" title="Separate" />
+          <nav:item data-view="/Janis_Cryostat/combined" title="Combined" />
+          <nav:item data-view="/Janis_Cryostat/historic" title="Historic" />
+        </nav:group>
+        <nav:group data-icon="fa fa-lg fa-fw fa-area-chart" title="BlueFors LD" >
+          <nav:item data-view="/BlueFors_LD" title="Separate" />
+          <nav:item data-view="/BlueFors_LD/combined" title="Combined" />
+          <nav:item data-view="/BlueFors_LD/historic" title="Historic" />
+          <nav:item data-view="/BlueFors_LD/MaxiGauge" title="Pressures" />
+        </nav:group>
+        <nav:group data-icon="fa fa-lg fa-fw fa-area-chart" title="BlueFors XLD" >
+          <nav:item data-view="/BlueFors_XLD" title="Separate" />
+          <nav:item data-view="/BlueFors_XLD/combined" title="Combined" />
+          <nav:item data-view="/BlueFors_XLD/historic" title="Historic" />
+          <nav:item data-view="/BlueFors_XLD/MaxiGauge" title="Pressures" />
+        </nav:group>
+        <nav:group data-icon="fa fa-lg fa-fw fa-area-chart" title="BlueFors QT1" >
+          <nav:item data-view="/BlueFors_QT1" title="Separate" />
+          <nav:item data-view="/BlueFors_QT1/combined" title="Combined" />
+          <nav:item data-view="/BlueFors_QT1/historic" title="Historic" />
+          <nav:item data-view="/BlueFors_QT1/MaxiGauge" title="Pressures" />
+        </nav:group>
+      </navigation>
+      <span class="minifyme" data-action="minifyMenu"> <i class="fa fa-arrow-circle-left hit"></i> </span>

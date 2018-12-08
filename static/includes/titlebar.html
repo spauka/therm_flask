@@ -1,0 +1,213 @@
+<div class="row">
+  <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
+    <h1 class="page-title txt-color-blueDark">
+      <i class="fa fa-area-chart fa-fw "></i> 
+        Thermometry 
+        <span>>
+        {{$route.current.scope.pagetitle}}
+      </span>
+    </h1>
+  </div>
+  <div class="col-xs-12 col-sm-5 col-md-5 col-lg-8">
+    <ul id="sparks" class="">
+      <li class="sparks-info">
+      <h5> Blue Fridge <span class="txt-color-blue" id="blue-fridge-summary-text"><i class="fa fa-spinner fa-spin"></i></span></h5>
+        <div id="blue-fridge-summary" class="sparkline txt-color-blue hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#BCCFD7">
+          Loading...
+        </div>
+      </li>
+      <li class="sparks-info">
+      <h5> Red Fridge <span class="txt-color-red" id="red-fridge-summary-text"><i class="fa fa-spinner fa-spin"></i></span></h5>
+        <div id="red-fridge-summary" class="sparkline txt-color-red hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#DD9AA9">
+          Loading...
+        </div>
+      </li>
+      <li class="sparks-info">
+      <h5> Big Fridge <span class="txt-color-purple" id="big-fridge-summary-text"><i class="fa fa-spinner fa-spin"></i></span></h5>
+        <div id="big-fridge-summary" class="sparkline txt-color-purple hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#CC99CC">
+          Loading...
+        </div>
+      </li>
+      <li class="sparks-info">
+      <h5> Green Fridge <span class="txt-color-greenDark" id="green-fridge-summary-text"><i class="fa fa-spinner fa-spin"></i></span></h5>
+        <div id="green-fridge-summary" class="sparkline txt-color-greenDark hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#B6C3B6">
+          Loading...
+        </div>
+      </li>
+      <li class="sparks-info">
+      <h5> NMR Cryostat <span class="txt-color-orange" id="nmr-summary-text"><i class="fa fa-spinner fa-spin"></i></span></h5>
+        <div id="nmr-summary" class="sparkline txt-color-orange hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#FEE5CA">
+          Loading...
+        </div>
+      </li>
+      <li class="sparks-info">
+      <h5> BlueFors LD <span class="txt-color-blueLight" id="ld-summary-text"><i class="fa fa-spinner fa-spin"></i></span></h5>
+        <div id="ld-summary" class="sparkline txt-color-blueLight hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#DEF6FF">
+          Loading...
+        </div>
+      </li>
+      <li class="sparks-info">
+      <h5> BlueFors XLD <span class="txt-color-blueDarkBright" id="xld-summary-text"><i class="fa fa-spinner fa-spin"></i></span></h5>
+        <div id="xld-summary" class="sparkline txt-color-blueDarkBright hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#7FB6FF">
+          Loading...
+        </div>
+      </li>
+      <li class="sparks-info">
+      <h5> BlueFors QT1 <span class="txt-color-teal" id="qt1-summary-text"><i class="fa fa-spinner fa-spin"></i></span></h5>
+        <div id="qt1-summary" class="sparkline txt-color-teal hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#8FE6E4">
+          Loading...
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<script type="text/javascript">
+  function init_sparkline(divid, data) {
+    var $this = divid;
+    var sparklineType = $this.data('sparkline-type');
+
+
+    //LINE CHART
+    if (sparklineType == 'line') {
+      var sparklineHeight = $this.data('sparkline-height') || '30px';
+      var sparklineWidth = $this.data('sparkline-width') || '90px';
+      var thisLineColor = $this.data('sparkline-line-color') || $this.css('color') || '#0000f0';
+      var thisLineWidth = $this.data('sparkline-line-width') || 1;
+      var thisFill = $this.data('fill-color') || '#c0d0f0';
+      var thisSpotColor = $this.data('sparkline-spot-color') || '#f08000';
+      var thisMinSpotColor = $this.data('sparkline-minspot-color') || '#ed1c24';
+      var thisMaxSpotColor = $this.data('sparkline-maxspot-color') || '#f08000';
+      var thishighlightSpotColor = $this.data('sparkline-highlightspot-color') || '#50f050';
+      var thisHighlightLineColor = $this.data('sparkline-highlightline-color') || 'f02020';
+      var thisSpotRadius = $this.data('sparkline-spotradius') || 1.5;
+      var thisChartMinYRange = $this.data('sparkline-min-y') || 'undefined'; 
+      var thisChartMaxYRange = $this.data('sparkline-max-y') || 'undefined'; 
+      var thisChartMinXRange = $this.data('sparkline-min-x') || 'undefined'; 
+      var thisChartMaxXRange = $this.data('sparkline-max-x') || 'undefined'; 
+      var thisMinNormValue = $this.data('min-val') || 'undefined'; 
+      var thisMaxNormValue = $this.data('max-val') || 'undefined'; 
+      var thisNormColor =  $this.data('norm-color') || '#c0c0c0';
+      var thisDrawNormalOnTop = $this.data('draw-normal') || false;
+
+      $this[0].sparkoptions = {
+       type : 'line',
+       width : sparklineWidth,
+       height : sparklineHeight,
+       lineWidth : thisLineWidth,
+       lineColor : thisLineColor,
+       fillColor : thisFill,
+       spotColor : thisSpotColor,
+       minSpotColor : thisMinSpotColor,
+       maxSpotColor : thisMaxSpotColor,
+       highlightSpotColor : thishighlightSpotColor,
+       highlightLineColor : thisHighlightLineColor,
+       spotRadius : thisSpotRadius,
+       chartRangeMin : thisChartMinYRange,
+       chartRangeMax : thisChartMaxYRange,
+       chartRangeMinX : thisChartMinXRange,
+       chartRangeMaxX : thisChartMaxXRange,
+       normalRangeMin : thisMinNormValue,
+       normalRangeMax : thisMaxNormValue,
+       normalRangeColor : thisNormColor,
+       drawNormalOnTop : thisDrawNormalOnTop
+      };
+      $this.sparkline(data, $this[0].sparkoptions);
+    }
+  }
+
+function format_temp(temp, multiplier) {
+  if (temp == null) {
+    return "Und";
+  }
+  temp *= multiplier;
+  if (temp > 100000) {
+    temp = Math.round(temp);
+    temp = temp - (temp % 100);
+    return (temp/1000) + " K";
+  } else if (temp > 1000) {
+    var hun = Math.round(temp%1000).toString();
+    var sig = Math.round((temp - hun)/1000);
+    if (hun.length == 1)
+        hun = "00" + hun;
+    else if (hun.length == 2)
+        hun = "0" + hun;
+    return sig + "," + hun + " mK";
+  } else {
+    temp = temp.toFixed(2);
+    return temp + " mK";
+  }
+}
+
+  $(function() {
+  // Initialize sparklines
+  $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Blue_Fridge/data/?summary', function(data) {
+      $("#blue-fridge-summary-text").text(format_temp(data[data.length-1], 1));
+      init_sparkline($("#blue-fridge-summary"), data);
+    });
+  $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Red_Fridge/data/?summary', function(data) {
+      $("#red-fridge-summary-text").text(format_temp(data[data.length-1], 1));
+      init_sparkline($("#red-fridge-summary"), data);
+    });
+  $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Big_Fridge/data/?summary', function(data) {
+      $("#big-fridge-summary-text").text(format_temp(data[data.length-1], 1));
+      init_sparkline($("#big-fridge-summary"), data);
+    });
+  $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Green_Fridge/data/?summary', function(data) {
+      $("#green-fridge-summary-text").text(format_temp(data[data.length-1], 1));
+      init_sparkline($("#green-fridge-summary"), data);
+    });
+  $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Janis_Cryostat/data/?summary', function(data) {
+      $("#nmr-summary-text").text(format_temp(data[data.length-1], 1));
+      init_sparkline($("#nmr-summary"), data);
+    });
+  $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/BlueFors_LD/data/?summary', function(data) {
+      $("#ld-summary-text").text(format_temp(data[data.length-1], 1000));
+      init_sparkline($("#ld-summary"), data);
+    });
+  $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/BlueFors_XLD/data/?summary', function(data) {
+      $("#xld-summary-text").text(format_temp(data[data.length-1], 1000));
+      init_sparkline($("#xld-summary"), data);
+    });
+  $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/BlueFors_QT1/data/?summary', function(data) {
+      $("#qt1-summary-text").text(format_temp(data[data.length-1], 1000));
+      init_sparkline($("#qt1-summary"), data);
+    });
+
+
+  setInterval( function(i) {
+    $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Blue_Fridge/data/?summary', function(data) {
+      $("#blue-fridge-summary-text").text(format_temp(data[data.length-1], 1));
+      $("#blue-fridge-summary").sparkline(data, $("#blue-fridge-summary")[0].sparkoptions);
+      });
+    $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Red_Fridge/data/?summary', function(data) {
+      $("#red-fridge-summary-text").text(format_temp(data[data.length-1], 1));
+      $("#red-fridge-summary").sparkline(data, $("#red-fridge-summary")[0].sparkoptions);
+      });
+    $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Big_Fridge/data/?summary', function(data) {
+      $("#big-fridge-summary-text").text(format_temp(data[data.length-1], 1));
+      $("#big-fridge-summary").sparkline(data, $("#big-fridge-summary")[0].sparkoptions);
+      });
+    $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Green_Fridge/data/?summary', function(data) {
+      $("#green-fridge-summary-text").text(format_temp(data[data.length-1], 1));
+      $("#green-fridge-summary").sparkline(data, $("#green-fridge-summary")[0].sparkoptions);
+      });
+    $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Janis_Cryostat/data/?summary', function(data) {
+      $("#nmr-summary-text").text(format_temp(data[data.length-1], 1));
+      $("#nmr-summary").sparkline(data, $("#nmr-summary")[0].sparkoptions);
+      });
+    $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/BlueFors_LD/data/?summary', function(data) {
+      $("#ld-summary-text").text(format_temp(data[data.length-1], 1000));
+      $("#ld-summary").sparkline(data, $("#ld-summary")[0].sparkoptions);
+      });
+    $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/BlueFors_XLD/data/?summary', function(data) {
+      $("#xld-summary-text").text(format_temp(data[data.length-1], 1000));
+      $("#xld-summary").sparkline(data, $("#xld-summary")[0].sparkoptions);
+      });
+    $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/BlueFors_QT1/data/?summary', function(data) {
+      $("#qt1-summary-text").text(format_temp(data[data.length-1], 1000));
+      $("#qt1-summary").sparkline(data, $("#qt1-summary")[0].sparkoptions);
+      });
+    }, 30000);
+  });
+</script>
