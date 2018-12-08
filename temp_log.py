@@ -173,12 +173,12 @@ class Sensors(db.Model, db.Column, metaclass=SensorMeta):
             self.fridge_id = fridge.id
         else:
             self.fridge_id = int(fridge)
-        self.display_name = name
-        self.column_name = name
+        self.display_name = display_name
+        self.column_name = column_name
         self.view_order = view_order
         self.visible = visible
-        
-        db.Column.__init__(self, name, Float)
+
+        db.Column.__init__(self, column_name, db.Float)
 
     def __repr__(self):
         return "<Sensor %r>" % (self.display_name)
@@ -192,7 +192,8 @@ class Sensors(db.Model, db.Column, metaclass=SensorMeta):
 
         sensor = cls.query.filter_by(column_name=name, fridge_id=fridge_id)
         if sensor.count() == 0 and add:
-            sensor = Sensors(name, fridge)
+            safe_name = name.replace(' ', '_')
+            sensor = Sensors(name, safe_name, fridge)
             db.session.add(sensor)
             return sensor
         elif sensor.count() == 0 and not add:
@@ -334,7 +335,7 @@ if __name__ == "__main__":
 
     # Create tables for those fridges
     for fridge in fridges:
-        fridge_model = Fridges(name=fridge, thermometers=thermometers)
+        fridge_model = Fridges(name=fridge, sensors=thermometers)
         fridge_table = fridge_model.fridge_table()
         fridge_models.append(fridge_model)
 
