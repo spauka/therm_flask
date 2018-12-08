@@ -100,3 +100,12 @@ ENV/
 
 # Config file
 config.py
+
+# OSX Stuff
+.DS_Store
+
+# OSX Stuff
+.DS_Store
+
+# OSX Stuff
+.DS_Store
