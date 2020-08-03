@@ -1,6 +1,6 @@
 import config
 
-from flask import Flask, request, render_template, render_template_string, Response, make_response
+from flask import Flask, request, render_template, render_template_string, Response, make_response, send_from_directory
 from flask_sqlalchemy import SQLAlchemy, get_debug_queries
 
 from temp_log import *
@@ -31,7 +31,7 @@ def index():
 
 @app.route('/js/<path:path>')
 def send_js(path):
-    return send_from_directory('js', path)
+    return send_from_directory('static/js', path)
 @app.route('/css/<path:path>')
 def send_css(path):
     return send_from_directory('css', path)
@@ -124,7 +124,7 @@ def get_data(fridge_name, data_type, sensor):
                 else:
                     data.append(row['MC'])
             elif 'ProbeTemp' in row: # NMR Cryostat
-                data.append(float(row['ProbeTemp'])*1000)
+                data.append(float(row['ProbeTemp'] if row['ProbeTemp'] else 0)*1000)
             else: # Also leiden
                 if row['Four_K_Pt'] is None or row['Four_K_Pt'] < 20000:
                     data.append(row['Four_K_RuO'])
