@@ -106,6 +106,7 @@ def get_data(fridge_name, data_type, sensor):
         data_raw = source[-30:]
         data = []
         for row in data_raw:
+            row = dict(row)
             if 'MC_Pt' in row: # Leiden Fridges
                 if row['MC_Pt'] > 20000 and row['MC_Pt'] < 500000:
                     data.append(row['MC_Pt'])
@@ -125,11 +126,14 @@ def get_data(fridge_name, data_type, sensor):
                     data.append(row['MC'])
             elif 'ProbeTemp' in row: # NMR Cryostat
                 data.append(float(row['ProbeTemp'] if row['ProbeTemp'] else 0)*1000)
-            else: # Also leiden
+            elif 'Four_K_Pt' in row: # Also leiden
                 if row['Four_K_Pt'] is None or row['Four_K_Pt'] < 20000:
                     data.append(row['Four_K_RuO'])
                 else:
                     data.append(row['Four_K_Pt'])
+            else:
+                data.append("MC_Pt in row: %r" % ("MC_Pt" in row))
+                data.append("Invalid row: %r" % dict(row))
     elif 'current' in request.args:
         data = source[-1]
         data = dict(data)

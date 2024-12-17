@@ -2,7 +2,9 @@ import config
 
 from flask import Flask
 import flask_sqlalchemy
-sa = flask_sqlalchemy.sqlalchemy
+
+#sa = flask_sqlalchemy.sqlalchemy
+import sqlalchemy as sa
 
 db = flask_sqlalchemy.SQLAlchemy()
 
@@ -156,7 +158,7 @@ class SensTable(object):
         query = self.fridge_table().select().where(self.fridge_table().columns.Time.between(start, stop)).order_by(self.fridge_table().columns.Time.asc())
         return db.session.execute(query)
 
-class SensorMeta(flask_sqlalchemy._BoundDeclarativeMeta, sa.sql.visitors.VisitableType):
+class SensorMeta(flask_sqlalchemy.DefaultMeta, sa.sql.visitors.VisitableType):
     pass
 
 class Sensors(db.Model, db.Column, metaclass=SensorMeta):

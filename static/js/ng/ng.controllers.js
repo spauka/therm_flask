@@ -34,6 +34,11 @@ angular.module('app.controllers', [])
                 "background": "txt-color-blue",
                 "axis": 2
             },
+            "MC_Sample": {
+                "foreground": "jarviswidget-color-blue",
+                "background": "txt-color-blue",
+                "axis": 2
+            },
             "CMN": {
                 "foreground": "jarviswidget-color-blue",
                 "background": "txt-color-blue",
@@ -82,6 +87,13 @@ angular.module('app.controllers', [])
                 "axisLabel": "Temperature (K)",
                 "tickLabel": "K",
             },
+            "Sample": {
+                "foreground": "jarviswidget-color-blue",
+                "background": "txt-color-blue",
+                "axis": 0,
+                "axisLabel": "Temperature (K)",
+                "tickLabel": "K",
+            },
             "Probe": {
                 "foreground": "jarviswidget-color-teal",
                 "background": "txt-color-teal",
@@ -92,6 +104,13 @@ angular.module('app.controllers', [])
             "Magnet": {
                 "foreground": "jarviswidget-color-green",
                 "background": "txt-color-green",
+                "axis": 0,
+                "axisLabel": "Temperature (K)",
+                "tickLabel": "K",
+            },
+            "ExtraProbe": {
+                "foreground": "jarviswidget-color-magenta",
+                "background": "txt-color-magenta",
                 "axis": 0,
                 "axisLabel": "Temperature (K)",
                 "tickLabel": "K",
@@ -109,6 +128,11 @@ angular.module('app.controllers', [])
                 "axis": 3,
                 "axisLabel": "Temperature (K)",
                 "tickLabel": "K",
+            },
+            "Noise_Head": {
+                "foreground": "jarviswidget-color-red",
+                "background": "txt-color-red",
+                "axis": 0
             },
             "P4": {
                 "foreground": "jarviswidget-color-pink",
@@ -367,6 +391,115 @@ angular.module('app.controllers', [])
                 "min": 0,
                 "max": 100,
             },
+            "Corridor": {
+                "foreground": "jarviswidget-color-blue",
+                "background": "txt-color-blue",
+                "axisLabel": "Temperature (C)",
+                "tickLabel": "°C",
+            },
+            "High": {
+                "foreground": "jarviswidget-color-blue",
+                "background": "txt-color-blue",
+                "axisLabel": "Pressure (PSI)",
+                "tickLabel": "PSI",
+            },
+            "Low": {
+                "foreground": "jarviswidget-color-blue",
+                "background": "txt-color-blue",
+                "axisLabel": "Pressure (PSI)",
+                "tickLabel": "PSI",
+            },
+            "Delta": {
+                "foreground": "jarviswidget-color-blue",
+                "background": "txt-color-blue",
+                "axisLabel": "Pressure (PSI)",
+                "tickLabel": "PSI",
+            },
+            "Bounce": {
+                "foreground": "jarviswidget-color-blue",
+                "background": "txt-color-blue",
+                "axisLabel": "Pressure (PSI)",
+                "tickLabel": "PSI",
+            },
+            "WaterIn": {
+                "foreground": "jarviswidget-color-blue",
+                "background": "txt-color-blue",
+                "axisLabel": "Temperature (C)",
+                "tickLabel": "°C",
+            },
+            "WaterOut": {
+                "foreground": "jarviswidget-color-blue",
+                "background": "txt-color-blue",
+                "axisLabel": "Temperature (C)",
+                "tickLabel": "°C",
+            },
+            "Helium": {
+                "foreground": "jarviswidget-color-blue",
+                "background": "txt-color-blue",
+                "axisLabel": "Temperature (C)",
+                "tickLabel": "°C",
+            },
+            "Oil": {
+                "foreground": "jarviswidget-color-blue",
+                "background": "txt-color-blue",
+                "axisLabel": "Temperature (C)",
+                "tickLabel": "°C",
+            },
+            "Current": {
+                "foreground": "jarviswidget-color-blue",
+                "background": "txt-color-blue",
+                "axisLabel": "Current (A)",
+                "tickLabel": "A",
+            },
+            "Dewar_Temp": {
+                "foreground": "jarviswidget-color-blue",
+                "background": "txt-color-blue",
+                "axis": 0,
+                "axisLabel": "Temperature (K)",
+                "tickLabel": "K",
+            },
+            "Dewar_Volume": {
+                "foreground": "jarviswidget-color-blue",
+                "background": "txt-color-blue",
+                "axis": 0,
+                "axisLabel": "Volume (L)",
+                "tickLabel": "L",
+            },
+            "Dewar_Level": {
+                "foreground": "jarviswidget-color-blue",
+                "background": "txt-color-blue",
+                "axis": 0,
+                "axisLabel": "Level (cm)",
+                "tickLabel": "cm",
+            },
+            "Dewar_Pressure": {
+                "foreground": "jarviswidget-color-blue",
+                "background": "txt-color-blue",
+                "axis": 0,
+                "axisLabel": "Pressure (PSI)",
+                "tickLabel": "PSI",
+            },
+            "Purity_Sensor": {
+                "foreground": "jarviswidget-color-blue",
+                "background": "txt-color-blue",
+                "axis": 0,
+                "axisLabel": "Purity (nA)",
+                "tickLabel": "nA",
+            },
+            "LN2_Level": {
+                "foreground": "jarviswidget-color-blue",
+                "background": "txt-color-blue",
+                "axis": 0,
+                "axisLabel": "Level (%)",
+                "tickLabel": "%",
+            },
+            "Storage_Pressure": {
+                "foreground": "jarviswidget-color-blue",
+                "background": "txt-color-blue",
+                "axis": 0,
+                "axisLabel": "Pressure (PSI)",
+                "tickLabel": "PSI",
+            },
         },
     };
 
@@ -387,13 +520,13 @@ angular.module('app.controllers', [])
     var fridge = $scope.$parent.params.fridge;
     if ('supp' in $scope.$parent.params) {
       var supp = $scope.$parent.params.supp;
-      var URL = "https://qphys1114.research.ext.sydney.edu.au/therm_flask/"+fridge+"/"+supp+"/?current";
-      var sen_URL = "https://qphys1114.research.ext.sydney.edu.au/therm_flask/"+fridge+"/"+supp+"/?sensors";
+      var URL = "http://qphys1114.research.sydney.edu.au/therm_flask/"+fridge+"/"+supp+"/?current";
+      var sen_URL = "http://qphys1114.research.sydney.edu.au/therm_flask/"+fridge+"/"+supp+"/?sensors";
       //var URL = "http://physics.usyd.edu.au/~spauka/therm_flask/"+fridge+"/"+supp+"/?current";
       //var sen_URL = "http://physics.usyd.edu.au/~spauka/therm_flask/"+fridge+"/"+supp+"/?sensors";
     } else {
-      var URL = "https://qphys1114.research.ext.sydney.edu.au/therm_flask/"+fridge+"/data/?current";
-      var sen_URL = "https://qphys1114.research.ext.sydney.edu.au/therm_flask/"+fridge+"/data/?sensors";
+      var URL = "http://qphys1114.research.sydney.edu.au/therm_flask/"+fridge+"/data/?current";
+      var sen_URL = "http://qphys1114.research.sydney.edu.au/therm_flask/"+fridge+"/data/?sensors";
     }
     var charts = $scope.charts = {};
     $http({method: 'GET', url: sen_URL, cache: false, responseType: 'json'})
@@ -450,7 +583,7 @@ angular.module('app.controllers', [])
     console.log(supp);
     if (typeof supp == 'undefined')
       supp = "data";
-    var sen_URL = "https://qphys1114.research.ext.sydney.edu.au/therm_flask/"+fridge+"/"+supp+"/?sensors";
+    var sen_URL = "http://qphys1114.research.sydney.edu.au/therm_flask/"+fridge+"/"+supp+"/?sensors";
     var charts = $scope.charts = {};
     $http({method: 'GET', url: sen_URL, cache: false, responseType: 'json'})
       .success(function (data, status) {
@@ -670,7 +803,7 @@ angular.module('app.controllers', [])
 
                     // Set up historic chart updater
                     if (historic && (xMax-xMin) <= (5*86400000)+1000) {
-                      var url = 'https://qphys1114.research.ext.sydney.edu.au/therm_flask/'+fridge+'/'+data+'/'+thermid+'?start='+xMin+'&stop='+xMax;
+                      var url = 'http://qphys1114.research.sydney.edu.au/therm_flask/'+fridge+'/'+data+'/'+thermid+'?start='+xMin+'&stop='+xMax;
                       chart.showLoading('Loading Data...');
                       $.getJSON(url, function (data) {
                         chart.series[0].setData(data);
@@ -717,9 +850,9 @@ angular.module('app.controllers', [])
 
       $.each(therms, function(i, therm) {
         if (!historic) {
-          var url = 'https://qphys1114.research.ext.sydney.edu.au/therm_flask/'+fridge+'/'+data+'/'+therm.column_name+'?count='+count;
+          var url = 'http://qphys1114.research.sydney.edu.au/therm_flask/'+fridge+'/'+data+'/'+therm.column_name+'?count='+count;
         } else {
-          var url = 'https://qphys1114.research.ext.sydney.edu.au/therm_flask/'+fridge+'/'+data+'/'+therm.column_name+'?hourly';
+          var url = 'http://qphys1114.research.sydney.edu.au/therm_flask/'+fridge+'/'+data+'/'+therm.column_name+'?hourly';
         }
         $.getJSON(url, function (data) {
           if (scope.therm != -1) {

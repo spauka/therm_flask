@@ -23,20 +23,8 @@
         </div>
       </li>
       <li class="sparks-info">
-      <h5> Big Fridge <span class="txt-color-purple" id="big-fridge-summary-text"><i class="fa fa-spinner fa-spin"></i></span></h5>
-        <div id="big-fridge-summary" class="sparkline txt-color-purple hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#CC99CC">
-          Loading...
-        </div>
-      </li>
-      <li class="sparks-info">
       <h5> Green Fridge <span class="txt-color-greenDark" id="green-fridge-summary-text"><i class="fa fa-spinner fa-spin"></i></span></h5>
         <div id="green-fridge-summary" class="sparkline txt-color-greenDark hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#B6C3B6">
-          Loading...
-        </div>
-      </li>
-      <li class="sparks-info">
-      <h5> NMR Cryostat <span class="txt-color-orange" id="nmr-summary-text"><i class="fa fa-spinner fa-spin"></i></span></h5>
-        <div id="nmr-summary" class="sparkline txt-color-orange hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#FEE5CA">
           Loading...
         </div>
       </li>
@@ -53,12 +41,18 @@
         </div>
       </li>
       <li class="sparks-info">
-      <h5> BlueFors QT1 <span class="txt-color-teal" id="qt1-summary-text"><i class="fa fa-spinner fa-spin"></i></span></h5>
-        <div id="qt1-summary" class="sparkline txt-color-teal hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#8FE6E4">
+      <h5> Friesland <span class="txt-color-teal" id="Friesland-summary-text"><i class="fa fa-spinner fa-spin"></i></span></h5>
+        <div id="Friesland-summary" class="sparkline txt-color-teal hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#8FE6E4">
           Loading...
         </div>
       </li>
-    </ul>
+      <li class="sparks-info">
+      <h5> Murphy <span class="txt-color-teal" id="Murphy-summary-text"><i class="fa fa-spinner fa-spin"></i></span></h5>
+        <div id="Murphy-summary" class="sparkline txt-color-teal hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#8FE6E4">
+          Loading...
+        </div>
+      </li>
+   </ul>
   </div>
 </div>
 
@@ -141,73 +135,65 @@ function format_temp(temp, multiplier) {
 
   $(function() {
   // Initialize sparklines
-  $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Blue_Fridge/data/?summary', function(data) {
+  $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Blue_Fridge/data/?summary', function(data) {
       $("#blue-fridge-summary-text").text(format_temp(data[data.length-1], 1));
       init_sparkline($("#blue-fridge-summary"), data);
     });
-  $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Red_Fridge/data/?summary', function(data) {
+  $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Red_Fridge/data/?summary', function(data) {
       $("#red-fridge-summary-text").text(format_temp(data[data.length-1], 1));
       init_sparkline($("#red-fridge-summary"), data);
     });
-  $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Big_Fridge/data/?summary', function(data) {
-      $("#big-fridge-summary-text").text(format_temp(data[data.length-1], 1));
-      init_sparkline($("#big-fridge-summary"), data);
-    });
-  $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Green_Fridge/data/?summary', function(data) {
+  $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Green_Fridge/data/?summary', function(data) {
       $("#green-fridge-summary-text").text(format_temp(data[data.length-1], 1));
       init_sparkline($("#green-fridge-summary"), data);
     });
-  $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Janis_Cryostat/data/?summary', function(data) {
-      $("#nmr-summary-text").text(format_temp(data[data.length-1], 1));
-      init_sparkline($("#nmr-summary"), data);
-    });
-  $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/BlueFors_LD/data/?summary', function(data) {
+  $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/BlueFors_LD/data/?summary', function(data) {
       $("#ld-summary-text").text(format_temp(data[data.length-1], 1000));
       init_sparkline($("#ld-summary"), data);
     });
-  $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/BlueFors_XLD/data/?summary', function(data) {
+  $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/BlueFors_XLD/data/?summary', function(data) {
       $("#xld-summary-text").text(format_temp(data[data.length-1], 1000));
       init_sparkline($("#xld-summary"), data);
     });
-  $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/BlueFors_QT1/data/?summary', function(data) {
-      $("#qt1-summary-text").text(format_temp(data[data.length-1], 1000));
-      init_sparkline($("#qt1-summary"), data);
+  $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Friesland/data/?summary', function(data) {
+      $("#Friesland-summary-text").text(format_temp(data[data.length-1], 1000));
+      init_sparkline($("#Friesland-summary"), data);
     });
+  $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Murphy/data/?summary', function(data) {
+     $("#Murphy-summary-text").text(format_temp(data[data.length-1], 1000));
+      init_sparkline($("Murphy-summary"), data);
+    });
+  });
 
 
   setInterval( function(i) {
-    $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Blue_Fridge/data/?summary', function(data) {
+    $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Blue_Fridge/data/?summary', function(data) {
       $("#blue-fridge-summary-text").text(format_temp(data[data.length-1], 1));
       $("#blue-fridge-summary").sparkline(data, $("#blue-fridge-summary")[0].sparkoptions);
       });
-    $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Red_Fridge/data/?summary', function(data) {
+    $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Red_Fridge/data/?summary', function(data) {
       $("#red-fridge-summary-text").text(format_temp(data[data.length-1], 1));
       $("#red-fridge-summary").sparkline(data, $("#red-fridge-summary")[0].sparkoptions);
       });
-    $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Big_Fridge/data/?summary', function(data) {
-      $("#big-fridge-summary-text").text(format_temp(data[data.length-1], 1));
-      $("#big-fridge-summary").sparkline(data, $("#big-fridge-summary")[0].sparkoptions);
-      });
-    $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Green_Fridge/data/?summary', function(data) {
+    $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Green_Fridge/data/?summary', function(data) {
       $("#green-fridge-summary-text").text(format_temp(data[data.length-1], 1));
       $("#green-fridge-summary").sparkline(data, $("#green-fridge-summary")[0].sparkoptions);
       });
-    $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/Janis_Cryostat/data/?summary', function(data) {
-      $("#nmr-summary-text").text(format_temp(data[data.length-1], 1));
-      $("#nmr-summary").sparkline(data, $("#nmr-summary")[0].sparkoptions);
-      });
-    $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/BlueFors_LD/data/?summary', function(data) {
+    $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/BlueFors_LD/data/?summary', function(data) {
       $("#ld-summary-text").text(format_temp(data[data.length-1], 1000));
       $("#ld-summary").sparkline(data, $("#ld-summary")[0].sparkoptions);
       });
-    $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/BlueFors_XLD/data/?summary', function(data) {
+    $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/BlueFors_XLD/data/?summary', function(data) {
       $("#xld-summary-text").text(format_temp(data[data.length-1], 1000));
       $("#xld-summary").sparkline(data, $("#xld-summary")[0].sparkoptions);
       });
-    $.getJSON('https://qphys1114.research.ext.sydney.edu.au/therm_flask/BlueFors_QT1/data/?summary', function(data) {
-      $("#qt1-summary-text").text(format_temp(data[data.length-1], 1000));
-      $("#qt1-summary").sparkline(data, $("#qt1-summary")[0].sparkoptions);
+    $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Friesland/data/?summary', function(data) {
+      $("#Friesland-summary-text").text(format_temp(data[data.length-1], 1000));
+      $("#Friesland-summary").sparkline(data, $("#Friesland-summary")[0].sparkoptions);
       });
-    }, 30000);
-  });
+     $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Murphy/data/?summary', function(data) {
+      $("#Murphy-summary-text").text(format_temp(data[data.length-1], 1000));
+      $("#Murphy-summary").sparkline(data, $("#Murphy-summary")[0].sparkoptions);
+      });
+ }, 5000);
 </script>
