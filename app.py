@@ -1,6 +1,6 @@
 import config
 
-from flask import Flask, request, render_template, render_template_string, Response, make_response, send_from_directory
+from flask import Flask, request, render_template, render_template_string, Response, make_response, send_from_directory, redirect
 from flask_sqlalchemy import SQLAlchemy, get_debug_queries
 
 from temp_log import *
@@ -27,26 +27,7 @@ def after_request(response):
 
 @app.route('/')
 def index():
-    return app.send_static_file('index.html')
-
-@app.route('/js/<path:path>')
-def send_js(path):
-    return send_from_directory('static/js', path)
-@app.route('/css/<path:path>')
-def send_css(path):
-    return send_from_directory('css', path)
-@app.route('/fonts/<path:path>')
-def send_fonts(path):
-    return send_from_directory('fonts', path)
-@app.route('/img/<path:path>')
-def send_img(path):
-    return send_from_directory('img', path)
-@app.route('/includes/<path:path>')
-def send_includes(path):
-    return send_from_directory('includes', path)
-@app.route('/views/<path:path>')
-def send_views(path):
-    return send_from_directory('views', path)
+    return redirect('/static/index.html', code=301)
 
 @app.route('/<fridge_name>/<data_type>/', defaults={'sensor': None}, methods=['GET', 'POST'])
 @app.route('/<fridge_name>/<data_type>/<sensor>')
