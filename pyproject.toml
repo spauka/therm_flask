@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "therm-flask"
+version = "0.1.0"
+description = "Flask module for running thermomtry in QNL/QSYD lab"
+authors = ["Sebastian Pauka <spauka@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+flask = "^3.1.0"
+sqlalchemy = "^2.0.36"
+psycopg = "^3.2.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
