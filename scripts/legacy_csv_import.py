@@ -29,25 +29,25 @@ if __name__ == "__main__":
     db.init_app(app)
 
     if len(sys.argv) != 3:
-        print "Usage: %s <fridge> <data_file>"
+        print("Usage: %s <fridge> <data_file>")
         exit(1)
 
     fridge = sys.argv[1].replace('_', ' ')
     fridge = Fridges.query.filter_by(name=fridge)
     if fridge.count() == 0:
-        print "Unable to find fridge %s." % fridge
+        print("Unable to find fridge %s." % fridge)
         exit(1)
 
     fridge = fridge.first()
 
     data = sys.argv[2]
     if not os.path.exists(data):
-        print "Unable to find data file %s." % data
+        print("Unable to find data file %s." % data)
         exit(1)
 
     data = open(data, 'rU')
     columns = csv.reader(data, delimiter=',', quotechar='"')
-    print columns.next()
+    print(columns.next())
     prompt = raw_input("Does the header look OK? (Y, N) ")
     if prompt == "N":
         exit(0)

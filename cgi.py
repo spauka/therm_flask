@@ -1,4 +1,4 @@
-#!/suphys/spauka/bin/python
+#!/usr/bin/env python3
 
 import config
 from wsgiref.handlers import CGIHandler
@@ -9,4 +9,4 @@ import sys
 try:
     CGIHandler().run(app)
 except Exception as e:
-    print e
+    print(e)
