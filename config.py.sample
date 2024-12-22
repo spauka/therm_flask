@@ -1,3 +1,0 @@
-# Add sqlalchemy connection string here
-db = '<database>://<path>'
-track_modifications = False
