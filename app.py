@@ -11,10 +11,11 @@ from datetime import datetime, timedelta
 from math import isnan, isinf
 
 app = Flask("Thermometry", static_url_path="/static")
-app.debug = False
+
+app.debug = config.debug
 app.config['SQLALCHEMY_DATABASE_URI'] = config.db
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = config.track_modifications
-app.config['SQLALCHEMY_RECORD_QUERIES'] = True
+app.config['SQLALCHEMY_RECORD_QUERIES'] = config.record_queries
 
 db.init_app(app)
 
