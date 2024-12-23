@@ -207,52 +207,6 @@
 					$('#hide-menu > span > a').trigger("click"); 
 				}
 			},
-			'mute' : function() {
-				$.sound_on = false;
-				$.smallBox({
-					title : "MUTE",
-					content : "All sounds have been muted!",
-					color : "#a90329",
-					timeout: 4000,
-					icon : "fa fa-volume-off"
-				});
-			},
-			'sound on' : function() {
-				$.sound_on = true;
-				$.speechApp.playConfirmation();
-				$.smallBox({
-					title : "UNMUTE",
-					content : "All sounds have been turned on!",
-					color : "#40ac2b",
-					sound_file: 'voice_alert',
-					timeout: 5000,
-					icon : "fa fa-volume-up"
-				});
-			},
-			'stop' : function() {
-				smartSpeechRecognition.abort();
-				$.root_.removeClass("voice-command-active");
-				$.smallBox({
-					title : "VOICE COMMAND OFF",
-					content : "Your voice commands has been successfully turned off. Click on the <i class='fa fa-microphone fa-lg fa-fw'></i> icon to turn it back on.",
-					color : "#40ac2b",
-					sound_file: 'voice_off',
-					timeout: 8000,
-					icon : "fa fa-microphone-slash"
-				});
-				if ($('#speech-btn .popover').is(':visible')) {
-					$('#speech-btn .popover').fadeOut(250);
-				}
-			},
-			'help' : function() {
-				$('#voiceModal').removeData('modal').modal( { remote: "ajax/modal-content/modal-voicecommand.html", show: true } );
-				if ($('#speech-btn .popover').is(':visible')) {
-					$('#speech-btn .popover').fadeOut(250);
-				}
-			},		
-			'got it' : function() {
-				$('#voiceModal').modal('hide');
-			},	
 			'logout' : function() {
 				$.speechApp.stop();
 				window.location = $('#logout > span > a').attr("href");

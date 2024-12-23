@@ -113,184 +113,7 @@ if ($('body').hasClass("menu-on-top") || localStorage.getItem('sm-setmenu')=='to
  * Description: Fire when DOM is ready
  */
 
-jQuery(document).ready(function() {
-
-
-  /*
-   * SMART ACTIONS
-   * ANGULAR: handled via "action" directive
-   */
-  /*var smartActions = {
-
-      // LOGOUT MSG 
-      userLogout: function($this){
-
-      // ask verification
-      $.SmartMessageBox({
-        title : "<i class='fa fa-sign-out txt-color-orangeDark'></i> Logout <span class='txt-color-orangeDark'><strong>" + $('#show-shortcut').text() + "</strong></span> ?",
-        content : $this.data('logout-msg') || "You can improve your security further after logging out by closing this opened browser",
-        buttons : '[No][Yes]'
-
-      }, function(ButtonPressed) {
-        if (ButtonPressed == "Yes") {
-          $.root_.addClass('animated fadeOutUp');
-          setTimeout(logout, 1000);
-        }
-      });
-      function logout() {
-        window.location = $this.attr('href');
-      }
-
-    },
-
-    // RESET WIDGETS
-      resetWidgets: function(){
-      $.widresetMSG = $this.data('reset-msg');
-
-      $.SmartMessageBox({
-        title : "<i class='fa fa-refresh' style='color:green'></i> Clear Local Storage",
-        content : $.widresetMSG || "Would you like to RESET all your saved widgets and clear LocalStorage?",
-        buttons : '[No][Yes]'
-      }, function(ButtonPressed) {
-        if (ButtonPressed == "Yes" && localStorage) {
-          localStorage.clear();
-          location.reload();
-        }
-
-      });
-      },
-
-      // LAUNCH FULLSCREEN 
-      launchFullscreen: function(element){
-
-      if (!$.root_.hasClass("full-screen")) {
-
-        $.root_.addClass("full-screen");
-
-        if (element.requestFullscreen) {
-          element.requestFullscreen();
-        } else if (element.mozRequestFullScreen) {
-          element.mozRequestFullScreen();
-        } else if (element.webkitRequestFullscreen) {
-          element.webkitRequestFullscreen();
-        } else if (element.msRequestFullscreen) {
-          element.msRequestFullscreen();
-        }
-
-      } else {
-
-        $.root_.removeClass("full-screen");
-
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-          document.mozCancelFullScreen();
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        }
-
-      }
-
-     },
-
-     // MINIFY MENU
-      minifyMenu: function(){
-        if (!$.root_.hasClass("menu-on-top")){
-        $.root_.toggleClass("minified");
-        $.root_.removeClass("hidden-menu");
-        $('html').removeClass("hidden-menu-mobile-lock");
-        $this.effect("highlight", {}, 500);
-      }
-      },
-
-      // TOGGLE MENU 
-      toggleMenu: function(){
-        if (!$.root_.hasClass("menu-on-top")){
-        $('html').toggleClass("hidden-menu-mobile-lock");
-        $.root_.toggleClass("hidden-menu");
-        $.root_.removeClass("minified");
-        }
-      },     
-
-      // TOGGLE SHORTCUT 
-      toggleShortcut: function(){
-
-      if (shortcut_dropdown.is(":visible")) {
-        shortcut_buttons_hide();
-      } else {
-        shortcut_buttons_show();
-      }
-
-      // SHORT CUT (buttons that appear when clicked on user name)
-      shortcut_dropdown.find('a').click(function(e) {
-        e.preventDefault();
-        window.location = $(this).attr('href');
-        setTimeout(shortcut_buttons_hide, 300);
-
-      });
-
-      // SHORTCUT buttons goes away if mouse is clicked outside of the area
-      $(document).mouseup(function(e) {
-        if (!shortcut_dropdown.is(e.target) && shortcut_dropdown.has(e.target).length === 0) {
-          shortcut_buttons_hide();
-        }
-      });
-
-      // SHORTCUT ANIMATE HIDE
-      function shortcut_buttons_hide() {
-        shortcut_dropdown.animate({
-          height : "hide"
-        }, 300, "easeOutCirc");
-        $.root_.removeClass('shortcut-on');
-
-      }
-
-      // SHORTCUT ANIMATE SHOW
-      function shortcut_buttons_show() {
-        shortcut_dropdown.animate({
-          height : "show"
-        }, 200, "easeOutCirc");
-        $.root_.addClass('shortcut-on');
-      }
-
-      }  
-
-  };
-
-
-  $.root_.on('click', '[data-action="userLogout"]', function(e) {
-    var $this = $(this);
-    smartActions.userLogout($this);
-    e.preventDefault();
-  }); 
-
-  $.root_.on('click', '[data-action="resetWidgets"]', function(e) { 
-    var $this = $(this);
-    smartActions.resetWidgets($this);
-    e.preventDefault();
-  });
-
-  $.root_.on('click', '[data-action="launchFullscreen"]', function(e) { 
-    smartActions.launchFullscreen(document.documentElement);
-    e.preventDefault();
-  }); 
-
-  $.root_.on('click', '[data-action="minifyMenu"]', function(e) {
-    var $this = $(this);
-    smartActions.minifyMenu($this);
-    e.preventDefault();
-  }); 
-
-  $.root_.on('click', '[data-action="toggleMenu"]', function(e) { 
-    smartActions.toggleMenu();
-    e.preventDefault();
-  });  
-
-  $.root_.on('click', '[data-action="toggleShortcut"]', function(e) { 
-    smartActions.toggleShortcut();
-    e.preventDefault();
-  }); */
-
+  jQuery(document).ready(function() {
 
   /*
    * Fire tooltips
@@ -298,66 +121,6 @@ jQuery(document).ready(function() {
   if ($("[rel=tooltip]").length) {
     $("[rel=tooltip]").tooltip();
   }
-
-  // INITIALIZE LEFT NAV
-  /* ANGULAR: handled via "navigation" directive
-  if (!$topmenu) {
-    if (!null) {
-      $('nav ul').jarvismenu({
-        accordion : true,
-        speed : menu_speed,
-        closedSign : '<em class="fa fa-plus-square-o"></em>',
-        openedSign : '<em class="fa fa-minus-square-o"></em>'
-      });
-    } else {
-      alert("Error - menu anchor does not exist");
-    }
-  }
-
-  // SHOW & HIDE MOBILE SEARCH FIELD
-  $('#search-mobile').click(function() {
-    $.root_.addClass('search-mobile');
-  });
-
-  $('#cancel-search-js').click(function() {
-    $.root_.removeClass('search-mobile');
-  });
-
-  // ACTIVITY
-  // ajax drop
-  $('#activity').click(function(e) {
-    var $this = $(this);
-
-    if ($this.find('.badge').hasClass('bg-color-red')) {
-      $this.find('.badge').removeClassPrefix('bg-color-');
-      $this.find('.badge').text("0");
-      // console.log("Ajax call for activity")
-    }
-
-    if (!$this.next('.ajax-dropdown').is(':visible')) {
-      $this.next('.ajax-dropdown').fadeIn(150);
-      $this.addClass('active');
-    } else {
-      $this.next('.ajax-dropdown').fadeOut(150);
-      $this.removeClass('active');
-    }
-
-    var mytest = $this.next('.ajax-dropdown').find('.btn-group > .active > input').attr('id');
-    //console.log(mytest)
-
-    e.preventDefault();
-  });
-
-  $('input[name="activity"]').change(function() {
-    //alert($(this).val())
-    var $this = $(this);
-
-    url = $this.attr('id');
-    container = $('.ajax-notifications');
-
-    loadURL(url, container);
-
-  });*/
 
   $(document).mouseup(function(e) {
     if (!$('.ajax-dropdown').is(e.target) && $('.ajax-dropdown').has(e.target).length === 0) {
@@ -373,26 +136,6 @@ jQuery(document).ready(function() {
       btn.button('reset');
     }, 3000);
   });
-
-  // NOTIFICATION IS PRESENT
-  /* ANGULAR: Handled via "activityButton" directive
-  function notification_check() {
-    $this = $('#activity > .badge');
-
-    if (parseInt($this.text()) > 0) {
-      $this.addClass("bg-color-red bounceIn animated");
-    }
-  }
-
-  notification_check();*/
-
-  // SLIMSCROLL FOR NAV
-  /* ANGULAR: Initialized via "navigation" directive
-  if ($.fn.slimScroll) {
-    $('nav').slimScroll({
-          height: '100%'
-      });
-  }*/
 
 });
 
@@ -796,8 +539,8 @@ function runAllForms() {
 
       $this.datepicker({
         dateFormat : dataDateFormat,
-        prevText : '<i class="fa fa-chevron-left"></i>',
-        nextText : '<i class="fa fa-chevron-right"></i>',
+        prevText : '<i class="fa-regular fa-chevron-left"></i>',
+        nextText : '<i class="fa-regular fa-chevron-right"></i>',
       });
     });
   }
@@ -1304,20 +1047,20 @@ function setup_widgets_desktop() {
       buttonsHidden : false,
       // toggle button
       toggleButton : true,
-      toggleClass : 'fa fa-minus | fa fa-plus',
+      toggleClass : 'fa-regular fa-minus | fa-regular fa-plus',
       toggleSpeed : 200,
       onToggle : function() {
       },
       // delete btn
       deleteButton : true,
-      deleteClass : 'fa fa-times',
+      deleteClass : 'fa-regular fa-times',
       deleteSpeed : 200,
       onDelete : function() {
       },
       // edit btn
       editButton : true,
       editPlaceholder : '.jarviswidget-editbox',
-      editClass : 'fa fa-cog | fa fa-save',
+      editClass : 'fa-regular fa-cog | fa-regular fa-save',
       editSpeed : 200,
       onEdit : function() {
       },
@@ -1325,7 +1068,7 @@ function setup_widgets_desktop() {
       colorButton : true,
       // full screen
       fullscreenButton : true,
-      fullscreenClass : 'fa fa-expand | fa fa-compress',
+      fullscreenClass : 'fa-solid fa-up-right-and-down-left-from-center | fa-solid fa-down-left-and-up-right-to-center',
       fullscreenDiff : 3,
       onFullscreen : function() {
       },
@@ -1349,7 +1092,7 @@ function setup_widgets_desktop() {
       timestampPlaceholder : '.jarviswidget-timestamp',
       timestampFormat : 'Last update: %m%/%d%/%y% %h%:%i%:%s%',
       refreshButton : true,
-      refreshButtonClass : 'fa fa-refresh',
+      refreshButtonClass : 'fa-regular fa-refresh',
       labelError : 'Sorry but there was a error:',
       labelUpdated : 'Last Update:',
       labelRefresh : 'Refresh',
@@ -1640,7 +1383,7 @@ function loadURL(url, container) {
       container.html("");
 
       // place cog
-      container.html('<h1 class="ajax-loading-animation"><i class="fa fa-cog fa-spin"></i> Loading...</h1>');
+      container.html('<h1 class="ajax-loading-animation"><i class="fa-regular fa-spinner fa-spin"></i> Loading...</h1>');
 
       // Only draw breadcrumb if it is main content material
       if (container[0] == $("#content")[0]) {
@@ -1667,7 +1410,7 @@ function loadURL(url, container) {
       }, 300);
     },
     error : function(xhr, ajaxOptions, thrownError) {
-      container.html('<h4 class="ajax-loading-error"><i class="fa fa-warning txt-color-orangeDark"></i> Error 404! Page not found.</h4>');
+      container.html('<h4 class="ajax-loading-error"><i class="fa-regular fa-triangle-exclamation txt-color-orangeDark"></i> Error 404! Page not found.</h4>');
     },
     async : true 
   });

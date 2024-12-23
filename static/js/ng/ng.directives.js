@@ -41,7 +41,7 @@ angular.module('app.main', [])
 
             // ask verification
             $.SmartMessageBox({
-              title : "<i class='fa fa-sign-out txt-color-orangeDark'></i> Logout <span class='txt-color-orangeDark'><strong>" + $('#show-shortcut').text() + "</strong></span> ?",
+              title : "<i class='fa-solid fa-right-from-bracket txt-color-orangeDark'></i> Logout <span class='txt-color-orangeDark'><strong>" + $('#show-shortcut').text() + "</strong></span> ?",
               content : $this.data('logout-msg') || "You can improve your security further after logging out by closing this opened browser",
               buttons : '[No][Yes]'
 
@@ -62,7 +62,7 @@ angular.module('app.main', [])
             $.widresetMSG = $this.data('reset-msg');
 
             $.SmartMessageBox({
-              title : "<i class='fa fa-refresh' style='color:green'></i> Clear Local Storage",
+              title : "<i class='fa-regular fa-arrows-rotate' style='color:green'></i> Clear Local Storage",
               content : $.widresetMSG || "Would you like to RESET all your saved widgets and clear LocalStorage?",
               buttons : '[No][Yes]'
             }, function(ButtonPressed) {
@@ -443,7 +443,7 @@ angular.module('app.main', [])
                 $logo.attr('src', $this.data("skinlogo"));
                 $("#smart-styles > a #skin-checked")
                     .remove();
-                $this.prepend("<i class='fa fa-check fa-fw' id='skin-checked'></i>");
+                $this.prepend("<i class='fa-regular fa-check fa-fw' id='skin-checked'></i>");
             });
       }
     };
@@ -554,8 +554,8 @@ angular.module('app.navigation', [])
             element.first().jarvismenu({
               accordion : true,
               speed : $.menu_speed,
-              closedSign : '<em class="fa fa-plus-square-o"></em>',
-              openedSign : '<em class="fa fa-minus-square-o"></em>'
+              closedSign : '<em class="fa-solid fa-square-plus"></em>',
+              openedSign : '<em class="fa-solid fa-square-minus"></em>'
             });
           } else {
             alert("Error - menu anchor does not exist");
@@ -789,7 +789,7 @@ angular.module('app.activity', [])
 
         attrs.$observe('icon', function(value) {
           if (!angular.isDefined(value))
-            scope.icon = 'fa fa-user';
+            scope.icon = 'fa-regular fa-user';
         });
 
         element.on('click', function(e) {
@@ -849,11 +849,11 @@ angular.module('app.activity', [])
               <h4>Click a button to show messages here</h4>\
               This blank page message helps protect your privacy, or you can show the first message here automatically.\
             </div>\
-            <i class="fa fa-lock fa-4x fa-border"></i>\
+            <i class="fa-regular fa-lock fa-4x fa-border"></i>\
           </div>\
           <span> {{ footer }}\
             <button type="button" data-loading-text="Loading..." data-ng-click="refresh($event)" class="btn btn-xs btn-default pull-right" data-activty-refresh-button="">\
-            <i class="fa fa-refresh"></i>\
+            <i class="fa-regular fa-arrows-rotate"></i>\
             </button>\
           </span>\
         </div>',
@@ -932,20 +932,20 @@ angular.module('app.smartui', [])
               buttonsHidden : false,
               // toggle button
               toggleButton : true,
-              toggleClass : 'fa fa-minus | fa fa-plus',
+              toggleClass : 'fa-regular fa-minus | fa-regular fa-plus',
               toggleSpeed : 200,
               onToggle : function() {
               },
               // delete btn
               deleteButton : true,
-              deleteClass : 'fa fa-times',
+              deleteClass : 'fa-regular fa-times',
               deleteSpeed : 200,
               onDelete : function() {
               },
               // edit btn
               editButton : true,
               editPlaceholder : '.jarviswidget-editbox',
-              editClass : 'fa fa-cog | fa fa-save',
+              editClass : 'fa-regular fa-cog | fa-regular fa-save',
               editSpeed : 200,
               onEdit : function() {
               },
@@ -953,7 +953,7 @@ angular.module('app.smartui', [])
               colorButton : true,
               // full screen
               fullscreenButton : true,
-              fullscreenClass : 'fa fa-expand | fa fa-compress',
+              fullscreenClass : 'fa-solid fa-up-right-and-down-left-from-center| fa-solid fa-down-left-and-up-right-to-center',
               fullscreenDiff : 3,
               onFullscreen : function() {
               },
@@ -977,7 +977,7 @@ angular.module('app.smartui', [])
               timestampPlaceholder : '.jarviswidget-timestamp',
               timestampFormat : 'Last update: %m%/%d%/%y% %h%:%i%:%s%',
               refreshButton : true,
-              refreshButtonClass : 'fa fa-refresh',
+              refreshButtonClass : 'fa-regular fa-arrows-rotate',
               labelError : 'Sorry but there was a error:',
               labelUpdated : 'Last Update:',
               labelRefresh : 'Refresh',
