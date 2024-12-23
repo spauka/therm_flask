@@ -230,6 +230,14 @@ function detectmob() {
     return false;
   }
 }
+
+// Load app config
+const config = await fetch("./config.json");
+if (!response.ok) {
+	throw new Error(`Response status: ${response.status}`);
+}
+config_json = await response.json();
+$.data_uri_base = config_json["uri_base"];
 /*
  * END APP.CONFIG
  */
