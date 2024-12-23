@@ -62,7 +62,7 @@ angular.module('app.main', [])
             $.widresetMSG = $this.data('reset-msg');
 
             $.SmartMessageBox({
-              title : "<i class='fa-regular fa-arrows-rotate' style='color:green'></i> Clear Local Storage",
+              title : "<i class='fa-solid fa-arrows-rotate' style='color:green'></i> Clear Local Storage",
               content : $.widresetMSG || "Would you like to RESET all your saved widgets and clear LocalStorage?",
               buttons : '[No][Yes]'
             }, function(ButtonPressed) {
@@ -443,7 +443,7 @@ angular.module('app.main', [])
                 $logo.attr('src', $this.data("skinlogo"));
                 $("#smart-styles > a #skin-checked")
                     .remove();
-                $this.prepend("<i class='fa-regular fa-check fa-fw' id='skin-checked'></i>");
+                $this.prepend("<i class='fa-solid fa-check fa-fw' id='skin-checked'></i>");
             });
       }
     };
@@ -789,7 +789,7 @@ angular.module('app.activity', [])
 
         attrs.$observe('icon', function(value) {
           if (!angular.isDefined(value))
-            scope.icon = 'fa-regular fa-user';
+            scope.icon = 'fa-solid fa-user';
         });
 
         element.on('click', function(e) {
@@ -849,11 +849,11 @@ angular.module('app.activity', [])
               <h4>Click a button to show messages here</h4>\
               This blank page message helps protect your privacy, or you can show the first message here automatically.\
             </div>\
-            <i class="fa-regular fa-lock fa-4x fa-border"></i>\
+            <i class="fa-solid fa-lock fa-4x fa-border"></i>\
           </div>\
           <span> {{ footer }}\
             <button type="button" data-loading-text="Loading..." data-ng-click="refresh($event)" class="btn btn-xs btn-default pull-right" data-activty-refresh-button="">\
-            <i class="fa-regular fa-arrows-rotate"></i>\
+            <i class="fa-solid fa-arrows-rotate"></i>\
             </button>\
           </span>\
         </div>',
@@ -932,20 +932,20 @@ angular.module('app.smartui', [])
               buttonsHidden : false,
               // toggle button
               toggleButton : true,
-              toggleClass : 'fa-regular fa-minus | fa-regular fa-plus',
+              toggleClass : 'fa-solid fa-minus | fa-solid fa-plus',
               toggleSpeed : 200,
               onToggle : function() {
               },
               // delete btn
               deleteButton : true,
-              deleteClass : 'fa-regular fa-times',
+              deleteClass : 'fa-solid fa-times',
               deleteSpeed : 200,
               onDelete : function() {
               },
               // edit btn
               editButton : true,
               editPlaceholder : '.jarviswidget-editbox',
-              editClass : 'fa-regular fa-cog | fa-regular fa-save',
+              editClass : 'fa-solid fa-cog | fa-solid fa-save',
               editSpeed : 200,
               onEdit : function() {
               },
@@ -977,7 +977,7 @@ angular.module('app.smartui', [])
               timestampPlaceholder : '.jarviswidget-timestamp',
               timestampFormat : 'Last update: %m%/%d%/%y% %h%:%i%:%s%',
               refreshButton : true,
-              refreshButtonClass : 'fa-regular fa-arrows-rotate',
+              refreshButtonClass : 'fa-solid fa-arrows-rotate',
               labelError : 'Sorry but there was a error:',
               labelUpdated : 'Last Update:',
               labelRefresh : 'Refresh',

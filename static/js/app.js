@@ -539,8 +539,8 @@ function runAllForms() {
 
       $this.datepicker({
         dateFormat : dataDateFormat,
-        prevText : '<i class="fa-regular fa-chevron-left"></i>',
-        nextText : '<i class="fa-regular fa-chevron-right"></i>',
+        prevText : '<i class="fa-solid fa-chevron-left"></i>',
+        nextText : '<i class="fa-solid fa-chevron-right"></i>',
       });
     });
   }
@@ -1047,20 +1047,20 @@ function setup_widgets_desktop() {
       buttonsHidden : false,
       // toggle button
       toggleButton : true,
-      toggleClass : 'fa-regular fa-minus | fa-regular fa-plus',
+      toggleClass : 'fa-solid fa-minus | fa-solid fa-plus',
       toggleSpeed : 200,
       onToggle : function() {
       },
       // delete btn
       deleteButton : true,
-      deleteClass : 'fa-regular fa-times',
+      deleteClass : 'fa-solid fa-times',
       deleteSpeed : 200,
       onDelete : function() {
       },
       // edit btn
       editButton : true,
       editPlaceholder : '.jarviswidget-editbox',
-      editClass : 'fa-regular fa-cog | fa-regular fa-save',
+      editClass : 'fa-solid fa-cog | fa-solid fa-save',
       editSpeed : 200,
       onEdit : function() {
       },
@@ -1092,7 +1092,7 @@ function setup_widgets_desktop() {
       timestampPlaceholder : '.jarviswidget-timestamp',
       timestampFormat : 'Last update: %m%/%d%/%y% %h%:%i%:%s%',
       refreshButton : true,
-      refreshButtonClass : 'fa-regular fa-refresh',
+      refreshButtonClass : 'fa-solid fa-refresh',
       labelError : 'Sorry but there was a error:',
       labelUpdated : 'Last Update:',
       labelRefresh : 'Refresh',
@@ -1383,7 +1383,7 @@ function loadURL(url, container) {
       container.html("");
 
       // place cog
-      container.html('<h1 class="ajax-loading-animation"><i class="fa-regular fa-spinner fa-spin"></i> Loading...</h1>');
+      container.html('<h1 class="ajax-loading-animation"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</h1>');
 
       // Only draw breadcrumb if it is main content material
       if (container[0] == $("#content")[0]) {
@@ -1410,7 +1410,7 @@ function loadURL(url, container) {
       }, 300);
     },
     error : function(xhr, ajaxOptions, thrownError) {
-      container.html('<h4 class="ajax-loading-error"><i class="fa-regular fa-triangle-exclamation txt-color-orangeDark"></i> Error 404! Page not found.</h4>');
+      container.html('<h4 class="ajax-loading-error"><i class="fa-solid fa-triangle-exclamation txt-color-orangeDark"></i> Error 404! Page not found.</h4>');
     },
     async : true 
   });
