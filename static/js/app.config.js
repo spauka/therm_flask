@@ -28,43 +28,43 @@
  *
  * APP CONFIGURATION (HTML/AJAX/PHP Versions ONLY)
  * Description: Enable / disable certain theme features here
- * GLOBAL: Your left nav in your app will no longer fire ajax calls, set 
+ * GLOBAL: Your left nav in your app will no longer fire ajax calls, set
  * it to false for HTML version
- */	
-	$.navAsAjax = true; 
+ */
+	$.navAsAjax = true;
 /*
  * GLOBAL: Sound Config
  */
 	$.sound_path = "sound/";
-	$.sound_on = false; 
+	$.sound_on = false;
 /*
- * Impacts the responce rate of some of the responsive elements (lower 
+ * Impacts the responce rate of some of the responsive elements (lower
  * value affects CPU but improves speed)
  */
 	var throttle_delay = 350,
 /*
  * The rate at which the menu expands revealing child elements on click
  */
-	menu_speed = 235,	
+	menu_speed = 235,
 /*
  * Turn on JarvisWidget functionality
  * dependency: js/jarviswidget/jarvis.widget.min.js
  */
 	enableJarvisWidgets = true,
 /*
- * Warning: Enabling mobile widgets could potentially crash your webApp 
- * if you have too many widgets running at once 
+ * Warning: Enabling mobile widgets could potentially crash your webApp
+ * if you have too many widgets running at once
  * (must have enableJarvisWidgets = true)
  */
-	enableMobileWidgets = false,	
+	enableMobileWidgets = false,
 /*
  * Turn on fast click for mobile devices?
  * Enable this to activate fastclick plugin
- * dependency: js/plugin/fastclick/fastclick.js 
+ * dependency: js/plugin/fastclick/fastclick.js
  */
 	fastClick = false,
 /*
- * These elements are ignored during DOM object deletion for ajax version 
+ * These elements are ignored during DOM object deletion for ajax version
  * It will delete all objects during page load with these exceptions:
  */
 	ignore_key_elms = ["#header, #left-panel, #main, div.page-footer, #shortcut, #divSmallBoxes, #divMiniIcons, #divbigBoxes, #voiceModal, script"],
@@ -75,12 +75,12 @@
 	voice_command = false,
 /*
  * Turns on speech without asking
- */	
+ */
 	voice_command_auto = false,
 /*
- * 	Sets the language to the default 'en-US'. (supports over 50 languages 
+ * 	Sets the language to the default 'en-US'. (supports over 50 languages
  * 	by google)
- * 
+ *
  *  Afrikaans         ['af-ZA']
  *  Bahasa Indonesia  ['id-ID']
  *  Bahasa Melayu     ['ms-MY']
@@ -147,16 +147,16 @@
 	voice_command_lang = 'en-US',
 /*
  * 	Use localstorage to remember on/off (best used with HTML Version)
- */	
+ */
 	voice_localStorage = false;
 /*
  * Voice Commands
  * Defines all voice command variables and functions
- */	
+ */
  	if (voice_command) {
-	 		
+
 		var commands = {
-					
+
 			'show dashboard' : function() { window.location.hash = "dashboard" },
 			'show inbox' : function() {  window.location.hash = "inbox" },
 			'show graphs' : function() {  window.location.hash = "graphs/flot" },
@@ -190,32 +190,32 @@
 			'show widgets' : function() { window.location.hash = "widgets" },
 			'show gallery' : function() { window.location.hash = "gallery" },
 			'show maps' : function() { window.location.hash = "gmap-xml" },
-			'go back' :  function() { history.back(1); }, 
+			'go back' :  function() { history.back(1); },
 			'scroll up' : function () { $('html, body').animate({ scrollTop: 0 }, 100); },
 			'scroll down' : function () { $('html, body').animate({ scrollTop: $(document).height() }, 100);},
-			'hide navigation' : function() { 
+			'hide navigation' : function() {
 				if ($.root_.hasClass("container") && !$.root_.hasClass("menu-on-top")){
 					$('span.minifyme').trigger("click");
 				} else {
-					$('#hide-menu > span > a').trigger("click"); 
+					$('#hide-menu > span > a').trigger("click");
 				}
 			},
-			'show navigation' : function() { 
+			'show navigation' : function() {
 				if ($.root_.hasClass("container") && !$.root_.hasClass("menu-on-top")){
 					$('span.minifyme').trigger("click");
 				} else {
-					$('#hide-menu > span > a').trigger("click"); 
+					$('#hide-menu > span > a').trigger("click");
 				}
 			},
 			'logout' : function() {
 				$.speechApp.stop();
 				window.location = $('#logout > span > a').attr("href");
 			}
-		}; 
-		
+		};
+
 	};
 
-function detectmob() { 
+function detectmob() {
   if( navigator.userAgent.match(/Android/i)
       || navigator.userAgent.match(/webOS/i)
       || navigator.userAgent.match(/iPhone/i)
@@ -232,12 +232,23 @@ function detectmob() {
 }
 
 // Load app config
-const config = await fetch("./config.json");
-if (!response.ok) {
-	throw new Error(`Response status: ${response.status}`);
+async function load_config() {
+	try {
+		const response = await fetch("./config.json");
+		if (!response.ok) {
+			throw new Error(`Response status: ${response.status}`);
+		}
+		config_json = await response.json();
+		return config_json;
+	} catch (error) {
+		console.log("Error: " + error.message);
+		return {};
+	}
 }
-config_json = await response.json();
-$.data_uri_base = config_json["uri_base"];
+load_config().then((result) => {
+	$.data_uri = result["uri_base"];
+	console.log("Set URI to: " + $.data_uri)
+})
 /*
  * END APP.CONFIG
  */

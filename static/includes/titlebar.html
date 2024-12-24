@@ -10,48 +10,7 @@
   </div>
   <div class="col-xs-12 col-sm-5 col-md-5 col-lg-8">
     <ul id="sparks" class="">
-      <li class="sparks-info">
-      <h5> Blue Fridge <span class="txt-color-blue" id="blue-fridge-summary-text"><i class="fa-solid fa-spinner fa-spin"></i></span></h5>
-        <div id="blue-fridge-summary" class="sparkline txt-color-blue hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#BCCFD7">
-          Loading...
-        </div>
-      </li>
-      <li class="sparks-info">
-      <h5> Red Fridge <span class="txt-color-red" id="red-fridge-summary-text"><i class="fa-solid fa-spinner fa-spin"></i></span></h5>
-        <div id="red-fridge-summary" class="sparkline txt-color-red hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#DD9AA9">
-          Loading...
-        </div>
-      </li>
-      <li class="sparks-info">
-      <h5> Green Fridge <span class="txt-color-greenDark" id="green-fridge-summary-text"><i class="fa-solid fa-spinner fa-spin"></i></span></h5>
-        <div id="green-fridge-summary" class="sparkline txt-color-greenDark hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#B6C3B6">
-          Loading...
-        </div>
-      </li>
-      <li class="sparks-info">
-      <h5> BlueFors LD <span class="txt-color-blueLight" id="ld-summary-text"><i class="fa-solid fa-spinner fa-spin"></i></span></h5>
-        <div id="ld-summary" class="sparkline txt-color-blueLight hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#DEF6FF">
-          Loading...
-        </div>
-      </li>
-      <li class="sparks-info">
-      <h5> BlueFors XLD <span class="txt-color-blueDarkBright" id="xld-summary-text"><i class="fa-solid fa-spinner fa-spin"></i></span></h5>
-        <div id="xld-summary" class="sparkline txt-color-blueDarkBright hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#7FB6FF">
-          Loading...
-        </div>
-      </li>
-      <li class="sparks-info">
-      <h5> Friesland <span class="txt-color-teal" id="Friesland-summary-text"><i class="fa-solid fa-spinner fa-spin"></i></span></h5>
-        <div id="Friesland-summary" class="sparkline txt-color-teal hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#8FE6E4">
-          Loading...
-        </div>
-      </li>
-      <li class="sparks-info">
-      <h5> Murphy <span class="txt-color-teal" id="Murphy-summary-text"><i class="fa-solid fa-spinner fa-spin"></i></span></h5>
-        <div id="Murphy-summary" class="sparkline txt-color-teal hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="#8FE6E4">
-          Loading...
-        </div>
-      </li>
+      <!-- Will be filled in by JS below -->
    </ul>
   </div>
 </div>
@@ -133,67 +92,65 @@ function format_temp(temp, multiplier) {
   }
 }
 
-  $(function() {
-  // Initialize sparklines
-  $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Blue_Fridge/data/?summary', function(data) {
-      $("#blue-fridge-summary-text").text(format_temp(data[data.length-1], 1));
-      init_sparkline($("#blue-fridge-summary"), data);
-    });
-  $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Red_Fridge/data/?summary', function(data) {
-      $("#red-fridge-summary-text").text(format_temp(data[data.length-1], 1));
-      init_sparkline($("#red-fridge-summary"), data);
-    });
-  $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Green_Fridge/data/?summary', function(data) {
-      $("#green-fridge-summary-text").text(format_temp(data[data.length-1], 1));
-      init_sparkline($("#green-fridge-summary"), data);
-    });
-  $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/BlueFors_LD/data/?summary', function(data) {
-      $("#ld-summary-text").text(format_temp(data[data.length-1], 1000));
-      init_sparkline($("#ld-summary"), data);
-    });
-  $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/BlueFors_XLD/data/?summary', function(data) {
-      $("#xld-summary-text").text(format_temp(data[data.length-1], 1000));
-      init_sparkline($("#xld-summary"), data);
-    });
-  $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Friesland/data/?summary', function(data) {
-      $("#Friesland-summary-text").text(format_temp(data[data.length-1], 1000));
-      init_sparkline($("#Friesland-summary"), data);
-    });
-  $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Murphy/data/?summary', function(data) {
-     $("#Murphy-summary-text").text(format_temp(data[data.length-1], 1000));
-      init_sparkline($("Murphy-summary"), data);
+// The fridges to sparkline
+class FridgeSparkLine {
+  fridge_name;
+  fridge_db_name;
+  fridge_js_name;
+  txt_color;
+  color;
+  constructor(fridge_name, fridge_db_name, fridge_js_name, txt_color, color) {
+    this.fridge_name = fridge_name;
+    this.fridge_db_name = fridge_db_name;
+    this.fridge_js_name = fridge_js_name;
+    this.txt_color = txt_color;
+    this.color = color;
+  }
+
+  data_uri() {
+    var data_uri = new URL($.data_uri);
+    data_uri.pathname += "/" + this.fridge_db_name + "/data/";
+    data_uri.searchParams.set("summary", "");
+    console.log(data_uri.toString());
+    return data_uri.toString();
+  }
+}
+
+fridge_sparklines = [
+  new FridgeSparkLine("Blue Fridge", "Blue_Fridge", "blue-fridge", "txt-color-blue", "#BCCFD7"),
+  new FridgeSparkLine("Red Fridge", "Red_Fridge", "red-fridge", "txt-color-red", "#DD9AA9"),
+  new FridgeSparkLine("Green Fridge", "Green_Fridge", "green-fridge", "txt-color-greenDark", "#B6C3B6"),
+  new FridgeSparkLine("BlueFors LD", "BlueFors_LD", "ld", "txt-color-blueLight", "#DEF6FF"),
+  new FridgeSparkLine("BlueFors XLD", "BlueFors_XLD", "xld", "txt-color-blueDarkBright", "#7FB6FF"),
+  new FridgeSparkLine("Friesland", "Friesland", "friesland", "txt-color-teal", "#8FE6E4"),
+  new FridgeSparkLine("Murphy", "Murphy", "murphy", "txt-color-teal", "#8FE6E4"),
+]
+
+  $(() => {
+    // Initialize sparklines
+    fridge_sparklines.forEach(fridge => {
+      // Create sparklines for each fridge
+      var li = document.createElement("li");
+      li.setAttribute("class", "sparks-info");
+      li.innerHTML = `
+        <h5> ${fridge.fridge_name} <span class="${fridge.txt_color}" id="${fridge.fridge_js_name}-summary-text"><small>Loading...</small></span></h5>
+        <div id="${fridge.fridge_js_name}-summary" class="sparkline ${fridge.txt_color} hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="${fridge.color}">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+        </div>
+      `;
+      $("ul#sparks")[0].appendChild(li);
+
+      $.getJSON(fridge.data_uri() , data => {
+        $("#"+fridge.fridge_js_name+"-summary-text").text(format_temp(data[data.length-1], 1));
+        init_sparkline($("#"+fridge.fridge_js_name+"-summary"), data);
+      });
+      setInterval(() => {
+        $.getJSON(fridge.data_uri(), data => {
+          var options = $("#"+fridge.fridge_js_name+"-summary")[0].sparkoptions;
+          $("#"+fridge.fridge_js_name+"-summary-text").text(format_temp(data[data.length-1], 1));
+          $("#"+fridge.fridge_js_name+"-summary").sparkline(data, options);
+        });
+      }, 5000);
     });
   });
-
-
-  setInterval( function(i) {
-    $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Blue_Fridge/data/?summary', function(data) {
-      $("#blue-fridge-summary-text").text(format_temp(data[data.length-1], 1));
-      $("#blue-fridge-summary").sparkline(data, $("#blue-fridge-summary")[0].sparkoptions);
-      });
-    $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Red_Fridge/data/?summary', function(data) {
-      $("#red-fridge-summary-text").text(format_temp(data[data.length-1], 1));
-      $("#red-fridge-summary").sparkline(data, $("#red-fridge-summary")[0].sparkoptions);
-      });
-    $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Green_Fridge/data/?summary', function(data) {
-      $("#green-fridge-summary-text").text(format_temp(data[data.length-1], 1));
-      $("#green-fridge-summary").sparkline(data, $("#green-fridge-summary")[0].sparkoptions);
-      });
-    $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/BlueFors_LD/data/?summary', function(data) {
-      $("#ld-summary-text").text(format_temp(data[data.length-1], 1000));
-      $("#ld-summary").sparkline(data, $("#ld-summary")[0].sparkoptions);
-      });
-    $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/BlueFors_XLD/data/?summary', function(data) {
-      $("#xld-summary-text").text(format_temp(data[data.length-1], 1000));
-      $("#xld-summary").sparkline(data, $("#xld-summary")[0].sparkoptions);
-      });
-    $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Friesland/data/?summary', function(data) {
-      $("#Friesland-summary-text").text(format_temp(data[data.length-1], 1000));
-      $("#Friesland-summary").sparkline(data, $("#Friesland-summary")[0].sparkoptions);
-      });
-     $.getJSON('http://qphys1114.research.sydney.edu.au/therm_flask/Murphy/data/?summary', function(data) {
-      $("#Murphy-summary-text").text(format_temp(data[data.length-1], 1000));
-      $("#Murphy-summary").sparkline(data, $("#Murphy-summary")[0].sparkoptions);
-      });
- }, 5000);
 </script>

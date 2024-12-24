@@ -520,13 +520,11 @@ angular.module('app.controllers', [])
     var fridge = $scope.$parent.params.fridge;
     if ('supp' in $scope.$parent.params) {
       var supp = $scope.$parent.params.supp;
-      var URL = "http://qphys1114.research.sydney.edu.au/therm_flask/"+fridge+"/"+supp+"/?current";
-      var sen_URL = "http://qphys1114.research.sydney.edu.au/therm_flask/"+fridge+"/"+supp+"/?sensors";
-      //var URL = "http://physics.usyd.edu.au/~spauka/therm_flask/"+fridge+"/"+supp+"/?current";
-      //var sen_URL = "http://physics.usyd.edu.au/~spauka/therm_flask/"+fridge+"/"+supp+"/?sensors";
+      var URL = $.data_uri+fridge+"/"+supp+"/?current";
+      var sen_URL = $.data_uri+fridge+"/"+supp+"/?sensors";
     } else {
-      var URL = "http://qphys1114.research.sydney.edu.au/therm_flask/"+fridge+"/data/?current";
-      var sen_URL = "http://qphys1114.research.sydney.edu.au/therm_flask/"+fridge+"/data/?sensors";
+      var URL = $.data_uri+fridge+"/data/?current";
+      var sen_URL = $.data_uri+fridge+"/data/?sensors";
     }
     var charts = $scope.charts = {};
     $http({method: 'GET', url: sen_URL, cache: false, responseType: 'json'})
@@ -583,7 +581,7 @@ angular.module('app.controllers', [])
     console.log(supp);
     if (typeof supp == 'undefined')
       supp = "data";
-    var sen_URL = "http://qphys1114.research.sydney.edu.au/therm_flask/"+fridge+"/"+supp+"/?sensors";
+    var sen_URL = $.data_uri+fridge+"/"+supp+"/?sensors";
     var charts = $scope.charts = {};
     $http({method: 'GET', url: sen_URL, cache: false, responseType: 'json'})
       .success(function (data, status) {
@@ -803,7 +801,7 @@ angular.module('app.controllers', [])
 
                     // Set up historic chart updater
                     if (historic && (xMax-xMin) <= (5*86400000)+1000) {
-                      var url = 'http://qphys1114.research.sydney.edu.au/therm_flask/'+fridge+'/'+data+'/'+thermid+'?start='+xMin+'&stop='+xMax;
+                      var url = $.data_uri+fridge+'/'+data+'/'+thermid+'?start='+xMin+'&stop='+xMax;
                       chart.showLoading('Loading Data...');
                       $.getJSON(url, function (data) {
                         chart.series[0].setData(data);
@@ -850,9 +848,9 @@ angular.module('app.controllers', [])
 
       $.each(therms, function(i, therm) {
         if (!historic) {
-          var url = 'http://qphys1114.research.sydney.edu.au/therm_flask/'+fridge+'/'+data+'/'+therm.column_name+'?count='+count;
+          var url = $.data_uri+fridge+'/'+data+'/'+therm.column_name+'?count='+count;
         } else {
-          var url = 'http://qphys1114.research.sydney.edu.au/therm_flask/'+fridge+'/'+data+'/'+therm.column_name+'?hourly';
+          var url = $.data_uri+fridge+'/'+data+'/'+therm.column_name+'?hourly';
         }
         $.getJSON(url, function (data) {
           if (scope.therm != -1) {
