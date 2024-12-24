@@ -109,7 +109,7 @@ class FridgeSparkLine {
 
   data_uri() {
     var data_uri = new URL($.data_uri);
-    data_uri.pathname += "/" + this.fridge_db_name + "/data/";
+    data_uri.pathname += this.fridge_db_name + "/data/";
     data_uri.searchParams.set("summary", "");
     console.log(data_uri.toString());
     return data_uri.toString();
