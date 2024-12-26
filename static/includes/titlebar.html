@@ -111,11 +111,11 @@ class FridgeSparkLine {
     var data_uri = new URL($.data_uri);
     data_uri.pathname += this.fridge_db_name + "/data/";
     data_uri.searchParams.set("summary", "");
-    console.log(data_uri.toString());
     return data_uri.toString();
   }
 }
 
+// To add a new fridge, add a new SparkLine configuration below.
 fridge_sparklines = [
   new FridgeSparkLine("Blue Fridge", "Blue_Fridge", "blue-fridge", "txt-color-blue", "#BCCFD7"),
   new FridgeSparkLine("Red Fridge", "Red_Fridge", "red-fridge", "txt-color-red", "#DD9AA9"),

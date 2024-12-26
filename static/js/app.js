@@ -78,7 +78,23 @@ var calc_navbar_height = function() {
  * a class is inserted to $.root_ and the variable thisDevice is decleard. 
  * (so far this is covering most hand held devices)
  */ 
-  ismobile = (/iphone|ipad|ipod|android|blackberry|mini|windows\sce|palm/i.test(navigator.userAgent.toLowerCase()));
+  detectmob = function() {
+    if( navigator.userAgent.match(/Android/i)
+        || navigator.userAgent.match(/webOS/i)
+        || navigator.userAgent.match(/iPhone/i)
+        || navigator.userAgent.match(/iPad/i)
+        || navigator.userAgent.match(/iPod/i)
+        || navigator.userAgent.match(/BlackBerry/i)
+        || navigator.userAgent.match(/Windows Phone/i)
+      ){
+        return true;
+      }
+    else {
+      return false;
+    }
+  },
+
+  ismobile = detectmob();
 /*
  * CHECK MOBILE VIEW
  */

@@ -568,7 +568,7 @@ angular.module('app.controllers', [])
         });
 
     };
-    interval = $interval(function() {$scope.fetch();}, 5000);
+    var interval = $interval(function() {$scope.fetch();}, 5000);
     $scope.$on('$destroy', function() {
       // Make sure that the interval is destroyed too
       $interval.cancel(interval);
