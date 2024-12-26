@@ -140,7 +140,7 @@ angular.module('app.main', [])
             }
 
             // SHORT CUT (buttons that appear when clicked on user name)
-            shortcut_dropdown.find('a').click(function(e) {
+            shortcut_dropdown.find('a').on("click", function(e) {
               e.preventDefault();
               window.location = $(this).attr('href');
               setTimeout(shortcut_buttons_hide, 300);
@@ -215,11 +215,11 @@ angular.module('app.main', [])
       restrict: 'EA',
       link: function(scope, element, attrs) {
         // SHOW & HIDE MOBILE SEARCH FIELD
-        angular.element('#search-mobile').click(function() {
+        angular.element('#search-mobile').on("click", function() {
           $.root_.addClass('search-mobile');
         });
 
-        angular.element('#cancel-search-js').click(function() {
+        angular.element('#cancel-search-js').on("click", function() {
           $.root_.removeClass('search-mobile');
         });
       }
@@ -240,7 +240,7 @@ angular.module('app.main', [])
          * FIXED HEADER
          */
         $('input[type="checkbox"]#smart-fixed-header')
-            .click(function () {
+            .on("click", function () {
                 if ($(this)
                     .is(':checked')) {
                     //checked
@@ -263,7 +263,7 @@ angular.module('app.main', [])
          * FIXED NAV
          */
         $('input[type="checkbox"]#smart-fixed-navigation')
-            .click(function () {
+            .on("click", function () {
                 if ($(this)
                     .is(':checked')) {
                     //checked
@@ -290,7 +290,7 @@ angular.module('app.main', [])
          * FIXED RIBBON
          */
         $('input[type="checkbox"]#smart-fixed-ribbon')
-            .click(function () {
+            .on("click", function () {
                 if ($(this)
                     .is(':checked')) {
 
@@ -321,7 +321,7 @@ angular.module('app.main', [])
          * RTL SUPPORT
          */
         $('input[type="checkbox"]#smart-fixed-footer')
-            .click(function () {
+            .on("click", function () {
                 if ($(this)
                     .is(':checked')) {
 
@@ -339,7 +339,7 @@ angular.module('app.main', [])
          * RTL SUPPORT
          */
         $('input[type="checkbox"]#smart-rtl')
-            .click(function () {
+            .on("click", function () {
                 if ($(this)
                     .is(':checked')) {
 
@@ -382,7 +382,7 @@ angular.module('app.main', [])
          * INSIDE CONTAINER
          */
         $('input[type="checkbox"]#smart-fixed-container')
-            .click(function () {
+            .on("click", function () {
                 if ($(this)
                     .is(':checked')) {
                     //checked
@@ -425,7 +425,7 @@ angular.module('app.main', [])
          * REFRESH WIDGET
          */
         $("#reset-smart-widget")
-            .bind("click", function () {
+            .on("click", function () {
                 $('#refresh')
                     .click();
                 return false;

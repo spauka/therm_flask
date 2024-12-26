@@ -122,7 +122,7 @@ if ($('body').hasClass("menu-on-top") || localStorage.getItem('sm-setmenu')=='to
     $("[rel=tooltip]").tooltip();
   }
 
-  $(document).mouseup(function(e) {
+  $(document).on("mouseup", function(e) {
     if (!$('.ajax-dropdown').is(e.target) && $('.ajax-dropdown').has(e.target).length === 0) {
       $('.ajax-dropdown').fadeOut(150);
       $('.ajax-dropdown').prev().removeClass("active");
@@ -211,7 +211,7 @@ if ($('body').hasClass("menu-on-top") || localStorage.getItem('sm-setmenu')=='to
 
                 old_handler.apply(this, arguments);
             }
-            if ($.isFunction(handleObj)) {
+            if (typeof handleObj === "function") {
                 old_handler = handleObj;
                 return new_handler;
             } else {
@@ -265,7 +265,7 @@ if ($('body').hasClass("menu-on-top") || localStorage.getItem('sm-setmenu')=='to
 * Note: This script uses JSthrottle technique so don't worry about memory/CPU usage
 */
 
-$('#main').resize(function() {
+$('#main').on("resize", function() {
   check_if_mobile_width();
 });
 
@@ -337,13 +337,13 @@ $.fn.extend({
 
     //add a mark [+] to a multilevel menu
     $this.find("li").each(function() {
-      if ($(this).find("ul").size() !== 0) {
+      if ($(this).find("ul").length !== 0) {
         //add the multilevel sign next to the link
         $(this).find("a:first").append("<b class='collapse-sign'>" + opts.closedSign + "</b>");
 
         //avoid jumping to the top of the page when the href is an #
         if ($(this).find("a:first").attr('href') == "#") {
-          $(this).find("a:first").click(function() {
+          $(this).find("a:first").on("click", function() {
             return false;
           });
         }
@@ -357,9 +357,9 @@ $.fn.extend({
       $(this).parents("ul").parent("li").addClass("open");
     });
 
-    $this.find("li a").click(function() {
+    $this.find("li a").on("click", function() {
 
-      if ($(this).parent().find("ul").size() !== 0) {
+      if ($(this).parent().find("ul").length !== 0) {
 
         if (opts.accordion) {
           //Do nothing when the list is open
@@ -466,15 +466,6 @@ function launchFullscreen(element) {
  */
 
 function runAllForms() {
-
-  /*
-   * BOOTSTRAP SLIDER PLUGIN
-   * Usage:
-   * Dependency: js/plugin/bootstrap-slider
-   */
-  if ($.fn.slider) {
-    $('.slider').slider();
-  }
 
   /*
    * SELECT2 PLUGIN
