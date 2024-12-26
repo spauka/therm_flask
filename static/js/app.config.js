@@ -163,6 +163,84 @@
  * Define data uri
  */
 $.data_uri = "https://qsyd.sydney.edu.au/therm/data/";
+
+/*
+ * Define sparkline style
+ */
+const defaultSparkStyle = {
+	chart: {
+		backgroundColor: null,
+		borderWidth: 0,
+		type: 'area',
+		margin: [2, 0, 2, 0],
+		width: 90,
+		height: 30,
+		style: {
+			overflow: 'visible'
+		},
+		// small optimalization, saves 1-2 ms each sparkline
+		skipClone: true
+	},
+	title: {
+		text: ''
+	},
+	credits: {
+		enabled: false
+	},
+	xAxis: {
+		labels: {
+			enabled: false
+		},
+		title: {
+			text: null
+		},
+		startOnTick: false,
+		endOnTick: false,
+		tickPositions: [],
+		lineWidth: 0,
+	},
+	yAxis: {
+		endOnTick: false,
+		startOnTick: false,
+		labels: {
+			enabled: false
+		},
+		title: {
+			text: null
+		},
+		tickPositions: []
+	},
+	legend: {
+		enabled: false
+	},
+	tooltip: {
+		hideDelay: 0,
+		outside: true,
+		shared: true,
+	},
+	plotOptions: {
+		series: {
+			animation: false,
+			lineWidth: 1,
+			shadow: false,
+			states: {
+				hover: {
+					lineWidth: 1
+				}
+			},
+			marker: {
+				radius: 1,
+				states: {
+					hover: {
+						radius: 2
+					}
+				}
+			},
+			fillOpacity: 0.25,
+			softThreshold: false,
+		},
+	}
+};
 /*
  * END APP.CONFIG
  */

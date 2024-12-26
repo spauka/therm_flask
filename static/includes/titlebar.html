@@ -16,59 +16,6 @@
 </div>
 
 <script type="text/javascript">
-  function init_sparkline(divid, data) {
-    var $this = divid;
-    var sparklineType = $this.data('sparkline-type');
-
-
-    //LINE CHART
-    if (sparklineType == 'line') {
-      var sparklineHeight = $this.data('sparkline-height') || '30px';
-      var sparklineWidth = $this.data('sparkline-width') || '90px';
-      var thisLineColor = $this.data('sparkline-line-color') || $this.css('color') || '#0000f0';
-      var thisLineWidth = $this.data('sparkline-line-width') || 1;
-      var thisFill = $this.data('fill-color') || '#c0d0f0';
-      var thisSpotColor = $this.data('sparkline-spot-color') || '#f08000';
-      var thisMinSpotColor = $this.data('sparkline-minspot-color') || '#ed1c24';
-      var thisMaxSpotColor = $this.data('sparkline-maxspot-color') || '#f08000';
-      var thishighlightSpotColor = $this.data('sparkline-highlightspot-color') || '#50f050';
-      var thisHighlightLineColor = $this.data('sparkline-highlightline-color') || 'f02020';
-      var thisSpotRadius = $this.data('sparkline-spotradius') || 1.5;
-      var thisChartMinYRange = $this.data('sparkline-min-y') || 'undefined'; 
-      var thisChartMaxYRange = $this.data('sparkline-max-y') || 'undefined'; 
-      var thisChartMinXRange = $this.data('sparkline-min-x') || 'undefined'; 
-      var thisChartMaxXRange = $this.data('sparkline-max-x') || 'undefined'; 
-      var thisMinNormValue = $this.data('min-val') || 'undefined'; 
-      var thisMaxNormValue = $this.data('max-val') || 'undefined'; 
-      var thisNormColor =  $this.data('norm-color') || '#c0c0c0';
-      var thisDrawNormalOnTop = $this.data('draw-normal') || false;
-
-      $this[0].sparkoptions = {
-       type : 'line',
-       width : sparklineWidth,
-       height : sparklineHeight,
-       lineWidth : thisLineWidth,
-       lineColor : thisLineColor,
-       fillColor : thisFill,
-       spotColor : thisSpotColor,
-       minSpotColor : thisMinSpotColor,
-       maxSpotColor : thisMaxSpotColor,
-       highlightSpotColor : thishighlightSpotColor,
-       highlightLineColor : thisHighlightLineColor,
-       spotRadius : thisSpotRadius,
-       chartRangeMin : thisChartMinYRange,
-       chartRangeMax : thisChartMaxYRange,
-       chartRangeMinX : thisChartMinXRange,
-       chartRangeMaxX : thisChartMaxXRange,
-       normalRangeMin : thisMinNormValue,
-       normalRangeMax : thisMaxNormValue,
-       normalRangeColor : thisNormColor,
-       drawNormalOnTop : thisDrawNormalOnTop
-      };
-      $this.sparkline(data, $this[0].sparkoptions);
-    }
-  }
-
 function format_temp(temp, multiplier) {
   if (temp == null) {
     return "Und";
@@ -99,12 +46,14 @@ class FridgeSparkLine {
   fridge_js_name;
   txt_color;
   color;
-  constructor(fridge_name, fridge_db_name, fridge_js_name, txt_color, color) {
+  multiplier;
+  constructor(fridge_name, fridge_db_name, fridge_js_name, txt_color, color, multiplier) {
     this.fridge_name = fridge_name;
     this.fridge_db_name = fridge_db_name;
     this.fridge_js_name = fridge_js_name;
     this.txt_color = txt_color;
     this.color = color;
+    this.multiplier = multiplier;
   }
 
   data_uri() {
@@ -117,40 +66,59 @@ class FridgeSparkLine {
 
 // To add a new fridge, add a new SparkLine configuration below.
 fridge_sparklines = [
-  new FridgeSparkLine("Blue Fridge", "Blue_Fridge", "blue-fridge", "txt-color-blue", "#BCCFD7"),
-  new FridgeSparkLine("Red Fridge", "Red_Fridge", "red-fridge", "txt-color-red", "#DD9AA9"),
-  new FridgeSparkLine("Green Fridge", "Green_Fridge", "green-fridge", "txt-color-greenDark", "#B6C3B6"),
-  new FridgeSparkLine("BlueFors LD", "BlueFors_LD", "ld", "txt-color-blueLight", "#DEF6FF"),
-  new FridgeSparkLine("BlueFors XLD", "BlueFors_XLD", "xld", "txt-color-blueDarkBright", "#7FB6FF"),
-  new FridgeSparkLine("Friesland", "Friesland", "friesland", "txt-color-teal", "#8FE6E4"),
-  new FridgeSparkLine("Murphy", "Murphy", "murphy", "txt-color-teal", "#8FE6E4"),
+  new FridgeSparkLine("Blue Fridge", "Blue_Fridge", "blue-fridge", "txt-color-blue", "#BCCFD7", 1),
+  new FridgeSparkLine("Red Fridge", "Red_Fridge", "red-fridge", "txt-color-red", "#DD9AA9", 1),
+  new FridgeSparkLine("Green Fridge", "Green_Fridge", "green-fridge", "txt-color-greenDark", "#B6C3B6", 1),
+  new FridgeSparkLine("BlueFors LD", "BlueFors_LD", "ld", "txt-color-blueLight", "#7ab6cc", 1000),
+  new FridgeSparkLine("BlueFors XLD", "BlueFors_XLD", "xld", "txt-color-blueDarkBright", "#7FB6FF", 1000),
+  new FridgeSparkLine("Friesland", "Friesland", "friesland", "txt-color-teal", "#8FE6E4", 1000),
+  new FridgeSparkLine("Murphy", "Murphy", "murphy", "txt-color-teal", "#8FE6E4", 1000),
 ]
 
-  $(() => {
-    // Initialize sparklines
-    fridge_sparklines.forEach(fridge => {
-      // Create sparklines for each fridge
-      var li = document.createElement("li");
-      li.setAttribute("class", "sparks-info");
-      li.innerHTML = `
-        <h5> ${fridge.fridge_name} <span class="${fridge.txt_color}" id="${fridge.fridge_js_name}-summary-text"><small>Loading...</small></span></h5>
-        <div id="${fridge.fridge_js_name}-summary" class="sparkline ${fridge.txt_color} hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="${fridge.color}">
-          <i class="fa-solid fa-spinner fa-spin"></i>
-        </div>
-      `;
-      $("ul#sparks")[0].appendChild(li);
+fridge_sparklines.forEach(fridge => {
+    var li = document.createElement("li");
+    li.setAttribute("class", "sparks-info");
+    li.innerHTML = `
+      <h5> ${fridge.fridge_name} <span class="${fridge.txt_color}" id="${fridge.fridge_js_name}-summary-text"><small>Loading...</small></span></h5>
+      <div id="${fridge.fridge_js_name}-summary" class="sparkline ${fridge.txt_color} hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="${fridge.color}">
+        <i class="fa-solid fa-spinner fa-spin"></i>
+      </div>
+    `;
+    $("ul#sparks")[0].appendChild(li);
+    const temp_label = "#"+fridge.fridge_js_name+"-summary-text";
+    const temp_line = "#"+fridge.fridge_js_name+"-summary";
 
-      $.getJSON(fridge.data_uri() , data => {
-        $("#"+fridge.fridge_js_name+"-summary-text").text(format_temp(data[data.length-1], 1));
-        init_sparkline($("#"+fridge.fridge_js_name+"-summary"), data);
-      });
+    $.getJSON(fridge.data_uri() , data => {
+      
+      // Set the temperature label
+      $(temp_label).text(format_temp(data[data.length-1], fridge.multiplier));
+
+      // Create sparkline
+      const customOptions = {
+        series: [{
+          data: data,
+          color: fridge.color,
+        }],
+        tooltip: {
+          headerFormat: '',
+          pointFormatter: function () {
+            formatted_temp = format_temp(this.y, fridge.multiplier);
+            return `<b>${formatted_temp}</b>`;
+          }
+        }
+      };
+      let chart_options = Highcharts.merge(defaultSparkStyle, customOptions);
+      let chart = $(temp_line).highcharts("Chart", chart_options);
+
+      // Create a callback to update every 10s
       setInterval(() => {
         $.getJSON(fridge.data_uri(), data => {
-          var options = $("#"+fridge.fridge_js_name+"-summary")[0].sparkoptions;
-          $("#"+fridge.fridge_js_name+"-summary-text").text(format_temp(data[data.length-1], 1));
-          $("#"+fridge.fridge_js_name+"-summary").sparkline(data, options);
-        });
-      }, 5000);
+          // Set the temperature label
+          $(temp_label).text(format_temp(data[data.length-1], fridge.multiplier));
+          $(temp_line).highcharts().series[0].setData(data);
+        })
+      }, 10000);
     });
-  });
+  }
+)
 </script>
