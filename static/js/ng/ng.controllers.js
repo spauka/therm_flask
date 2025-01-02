@@ -911,7 +911,7 @@ angular.module('app.controllers', [])
               else
                 number = this.y.toFixed(3) + tickLabel;
               var dt = new Date(this.x);
-              var dts = $.format.date(dt, "E, dd MMM, HH:mm:ss");
+              var dts = tooltipDateFormatter.format(dt);
               return "<span style=\"font-size: xx-small\">" + dts + "</span><br/>" + therm.name + ": <b>" + number + "</b>";
             };
           } else {

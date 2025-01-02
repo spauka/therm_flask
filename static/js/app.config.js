@@ -93,8 +93,6 @@ const defaultSparkStyle = {
 		title: {
 			text: null
 		},
-		startOnTick: false,
-		endOnTick: false,
 		tickPositions: [],
 		lineWidth: 0,
 	},
@@ -140,6 +138,23 @@ const defaultSparkStyle = {
 		},
 	}
 };
+
+/*
+ * Tooltip date format - main graphs
+ */
+const tooltipDateFormat = {
+	weekday: "short",
+	year: "2-digit",
+	month: "short",
+	day: "numeric",
+	hour: "numeric",
+	minute: "numeric",
+	second: "numeric",
+	timeZoneName: "shortOffset", // DB only stores offset, not original tz
+	hourCycle: "h24" // "h12" for 12 hour time
+};
+const tooltipDateFormatter = new Intl.DateTimeFormat(undefined, tooltipDateFormat);
+
 /*
  * END APP.CONFIG
  */
