@@ -39,42 +39,6 @@ function format_temp(temp, multiplier) {
   }
 }
 
-// The fridges to sparkline
-class FridgeSparkLine {
-  fridge_name;
-  fridge_db_name;
-  fridge_js_name;
-  txt_color;
-  color;
-  multiplier;
-  constructor(fridge_name, fridge_db_name, fridge_js_name, txt_color, color, multiplier) {
-    this.fridge_name = fridge_name;
-    this.fridge_db_name = fridge_db_name;
-    this.fridge_js_name = fridge_js_name;
-    this.txt_color = txt_color;
-    this.color = color;
-    this.multiplier = multiplier;
-  }
-
-  data_uri() {
-    var data_uri = new URL($.data_uri);
-    data_uri.pathname += this.fridge_db_name + "/data/";
-    data_uri.searchParams.set("summary", "");
-    return data_uri.toString();
-  }
-}
-
-// To add a new fridge, add a new SparkLine configuration below.
-fridge_sparklines = [
-  new FridgeSparkLine("Blue Fridge", "Blue_Fridge", "blue-fridge", "txt-color-blue", "#BCCFD7", 1),
-  new FridgeSparkLine("Red Fridge", "Red_Fridge", "red-fridge", "txt-color-red", "#DD9AA9", 1),
-  new FridgeSparkLine("Green Fridge", "Green_Fridge", "green-fridge", "txt-color-greenDark", "#B6C3B6", 1),
-  new FridgeSparkLine("BlueFors LD", "BlueFors_LD", "ld", "txt-color-blueLight", "#7ab6cc", 1000),
-  new FridgeSparkLine("BlueFors XLD", "BlueFors_XLD", "xld", "txt-color-blueDarkBright", "#7FB6FF", 1000),
-  new FridgeSparkLine("Friesland", "Friesland", "friesland", "txt-color-teal", "#8FE6E4", 1000),
-  new FridgeSparkLine("Murphy", "Murphy", "murphy", "txt-color-teal", "#8FE6E4", 1000),
-]
-
 fridge_sparklines.forEach(fridge => {
     var li = document.createElement("li");
     li.setAttribute("class", "sparks-info");
