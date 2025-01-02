@@ -52,7 +52,7 @@ fridge_sparklines.forEach(fridge => {
     const temp_label = "#"+fridge.fridge_js_name+"-summary-text";
     const temp_line = "#"+fridge.fridge_js_name+"-summary";
 
-    $.getJSON(fridge.data_uri() , data => {
+    $.getJSON(fridge.fridge_data_uri() , data => {
       
       // Set the temperature label
       $(temp_label).text(format_temp(data[data.length-1], fridge.multiplier));
@@ -76,7 +76,7 @@ fridge_sparklines.forEach(fridge => {
 
       // Create a callback to update every 10s
       setInterval(() => {
-        $.getJSON(fridge.data_uri(), data => {
+        $.getJSON(fridge.fridge_data_uri(), data => {
           // Set the temperature label
           $(temp_label).text(format_temp(data[data.length-1], fridge.multiplier));
           $(temp_line).highcharts().series[0].setData(data);

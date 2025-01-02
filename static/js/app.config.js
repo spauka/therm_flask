@@ -61,7 +61,7 @@
 /*
  * Define data uri
  */
-$.data_uri = "https://qsyd.sydney.edu.au/therm/data/";
+const data_uri = "https://qsyd.sydney.edu.au/therm/data/";
 
 /*
  * Define sparkline style (top of page)

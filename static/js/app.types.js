@@ -15,11 +15,11 @@ class FridgeSparkLine {
         this.multiplier = multiplier;
     }
 
-    data_uri() {
-        var data_uri = new URL($.data_uri);
-        data_uri.pathname += this.fridge_db_name + "/data/";
-        data_uri.searchParams.set("summary", "");
-        return data_uri.toString();
+    fridge_data_uri() {
+        var constructed_url = new URL(data_uri);
+        constructed_url.pathname += this.fridge_db_name + "/data/";
+        constructed_url.searchParams.set("summary", "");
+        return constructed_url.toString();
     }
 }
 
