@@ -729,58 +729,7 @@ angular.module('app.controllers', [])
         }
 
         // Calculate ranges for historic and nonhistoric graphs
-        var ranges = [];
-        if (!historic) {
-          ranges = ranges.concat([{
-            type: 'minute',
-            count: 10,
-            text: '10m'
-          }, {
-            type: 'hour',
-            count: 1,
-            text: '1h'
-          }, {
-            type: 'hour',
-            count: 2,
-            text: '2h'
-          }, {
-            type: 'hour',
-            count: 5,
-            text: '5h'
-          }]);
-        }
-        ranges = ranges.concat([{
-          type: 'day',
-          count: 1,
-          text: '1d'
-        }, {
-          type: 'day',
-          count: 3,
-          text: '3d'
-        }]);
-        if (historic) {
-          ranges = ranges.concat([{
-            type: 'day',
-            count: 7,
-            text: '7d'
-          }, {
-            type: 'month',
-            count: 1,
-            text: '1m'
-          }, {
-            type: 'month',
-            count: 2,
-            text: '2m'
-          }, {
-            type: 'month',
-            count: 3,
-            text: '3m'
-          }]);
-        }
-        ranges = ranges.concat([{
-          type: 'all',
-          text: 'All'
-        }]);
+        var ranges = historic ? historicRanges : normalRanges;
 
         $('#' + thermid).highcharts('StockChart', {
           chart: {

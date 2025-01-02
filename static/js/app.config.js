@@ -154,6 +154,27 @@ const fridge_sparklines = [
 	new FridgeSparkLine("Murphy", "Murphy", "murphy", "txt-color-teal", "#8FE6E4", 1000),
 ];
 
+/*
+ * Define default graph style
+ */
+const normalRanges = [
+	new HighStockRangeSelector("minute", 10, "10m"),
+	new HighStockRangeSelector("hour", 1, "1h"),
+	new HighStockRangeSelector("hour", 2, "2h"),
+	new HighStockRangeSelector("hour", 5, "5h"),
+	new HighStockRangeSelector("day", 1, "1d"),
+	new HighStockRangeSelector("day", 3, "3d"),
+	new HighStockRangeSelector("all", undefined, "All")
+];
+const historicRanges = [
+	new HighStockRangeSelector("day", 1, "1d"),
+	new HighStockRangeSelector("day", 3, "3d"),
+	new HighStockRangeSelector("day", 7, "7d"),
+	new HighStockRangeSelector("month", 1, "1m"),
+	new HighStockRangeSelector("month", 3, "3m"),
+	new HighStockRangeSelector("year", 1, "1y"),
+	new HighStockRangeSelector("all", undefined, "All")
+];
 
 /*
  * Tooltip date format - main graphs
