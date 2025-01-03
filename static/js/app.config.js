@@ -56,7 +56,7 @@
  * These elements are ignored during DOM object deletion for ajax version
  * It will delete all objects during page load with these exceptions:
  */
-	ignore_key_elms = ["#header, #left-panel, #main, div.page-footer, #shortcut, #divSmallBoxes, #divMiniIcons, #divbigBoxes, #voiceModal, script"];
+	ignore_key_elms = ["#header, #left-panel, #main, div.page-footer, #shortcut, #divSmallBoxes, #divMiniIcons, #divbigBoxes,, script"];
 
 /*
  * Define data uri
