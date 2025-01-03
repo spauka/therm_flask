@@ -1,12 +1,9 @@
 var smartApp = angular.module('smartApp', [
     'ngRoute',
-    //'ngAnimate', // this is buggy, jarviswidget will not work with ngAnimate :(
     'ui.bootstrap',
     'app.controllers',
     'app.main',
     'app.navigation',
-    'app.activity',
-    //'app.smartui'
 ]);
 
 smartApp.config(['$routeProvider', function ($routeProvider) {
