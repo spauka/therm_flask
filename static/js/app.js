@@ -26,40 +26,15 @@
  * email: info@myorange.ca
  */
 
-/*
- * Calculate nav height
- */
-var calc_navbar_height = function () {
-    var height = null;
-
-    if ($('#header').length)
-        height = $('#header').height();
-
-    if (height === null)
-        height = $('<div id="header"></div>').height();
-
-    if (height === null)
-        return 49;
-    // default
-    return height;
-},
-
-    navbar_height = calc_navbar_height,
     /*
      * APP DOM REFERENCES
      * Description: Obj DOM reference, please try to avoid changing these
      */
-    shortcut_dropdown = $('#shortcut'),
-
-    bread_crumb = $('#ribbon ol.breadcrumb'),
+var shortcut_dropdown = $('#shortcut'),
     /*
      * Top menu on/off
      */
     topmenu = false,
-    /*
-     * desktop or mobile
-     */
-    thisDevice = null,
 
     /*
      * DETECT MOBILE DEVICES
@@ -96,13 +71,6 @@ if (!ismobile) {
     $('body').addClass("mobile-detected");
     device = "mobile";
 
-    if (fastClick) {
-        // Removes the tap delay in idevices
-        // dependency: js/plugin/fastclick/fastclick.js 
-        $('body').addClass("needsclick");
-        FastClick.attach(document.body);
-    }
-
 }
 /*
  * CHECK FOR MENU POSITION
@@ -119,7 +87,6 @@ if ($('body').hasClass("menu-on-top") || localStorage.getItem('sm-setmenu') == '
  */
 
 jQuery(document).ready(function () {
-
     /*
      * Fire tooltips
      */
@@ -143,125 +110,6 @@ jQuery(document).ready(function () {
     });
 
 });
-
-
-/*
- * RESIZER WITH THROTTLE
- * Source: http://benalman.com/code/projects/jquery-resize/examples/resize/
- */
-
-(function ($, window, undefined) {
-
-    var elems = $([]),
-        jq_resize = $.resize = $.extend($.resize, {}),
-        timeout_id, str_setTimeout = 'setTimeout',
-        str_resize = 'resize',
-        str_data = str_resize + '-special-event',
-        str_delay = 'delay',
-        str_throttle = 'throttleWindow';
-
-    jq_resize[str_delay] = throttle_delay;
-
-    jq_resize[str_throttle] = true;
-
-    $.event.special[str_resize] = {
-
-        setup: function () {
-            if (!jq_resize[str_throttle] && this[str_setTimeout]) {
-                return false;
-            }
-
-            var elem = $(this);
-            elems = elems.add(elem);
-            try {
-                $.data(this, str_data, {
-                    w: elem.width(),
-                    h: elem.height()
-                });
-            } catch (e) {
-                $.data(this, str_data, {
-                    w: elem.width, // elem.width();
-                    h: elem.height // elem.height();
-                });
-            }
-
-            if (elems.length === 1) {
-                loopy();
-            }
-        },
-        teardown: function () {
-            if (!jq_resize[str_throttle] && this[str_setTimeout]) {
-                return false;
-            }
-
-            var elem = $(this);
-            elems = elems.not(elem);
-            elem.removeData(str_data);
-            if (!elems.length) {
-                clearTimeout(timeout_id);
-            }
-        },
-
-        add: function (handleObj) {
-            if (!jq_resize[str_throttle] && this[str_setTimeout]) {
-                return false;
-            }
-            var old_handler;
-
-            function new_handler(e, w, h) {
-                var elem = $(this),
-                    data = $.data(this, str_data);
-                data.w = w !== undefined ? w : elem.width();
-                data.h = h !== undefined ? h : elem.height();
-
-                old_handler.apply(this, arguments);
-            }
-            if (typeof handleObj === "function") {
-                old_handler = handleObj;
-                return new_handler;
-            } else {
-                old_handler = handleObj.handler;
-                handleObj.handler = new_handler;
-            }
-        }
-    };
-
-    function loopy() {
-        timeout_id = window[str_setTimeout](function () {
-            elems.each(function () {
-                var width;
-                var height;
-
-                var elem = $(this),
-                    data = $.data(this, str_data); //width = elem.width(), height = elem.height();
-
-                // Highcharts fix
-                try {
-                    width = elem.width();
-                } catch (e) {
-                    width = elem.width;
-                }
-
-                try {
-                    height = elem.height();
-                } catch (e) {
-                    height = elem.height;
-                }
-                //fixed bug
-
-
-                if (width !== data.w || height !== data.h) {
-                    elem.trigger(str_resize, [data.w = width, data.h = height]);
-                }
-
-            });
-            loopy();
-
-        }, jq_resize[str_delay]);
-
-    }
-
-})(jQuery, this);
 
 /*
 * ADD CLASS WHEN BELOW CERTAIN WIDTH (MOBILE MENU)
@@ -376,108 +224,7 @@ $.fn.extend({
     } // end function
 });
 
-
 /* ~ END: CUSTOM MENU PLUGIN */
-
-/*
- * INITIALIZE JARVIS WIDGETS
- */
-
-// Setup Desktop Widgets
-function setup_widgets_desktop() {
-
-    if ($.fn.jarvisWidgets && enableJarvisWidgets) {
-
-        $('#widget-grid').jarvisWidgets({
-
-            grid: 'article',
-            widgets: '.jarviswidget',
-            localStorage: true,
-            deleteSettingsKey: '#deletesettingskey-options',
-            settingsKeyLabel: 'Reset settings?',
-            deletePositionKey: '#deletepositionkey-options',
-            positionKeyLabel: 'Reset position?',
-            sortable: true,
-            buttonsHidden: false,
-            // toggle button
-            toggleButton: true,
-            toggleClass: 'fa-solid fa-minus | fa-solid fa-plus',
-            toggleSpeed: 200,
-            onToggle: function () {
-            },
-            // delete btn
-            deleteButton: true,
-            deleteClass: 'fa-solid fa-times',
-            deleteSpeed: 200,
-            onDelete: function () {
-            },
-            // edit btn
-            editButton: true,
-            editPlaceholder: '.jarviswidget-editbox',
-            editClass: 'fa-solid fa-cog | fa-solid fa-save',
-            editSpeed: 200,
-            onEdit: function () {
-            },
-            // color button
-            colorButton: true,
-            // full screen
-            fullscreenButton: true,
-            fullscreenClass: 'fa-solid fa-up-right-and-down-left-from-center | fa-solid fa-down-left-and-up-right-to-center',
-            fullscreenDiff: 3,
-            onFullscreen: function () {
-            },
-            // custom btn
-            customButton: false,
-            customClass: 'folder-10 | next-10',
-            customStart: function () {
-                alert('Hello you, this is a custom button...');
-            },
-            customEnd: function () {
-                alert('bye, till next time...');
-            },
-            // order
-            buttonOrder: '%refresh% %custom% %edit% %toggle% %fullscreen% %delete%',
-            opacity: 1.0,
-            dragHandle: '> header',
-            placeholderClass: 'jarviswidget-placeholder',
-            indicator: true,
-            indicatorTime: 600,
-            ajax: true,
-            timestampPlaceholder: '.jarviswidget-timestamp',
-            timestampFormat: 'Last update: %m%/%d%/%y% %h%:%i%:%s%',
-            refreshButton: true,
-            refreshButtonClass: 'fa-solid fa-refresh',
-            labelError: 'Sorry but there was a error:',
-            labelUpdated: 'Last Update:',
-            labelRefresh: 'Refresh',
-            labelDelete: 'Delete widget:',
-            afterLoad: function () {
-            },
-            rtl: false, // best not to toggle this!
-            onChange: function () {
-
-            },
-            onSave: function () {
-
-            },
-            ajaxnav: $.navAsAjax // declears how the localstorage should be saved (HTML or AJAX page)
-
-        });
-
-    }
-
-}
-
-// Setup Desktop Widgets
-function setup_widgets_mobile() {
-
-    if (enableMobileWidgets && enableJarvisWidgets) {
-        setup_widgets_desktop();
-    }
-
-}
-
-/* ~ END: INITIALIZE JARVIS WIDGETS */
 
 /*
  * PAGE SETUP
@@ -500,9 +247,6 @@ function pageSetUp() {
             trigger: "hover"
         });
 
-        // setup widgets
-        setup_widgets_desktop();
-
     } else {
 
         // is mobile
@@ -514,9 +258,6 @@ function pageSetUp() {
         $("[rel=popover-hover]").popover({
             trigger: "hover"
         });
-
-        // setup widgets
-        setup_widgets_mobile();
 
     }
 
