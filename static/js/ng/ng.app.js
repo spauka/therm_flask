@@ -23,12 +23,6 @@ smartApp.config(['$routeProvider', function ($routeProvider) {
             },
             controller: 'FridgeViewController'
         })
-        .when('/:fridge/combined', {
-            templateUrl: function ($routeParams) {
-                return 'views/fridge-combined.html';
-            },
-            controller: 'FridgeViewController'
-        })
         .when('/:fridge/historic', {
             templateUrl: function ($routeParams) {
                 return 'views/fridge-historic.html';

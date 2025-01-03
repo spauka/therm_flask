@@ -648,10 +648,7 @@ angular.module('app.controllers', [])
                 thermtable = thermtable[1];
                 var historic = true;
             }
-            if (scope.therm != -1)
-                var therms = [scope.$parent.sensors[parseInt(scope.therm)]];
-            else
-                var therms = scope.$parent.sensors;
+            var therms = scope.$parent.sensors;
             fridge = scope.$parent.params.fridge;
             if ('supp' in scope.$parent.params)
                 var data = scope.$parent.params.supp;
@@ -671,64 +668,18 @@ angular.module('app.controllers', [])
                         timezoneOffset: cdate.getTimezoneOffset()
                     }
                 });
-                if (scope.therm == -1) {
-                    $('#' + thermid).css('height', '800px');
-                    var yAxis = [
-                        {
-                            title: {
-                                text: 'Temperature (mK)'
-                            },
-                            startOnTick: true,
-                            endOnTick: true,
-                            minRange: 3000,
-                            floor: 0,
-                            min: 0
-                        }, {
-                            title: {
-                                text: 'Temperature (mK)'
-                            },
-                            startOnTick: true,
-                            endOnTick: true,
-                            minRange: 1000,
-                            floor: 0,
-                            min: 0
-                        },
-                        {
-                            title: {
-                                text: 'Temperature (mK)'
-                            },
-                            startOnTick: true,
-                            endOnTick: true,
-                            minRange: 100,
-                            floor: 0,
-                            min: 0
-                        },
-                        {
-                            title: {
-                                text: 'Temperature (mK)'
-                            },
-                            startOnTick: true,
-                            endOnTick: true,
-                            minRange: 10000,
-                            floor: 0
-                        },
-                    ];
-                    if (detectmob()) {
-                        yAxis.forEach(function (axis) { axis.labels = { enabled: false }; axis.title.text = null; });
-                    }
-                } else {
-                    var yAxis = {
-                        title: {
-                            text: seriesOptions[0].axisLabel,
-                        },
-                        startOnTick: true,
-                        endOnTick: true,
-                        type: seriesOptions[0].axisType,
-                        min: seriesOptions[0].min,
-                        max: seriesOptions[0].max,
-                        plotBands: seriesOptions[0].plotBands,
-                    };
-                }
+
+                var yAxis = {
+                    title: {
+                        text: seriesOptions[0].axisLabel,
+                    },
+                    startOnTick: true,
+                    endOnTick: true,
+                    type: seriesOptions[0].axisType,
+                    min: seriesOptions[0].min,
+                    max: seriesOptions[0].max,
+                    plotBands: seriesOptions[0].plotBands,
+                };
 
                 // Calculate ranges for historic and nonhistoric graphs
                 var ranges = historic ? historicRanges : normalRanges;
@@ -757,8 +708,8 @@ angular.module('app.controllers', [])
                         events: {
                             setExtremes: function (e) {
                                 chart = $('#' + thermid).highcharts();
-                                // if (e.min == chart.xAxis[0].min && e.max == chart.xAxis[0].max) 
-                                //  return;
+                                if (e.min == chart.xAxis[0].min && e.max == chart.xAxis[0].max)
+                                    return;
                             },
                             afterSetExtremes: function () {
                                 var chart = $('#' + thermid).highcharts();
@@ -807,11 +758,7 @@ angular.module('app.controllers', [])
                     linkedUpdate: false,
                     historic: historic,
                 });
-                if (scope.therm != -1)
-                    thermtable.addChart(thermid, $('#' + thermid).highcharts(), 0);
-                else {
-                    seriesOptions.forEach(function (therm) { thermtable.addChart(therm.column_name, $('#' + thermid).highcharts(), therm.column_id) });
-                }
+                seriesOptions.forEach(function (therm) { thermtable.addChart(therm.column_name, $('#' + thermid).highcharts(), therm.column_id) });
             };
 
             $.each(therms, function (i, therm) {
