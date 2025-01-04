@@ -1,11 +1,9 @@
 <div class="row">
   <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
     <h1 class="page-title txt-color-blueDark">
-      <i class="fa-solid fa-chart-area fa-fw "></i> 
-        Thermometry 
-        <span>>
-        {{$route.current.scope.pagetitle}}
-      </span>
+      <i class="fa-solid fa-chart-area fa-fw "></i>
+        Thermometry <span>></span>
+        <span ng-bind="$route.current.scope.pagetitle"></span>
     </h1>
   </div>
   <div class="col-xs-12 col-sm-5 col-md-5 col-lg-8">
@@ -53,7 +51,7 @@ fridge_sparklines.forEach(fridge => {
     const temp_line = "#"+fridge.fridge_js_name+"-summary";
 
     $.getJSON(fridge.fridge_data_uri() , data => {
-      
+
       // Set the temperature label
       $(temp_label).text(format_temp(data[data.length-1], fridge.multiplier));
 
