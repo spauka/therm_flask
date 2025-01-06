@@ -1,24 +1,9 @@
 smartApp
-    .directive('fridgeview', ['$interval', '$http', function ($interval, $http) {
-        function link(scope, element, attrs) {
-            // Keep track of the charts that are associated with this table
-
-        }
-
-        return {
-            link: link,
-        };
-    }])
     .directive('thermtable', [function () {
-        function link(scope, element, attrs) {
-            //debugger
-        }
-
         return {
             restrict: 'E',
             transclude: true,
             templateUrl: 'includes/thermtable.html',
-            link: link,
         };
     }])
     .directive('highchart', ["$http", function ($http) {
