@@ -537,7 +537,7 @@ angular.module('app.controllers', [])
         $scope.historic = 'historic' in $routeParams;
         if ('supp' in $routeParams) {
             $scope.supp = $routeParams.supp;
-            $scope.baseURL = new URL($routeParams.fridge+"/"+supp+"/", data_uri);
+            $scope.baseURL = new URL($routeParams.fridge+"/"+$scope.supp+"/", data_uri);
         } else {
             $scope.supp = null;
             $scope.baseURL = new URL($routeParams.fridge+"/data/", data_uri);
