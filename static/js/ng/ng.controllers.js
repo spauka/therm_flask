@@ -554,11 +554,7 @@ angular.module('app.controllers', [])
             $scope._lastUpdated = time;
             $scope.$parent.lastUpdated = time;
         };
-        function fetch(updateCharts=undefined) {
-            if (updateCharts === undefined) {
-                // By default - update charts unless we are looking at historic data
-                updateCharts = $scope.historic;
-            }
+        function fetch(updateCharts) {
             $http({ method: 'GET', url: $scope.currentURL.href, cache: false, responseType: 'json' })
                 .then(function (response) {
                     var data = response.data;
@@ -576,19 +572,20 @@ angular.module('app.controllers', [])
                         var charts = $scope.charts;
                         for (var therm in data) {
                             if (therm in charts) {
-                                charts[therm].chart.series[charts[therm].series].addPoint([time.getTime(), data[therm]], true, true);
+                                var chart = charts[therm].highcharts();
+                                chart.series[0].addPoint([time.getTime(), data[therm]], true, true);
                             }
                         }
                     }
                 }, function (response) {
-                    // Do something smarter here
+                    // Do something smarter here on failure
                     return;
                 });
         };
         // Create a periodic update if we are not looking at historic data
         if (!$scope.historic) {
             var fetchInterval = $interval(function () {
-                fetch();
+                fetch(true);
             }, 5000);
             $scope.$on("$destroy", function () {
                 // Cancel downloading new data

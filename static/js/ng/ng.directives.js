@@ -44,8 +44,9 @@ smartApp
                 // Get custom options for the line if they exist
                 chartStyle.series = series;
                 var chart = $('#' + thermid).highcharts('StockChart', chartStyle);
-                console.debug(chartStyle);
-                console.debug(chart);
+
+                // Add the chart to the list of charts
+                scope.charts[thermid] = chart;
             };
 
             // Get the data for the chart and then create the chart
