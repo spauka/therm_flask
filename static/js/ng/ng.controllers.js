@@ -1,7 +1,6 @@
 angular.module('app.controllers', [])
     .factory('settings', ['$rootScope', function ($rootScope) {
         // supported languages
-
         var settings = {
             therm_colors: {
                 "Fifty_K_Pt": {
@@ -514,102 +513,6 @@ angular.module('app.controllers', [])
         return settings;
 
     }])
-
-    .controller('FridgeViewController', ['$scope', '$routeParams', function ($scope, $routeParams) {
-        if ('fridge' in $routeParams) {
-            $scope.pagetitle = $routeParams.fridge.replace('_', ' ');
-        } else {
-            $scope.pagetitle = 'Dashboard';
-        }
-        $scope.params = $routeParams;
-    }])
-
-    .controller('TempTableController', ['$scope', '$http', '$interval', 'settings', function ($scope, $http, $interval, settings) {
-        var fridge = $scope.$parent.params.fridge;
-        if ('supp' in $scope.$parent.params) {
-            var supp = $scope.$parent.params.supp;
-            var URL = data_uri + fridge + "/" + supp + "/?current";
-            var sen_URL = data_uri + fridge + "/" + supp + "/?sensors";
-        } else {
-            var URL = data_uri + fridge + "/data/?current";
-            var sen_URL = data_uri + fridge + "/data/?sensors";
-        }
-        var charts = $scope.charts = {};
-        $http({ method: 'GET', url: sen_URL, cache: false, responseType: 'json' })
-            .then(function (response) {
-                var data = response.data;
-                for (var i = 0; i < data.length; i++) {
-                    if (data[i].column_name in settings.therm_colors) {
-                        data[i].color = settings.therm_colors[data[i].column_name];
-                    }
-                }
-                $scope.sensors = data;
-                $scope.$parent.sensors = data;
-            });
-        this.addChart = function (thermid, chart, series) {
-            charts[thermid] = { chart: chart, series: series };
-        };
-        this.getCharts = function () {
-            return charts;
-        };
-        $scope.fetch = function () {
-            $scope.code = null;
-            $scope.response = null;
-
-            $http({ method: 'GET', url: URL, cache: false, responseType: 'json' })
-                .then(function (response) {
-                    var data = response.data;
-                    var Time = new Date(data.Time);
-                    if ($scope.$parent.Time == Time.toString())
-                        return;
-                    $scope.$parent.Time = Time.toString();
-
-                    for (var item in data) {
-                        $scope[item] = data[item];
-                    }
-                    for (therm in data) {
-                        if (therm in charts) {
-                            charts[therm].chart.series[charts[therm].series].addPoint([Time.getTime(), data[therm]], true, true);
-                        }
-                    }
-                }, function (data, status) {
-                    $scope.Four_K_RuO = "Request Failed";
-                });
-
-        };
-        var interval = $interval(function () { $scope.fetch(); }, 5000);
-        $scope.$on('$destroy', function () {
-            // Make sure that the interval is destroyed too
-            $interval.cancel(interval);
-        });
-        $scope.fetch();
-    }])
-    .controller('HistoricViewController', ['$scope', '$http', '$interval', 'settings', function ($scope, $http, $interval, settings) {
-        var fridge = $scope.$parent.params.fridge;
-        var supp = $scope.$parent.params.supp;
-        console.log(supp);
-        if (typeof supp == 'undefined')
-            supp = "data";
-        var sen_URL = data_uri + fridge + "/" + supp + "/?sensors";
-        var charts = $scope.charts = {};
-        $http({ method: 'GET', url: sen_URL, cache: false, responseType: 'json' })
-            .then(function (response) {
-                var data = response.data;
-                for (var i = 0; i < data.length; i++) {
-                    if (data[i].column_name in settings.therm_colors) {
-                        data[i].color = settings.therm_colors[data[i].column_name];
-                    }
-                }
-                $scope.sensors = data;
-                $scope.$parent.sensors = data;
-            });
-        this.addChart = function (thermid, chart, series) {
-            charts[thermid] = { chart: chart, series: series };
-        };
-        this.getCharts = function () {
-            return charts;
-        }
-    }])
     .controller('SmartAppController', ['$scope', '$route', '$routeParams', '$location', function ($scope, $route, $routeParams, $location) {
         $scope.$route = $route;
         $scope.$location = $location;
@@ -619,249 +522,92 @@ angular.module('app.controllers', [])
                 return new Array();
             return new Array(Math.ceil(num));
         }
+        // This should be a property since it's shared globally
+        $scope.lastUpdated = 'Never';
     }])
-    .directive('thermtable', [function () {
-        return {
-            restrict: 'E',
-            scope: { color: '@' },
-            templateUrl: 'includes/thermtable.html',
-            transclude: true,
-            controller: 'TempTableController',
+    .controller('FridgeViewController', ['$scope', '$routeParams', '$http', '$interval', function ($scope, $routeParams, $http, $interval) {
+        $scope.pagetitle = $routeParams.fridge.replace('_', ' ');
+        $scope.params = $routeParams;
+        $scope.sensors = [];
+        $scope.values = {};
+        $scope.charts = {};
+
+        // Figure out the data URL's for the fridge
+        $scope.fridge = $routeParams.fridge;
+        $scope.historic = 'historic' in $routeParams;
+        if ('supp' in $routeParams) {
+            $scope.supp = $routeParams.supp;
+            $scope.baseURL = new URL($routeParams.fridge+"/"+supp+"/", data_uri);
+        } else {
+            $scope.supp = null;
+            $scope.baseURL = new URL($routeParams.fridge+"/data/", data_uri);
+        }
+        $scope.currentURL = new URL("?current", $scope.baseURL);
+        $scope.sensorURL = new URL("?sensors", $scope.baseURL);
+
+        // Create a function to update values on a regular interval
+        $scope._lastUpdated = "Never";
+        $scope.getLastUpdated = function () {
+            return $scope._lastUpdated;
+        }
+        $scope.updateTime = function (time) {
+            $scope._lastUpdated = time;
+            $scope.$parent.lastUpdated = time;
         };
-    }])
-    .directive('histcharts', [function () {
-        return {
-            restrict: 'E',
-            scope: {},
-            templateUrl: 'includes/histchart.html',
-            transclude: true,
-            controller: 'HistoricViewController'
+        function fetch(updateCharts=undefined) {
+            if (updateCharts === undefined) {
+                // By default - update charts unless we are looking at historic data
+                updateCharts = $scope.historic;
+            }
+            $http({ method: 'GET', url: $scope.currentURL.href, cache: false, responseType: 'json' })
+                .then(function (response) {
+                    var data = response.data;
+                    var time = new Date(data.Time);
+                    var new_update = time.toString();
+
+                    if ($scope.getLastUpdated() == new_update)
+                        return;
+                    $scope.updateTime(new_update);
+
+                    for (var therm in data) {
+                        $scope.values[therm] = data[therm];
+                    }
+                    if (updateCharts) {
+                        var charts = $scope.charts;
+                        for (var therm in data) {
+                            if (therm in charts) {
+                                charts[therm].chart.series[charts[therm].series].addPoint([time.getTime(), data[therm]], true, true);
+                            }
+                        }
+                    }
+                }, function (response) {
+                    // Do something smarter here
+                    return;
+                });
         };
-    }])
-    .directive('highchart', [function () {
-        function link(scope, element, attrs, thermtable) {
-            if (typeof thermtable[0] !== 'undefined') {
-                thermtable = thermtable[0];
-                var historic = false;
-            }
-            else {
-                thermtable = thermtable[1];
-                var historic = true;
-            }
-            var therms = scope.$parent.sensors;
-            fridge = scope.$parent.params.fridge;
-            if ('supp' in scope.$parent.params)
-                var data = scope.$parent.params.supp;
-            else
-                var data = 'data';
-            count = 20000;
-            if (detectmob())
-                count = 100;
-            var seriesOptions = [];
-            var seriesCounter = 0;
-            var thermid = scope.thermid;
-
-            var createChart = function () {
-                cdate = new Date();
-                Highcharts.setOptions({
-                    global: {
-                        timezoneOffset: cdate.getTimezoneOffset()
-                    }
-                });
-
-                var yAxis = {
-                    title: {
-                        text: seriesOptions[0].axisLabel,
-                    },
-                    startOnTick: true,
-                    endOnTick: true,
-                    type: seriesOptions[0].axisType,
-                    min: seriesOptions[0].min,
-                    max: seriesOptions[0].max,
-                    plotBands: seriesOptions[0].plotBands,
-                };
-
-                // Calculate ranges for historic and nonhistoric graphs
-                var ranges = historic ? historicRanges : normalRanges;
-
-                $('#' + thermid).highcharts('StockChart', {
-                    chart: {
-                        zoomType: 'x',
-                        style: {
-                            fontFamily: "'Open Sans', Arial, Helvetica, sans-serif",
-                            fontSize: "13px"
-                        }
-                    },
-                    rangeSelector: {
-                        inputEnabled: $('#' + thermid).width() > 480,
-                        buttons: ranges,
-                        selected: (historic ? 6 : 1),
-                    },
-                    navigator: {
-                        adaptToUpdatedData: (historic ? false : true),
-                    },
-                    scrollbar: {
-                        liveRedraw: (historic ? false : true),
-                    },
-                    xAxis: {
-                        ordinal: false,
-                        events: {
-                            setExtremes: function (e) {
-                                chart = $('#' + thermid).highcharts();
-                                if (e.min == chart.xAxis[0].min && e.max == chart.xAxis[0].max)
-                                    return;
-                            },
-                            afterSetExtremes: function () {
-                                var chart = $('#' + thermid).highcharts();
-
-                                var xMin = chart.xAxis[0].min;
-                                var xMax = chart.xAxis[0].max;
-
-                                // Set up historic chart updater
-                                if (historic && (xMax - xMin) <= (5 * 86400000) + 1000) {
-                                    var url = data_uri + fridge + '/' + data + '/' + thermid + '?start=' + xMin + '&stop=' + xMax;
-                                    chart.showLoading('Loading Data...');
-                                    $.getJSON(url, function (data) {
-                                        chart.series[0].setData(data);
-                                        chart.hideLoading();
-                                    });
-                                } else if (historic) {
-                                    chart.series[0].setData(seriesOptions[0].data);
-                                }
-
-                                if (chart.linkedUpdate) {
-                                    return;
-                                }
-                                var charts = thermtable.getCharts();
-                                $.each(charts, function (i, setChart) {
-                                    if (setChart.chart.container == chart.container) {
-                                        return;
-                                    }
-                                    setChart.chart.linkedUpdate = true;
-                                    setChart.chart.xAxis[0].setExtremes(xMin, xMax, true, false);
-                                    setChart.chart.linkedUpdate = false;
-                                });
-                            },
-                        }
-                    },
-                    yAxis: yAxis,
-                    plotOptions: {
-                        series: {
-                            connectNulls: false
-                        },
-                        area: {
-                            threshold: null
-                        }
-                    },
-                    series: seriesOptions,
-                    tooltip: seriesOptions[0].tooltip,
-                    linkedUpdate: false,
-                    historic: historic,
-                });
-                seriesOptions.forEach(function (therm) { thermtable.addChart(therm.column_name, $('#' + thermid).highcharts(), therm.column_id) });
-            };
-
-            $.each(therms, function (i, therm) {
-                if (!historic) {
-                    var url = data_uri + fridge + '/' + data + '/' + therm.column_name + '?count=' + count;
-                } else {
-                    var url = data_uri + fridge + '/' + data + '/' + therm.column_name + '?hourly';
-                }
-                $.getJSON(url, function (data) {
-                    if (scope.therm != -1) {
-                        $('#' + therm.column_name + '-name').text(therm.name);
-                        $('#' + therm.column_name).addClass(therm.color.background);
-                        $('#' + therm.column_name).parents().eq(2).addClass(therm.color.foreground);
-                        // Create the chart
-                        var lineColor = $('.' + therm.color.background).css('color') || Highcharts.getOptions().colors[0];
-                        var fillColor = new Highcharts.Color(lineColor).setOpacity(0.25).get('rgba');
-                        var type = 'area';
-                        var axis = 0;
-                        if ('axisType' in therm.color)
-                            var axisType = therm.color.axisType;
-                        else
-                            var axisType = 'linear';
-                        if ('axisLabel' in therm.color)
-                            var axisLabel = therm.color.axisLabel;
-                        else
-                            var axisLabel = 'Temperature (mK)';
-                        if ('tickLabel' in therm.color)
-                            var tickLabel = therm.color.tickLabel;
-                        else
-                            var tickLabel = 'mK';
-                        if ('min' in therm.color)
-                            var min = therm.color.min;
-                        else
-                            var min = null;
-                        if ('max' in therm.color)
-                            var max = therm.color.max;
-                        else
-                            var max = null;
-                        if ('plotBands' in therm.color)
-                            var plotBands = therm.color.plotBands;
-                        else
-                            var plotBands = null;
-
-                        var formatter = function () {
-                            var number = "";
-                            if (this.y < 0.01)
-                                number = this.y.toExponential(3) + tickLabel;
-                            else
-                                number = this.y.toFixed(3) + tickLabel;
-                            var dt = new Date(this.x);
-                            var dts = tooltipDateFormatter.format(dt);
-                            return "<span style=\"font-size: xx-small\">" + dts + "</span><br/>" + therm.name + ": <b>" + number + "</b>";
-                        };
-                    } else {
-                        $('#combined-name').text("Combined View");
-                        $('#combined').parents().eq(2).addClass("jarviswidget-color-blueDark");
-                        var lineColor = $('.' + therm.color.background).css('color') || Highcharts.getOptions().colors[0];
-                        var type = 'line';
-                        var axis = therm.color.axis;
-                        var axisType = 'linear';
-                        var formatter = null;
-                    }
-                    var id = seriesOptions.push({
-                        name: therm.name,
-                        data: data,
-                        type: type,
-                        fillColor: fillColor,
-                        color: lineColor,
-                        yAxis: axis,
-                        tooltip: {
-                            formatter: formatter,
-                            valueSuffix: tickLabel,
-                            valueDecimals: 2,
-                        },
-                        axisType: axisType,
-                        axisLabel: axisLabel,
-                        min: min,
-                        max: max,
-                        plotBands: plotBands,
-                    });
-                    seriesOptions[id - 1].column_id = id - 1;
-                    seriesOptions[id - 1].column_name = therm.column_name;
-                    seriesCounter += 1;
-                    if (seriesCounter == therms.length)
-                        createChart();
-                })
-            });
-
-            element.on('$destroy', function () {
-                thermid = scope.thermid;
-                chart = $("#" + thermid).highcharts();
-                if (chart)
-                    chart.destroy();
-                $('#' + thermid).text("");
+        // Create a periodic update if we are not looking at historic data
+        if (!$scope.historic) {
+            var fetchInterval = $interval(function () {
+                fetch();
+            }, 5000);
+            $scope.$on("$destroy", function () {
+                // Cancel downloading new data
+                $interval.cancel(fetchInterval);
+                // Reset last updated
+                $scope.$parent.lastUpdated = "Never";
             });
         }
-        return {
-            link: link,
-            restrict: 'E',
-            scope: { therm: '@', thermid: '@' },
-            templateUrl: 'includes/highcharts.html',
-            require: ['?^thermtable', '?^histcharts'],
-            replace: true,
-        };
+
+        // Load the sensors for the fridge
+        $http({ method: 'GET', url: $scope.sensorURL.href, cache: true, responseType: 'json' })
+            .then(function (response) {
+                var data = response.data;
+                $scope.sensors = data;
+                data.forEach(element => {
+                    $scope.values[element.column_name] = NaN;
+                });
+                // Perform an initial fetch of the values. This occurs even for historic datasets
+                fetch(false);
+            });
+
     }]);
-;

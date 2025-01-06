@@ -5,6 +5,90 @@
 const data_uri = "https://qsyd.sydney.edu.au/therm/data/";
 
 /*
+ * Default number of points to load on live charts
+ */
+const pointCountDesktop = 20000;
+const pointCountMobile = 1000;
+
+/*
+ * Tooltip date format - main graphs
+ */
+const tooltipDateFormat = {
+	weekday: "short",
+	year: "2-digit",
+	month: "short",
+	day: "numeric",
+	hour: "numeric",
+	minute: "numeric",
+	second: "numeric",
+	timeZoneName: "shortOffset", // DB only stores offset, not original tz
+	hourCycle: "h24" // "h12" for 12 hour time
+};
+const tooltipDateFormatter = new Intl.DateTimeFormat(undefined, tooltipDateFormat);
+
+/*
+ * Define default chart format
+ */
+function tooltipFormatter() {
+    var seriesOptions = this.series.userOptions;
+    var name = seriesOptions.name;
+    var units = seriesOptions.units;
+    var number = "";
+    if (this.y < 0.01)
+        number = this.y.toExponential(3) + units;
+    else
+        number = this.y.toFixed(3) + units;
+    var dt = new Date(this.x);
+    var dts = tooltipDateFormatter.format(dt);
+    return "<span style=\"font-size: xx-small\">" + dts + "</span><br/>" + name + ": <b>" + number + "</b>";
+};
+const currentTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const defaultChartStyle = {
+    table: {
+        // Default container colour
+        color: "jarviswidget-color-blue",
+    },
+    chart: {
+        zoomType: 'x',
+        style: {
+            fontFamily: "'Open Sans', Arial, Helvetica, sans-serif",
+            fontSize: "13px"
+        }
+    },
+    rangeSelector: {
+    },
+    time: {
+        timezone: currentTimezone,
+    },
+    xAxis: {
+        title: {
+            text: "Time",
+        },
+        ordinal: false, // Don't collapse missing points
+    },
+    yAxis: {
+        title: {
+            text: "Temperature (K)",
+        },
+        startOnTick: true,
+        endOnTick: true,
+        type: "linear",
+    },
+    tooltip: {
+        formatter: tooltipFormatter,
+    },
+    plotOptions: {
+        series: {
+            connectNulls: false
+        },
+        area: {
+            threshold: null
+        }
+    },
+};
+const customSensorStyles = {};
+
+/*
  * Define sparkline style (top of page)
  */
 const defaultSparkStyle = {
@@ -116,22 +200,6 @@ const historicRanges = [
 	new HighStockRangeSelector("year", 1, "1y"),
 	new HighStockRangeSelector("all", undefined, "All")
 ];
-
-/*
- * Tooltip date format - main graphs
- */
-const tooltipDateFormat = {
-	weekday: "short",
-	year: "2-digit",
-	month: "short",
-	day: "numeric",
-	hour: "numeric",
-	minute: "numeric",
-	second: "numeric",
-	timeZoneName: "shortOffset", // DB only stores offset, not original tz
-	hourCycle: "h24" // "h12" for 12 hour time
-};
-const tooltipDateFormatter = new Intl.DateTimeFormat(undefined, tooltipDateFormat);
 
 /*
  * END APP.CONFIG

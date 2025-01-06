@@ -39,7 +39,7 @@ var shortcut_dropdown = $('#shortcut'),
     /*
      * DETECT MOBILE DEVICES
      * Description: Detects mobile device - if any of the listed device is detected
-     * a class is inserted to $('body') and the variable thisDevice is decleard. 
+     * a class is inserted to $('body') and the variable thisDevice is decleard.
      * (so far this is covering most hand held devices)
      */
     detectmob = function () {
@@ -248,7 +248,6 @@ function pageSetUp() {
         });
 
     } else {
-
         // is mobile
 
         // activate popovers
@@ -272,4 +271,4 @@ $('body').on('click', function (e) {
             $(this).popover('hide');
         }
     });
-}); 
+});

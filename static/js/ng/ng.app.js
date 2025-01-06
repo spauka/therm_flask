@@ -15,7 +15,7 @@ smartApp.config(['$routeProvider', function ($routeProvider) {
             templateUrl: function ($routeParams) {
                 return 'views/dashboard.html';
             },
-            controller: 'FridgeViewController'
+            controller: 'SmartAppController',
         })
         .when('/:fridge', {
             templateUrl: function ($routeParams) {

@@ -69,7 +69,7 @@ fridge_sparklines.forEach(fridge => {
           }
         }
       };
-      let chart_options = Highcharts.merge(defaultSparkStyle, customOptions);
+      let chart_options = Highcharts.merge(customOptions, defaultSparkStyle);
       let chart = $(temp_line).highcharts("Chart", chart_options);
 
       // Create a callback to update every 10s

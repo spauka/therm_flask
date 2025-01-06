@@ -1,37 +1,45 @@
 <div class="row">
-  <div class="col-md-4 col-md-offset-4">
-    <div class="jarviswidget {{color}}" id="wid-temp-table"  data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-deletebutton="false" data-widget-fullscreenbutton="false" role="widget">
-      <header>
-        <span class="widget-icon"> <i class="fa-solid fa-table"></i> </span>
-        <h2>Fridge Temperatures</h2>
-      </header>
-      <div>
-        <div class="jarviswidget-editbox"></div>
-        <div class="widget-body no-padding">
-          <div class="table-responsive">
-            <table class="table table-hover">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Thermometer</th>
-                  <th>Temperature</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr ng-repeat="sensor in sensors">
-                  <td>{{$index+1}}</td>
-                  <td>{{sensor.name}}</td>
-                  <td ng-bind="{{sensor.column_name}}">{{sensor.column_name}}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+    <div class="col-md-4 col-md-offset-4">
+        <div class="jarviswidget jarviswidget-color-greenDark" id="wid-temp-table" data-widget-editbutton="false"
+            data-widget-colorbutton="false" data-widget-deletebutton="false" data-widget-fullscreenbutton="false"
+            role="widget">
+            <header>
+                <span class="widget-icon"> <i class="fa-solid fa-table"></i> </span>
+                <h2>Fridge Temperatures</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body no-padding">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Thermometer</th>
+                                    <th>Temperature</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="sensor in sensors">
+                                    <td ng-bind="$index+1"></td>
+                                    <td ng-bind="sensor.name"></td>
+                                    <td ng-bind="values[sensor.column_name]"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
-
-<div ng-transclude>
+<div>
+    <div class="row" ng-repeat="i in range(sensors.length/2) track by $index">
+        <div class="col-md-6">
+            <highchart data-thermid="{{sensors[$index*2].column_name}}" data-therm="{{sensors[$index*2].name}}"></highchart>
+        </div>
+        <div class="col-md-6" ng-if="$index*2+1 < sensors.length">
+            <highchart data-thermid="{{sensors[$index*2+1].column_name}}" data-therm="{{sensors[$index*2+1].name}}"></highchart>
+        </div>
+    </div>
 </div>
-
