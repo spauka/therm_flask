@@ -26,10 +26,10 @@
  * email: info@myorange.ca
  */
 
-    /*
-     * APP DOM REFERENCES
-     * Description: Obj DOM reference, please try to avoid changing these
-     */
+/*
+ * APP DOM REFERENCES
+ * Description: Obj DOM reference, please try to avoid changing these
+ */
 var shortcut_dropdown = $('#shortcut'),
     /*
      * Top menu on/off

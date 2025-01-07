@@ -1,86 +1,86 @@
 <div class="row">
-  <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
-    <h1 class="page-title txt-color-blueDark">
-      <i class="fa-solid fa-chart-area fa-fw "></i>
-        Thermometry <span>></span>
-        <span ng-bind="$route.current.scope.pagetitle"></span>
-    </h1>
-  </div>
-  <div class="col-xs-12 col-sm-5 col-md-5 col-lg-8">
-    <ul id="sparks" class="">
-      <!-- Will be filled in by JS below -->
-   </ul>
-  </div>
+    <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
+        <h1 class="page-title txt-color-blueDark">
+            <i class="fa-solid fa-chart-area fa-fw "></i>
+            Thermometry <span>></span>
+            <span ng-bind="$route.current.scope.pagetitle"></span>
+        </h1>
+    </div>
+    <div class="col-xs-12 col-sm-5 col-md-5 col-lg-8">
+        <ul id="sparks" class="">
+            <!-- Will be filled in by JS below -->
+        </ul>
+    </div>
 </div>
 
 <script type="text/javascript">
-function format_temp(temp, multiplier) {
-  if (temp == null) {
-    return "Und";
-  }
-  temp *= multiplier;
-  if (temp > 100000) {
-    temp = Math.round(temp);
-    temp = temp - (temp % 100);
-    return (temp/1000) + " K";
-  } else if (temp > 1000) {
-    var hun = Math.round(temp%1000).toString();
-    var sig = Math.round((temp - hun)/1000);
-    if (hun.length == 1)
-        hun = "00" + hun;
-    else if (hun.length == 2)
-        hun = "0" + hun;
-    return sig + "," + hun + " mK";
-  } else {
-    temp = temp.toFixed(2);
-    return temp + " mK";
-  }
-}
+    function format_temp(temp, multiplier) {
+        if (temp == null) {
+            return "Und";
+        }
+        temp *= multiplier;
+        if (temp > 100000) {
+            temp = Math.round(temp);
+            temp = temp - (temp % 100);
+            return (temp / 1000) + " K";
+        } else if (temp > 1000) {
+            var hun = Math.round(temp % 1000).toString();
+            var sig = Math.round((temp - hun) / 1000);
+            if (hun.length == 1)
+                hun = "00" + hun;
+            else if (hun.length == 2)
+                hun = "0" + hun;
+            return sig + "," + hun + " mK";
+        } else {
+            temp = temp.toFixed(2);
+            return temp + " mK";
+        }
+    }
 
-fridge_sparklines.forEach(fridge => {
-    var li = document.createElement("li");
-    li.setAttribute("class", "sparks-info");
-    li.innerHTML = `
+    fridge_sparklines.forEach(fridge => {
+        var li = document.createElement("li");
+        li.setAttribute("class", "sparks-info");
+        li.innerHTML = `
       <h5> ${fridge.fridge_name} <span class="${fridge.txt_color}" id="${fridge.fridge_js_name}-summary-text"><small>Loading...</small></span></h5>
       <div id="${fridge.fridge_js_name}-summary" class="sparkline ${fridge.txt_color} hidden-mobile hidden-md hidden-sm" data-sparkline-type="line" data-fill-color="${fridge.color}">
         <i class="fa-solid fa-spinner fa-spin"></i>
       </div>
     `;
-    $("ul#sparks")[0].appendChild(li);
-    const temp_label = "#"+fridge.fridge_js_name+"-summary-text";
-    const temp_line = "#"+fridge.fridge_js_name+"-summary";
+        $("ul#sparks")[0].appendChild(li);
+        const temp_label = "#" + fridge.fridge_js_name + "-summary-text";
+        const temp_line = "#" + fridge.fridge_js_name + "-summary";
 
-    $.getJSON(fridge.fridge_data_uri() , data => {
-
-      // Set the temperature label
-      $(temp_label).text(format_temp(data[data.length-1], fridge.multiplier));
-
-      // Create sparkline
-      const customOptions = {
-        series: [{
-          data: data,
-          color: fridge.color,
-        }],
-        tooltip: {
-          headerFormat: '',
-          pointFormatter: function () {
-            formatted_temp = format_temp(this.y, fridge.multiplier);
-            return `<b>${formatted_temp}</b>`;
-          }
-        }
-      };
-      let chart_options = Highcharts.merge(customOptions, defaultSparkStyle);
-      let chart = $(temp_line).highcharts("Chart", chart_options);
-
-      // Create a callback to update every 10s
-      setInterval(() => {
         $.getJSON(fridge.fridge_data_uri(), data => {
-          // Set the temperature label
-          $(temp_label).text(format_temp(data[data.length-1], fridge.multiplier));
-          $(temp_line).highcharts().series[0].setData(data);
-        })
-      }, 10000);
-    });
-  }
-)
+
+            // Set the temperature label
+            $(temp_label).text(format_temp(data[data.length - 1], fridge.multiplier));
+
+            // Create sparkline
+            var customOptions = {
+                series: [{
+                    data: data,
+                    color: fridge.color,
+                }],
+                tooltip: {
+                    headerFormat: '',
+                    pointFormatter: function () {
+                        formatted_temp = format_temp(this.y, fridge.multiplier);
+                        return `<b>${formatted_temp}</b>`;
+                    }
+                }
+            };
+            let chart_options = $.extend(true, customOptions, defaultSparkStyle);
+            let chart = $(temp_line).highcharts("Chart", chart_options);
+
+            // Create a callback to update every 10s
+            setInterval(() => {
+                $.getJSON(fridge.fridge_data_uri(), data => {
+                    // Set the temperature label
+                    $(temp_label).text(format_temp(data[data.length - 1], fridge.multiplier));
+                    $(temp_line).highcharts().series[0].setData(data);
+                })
+            }, 10000);
+        });
+    }
+    )
 </script>
