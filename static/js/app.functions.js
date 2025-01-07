@@ -80,7 +80,6 @@ function afterSetExtremes(e) {
             });
     } else if (historic && chart.series[0].zoomed === true) {
         // Restore original data
-        console.debug("Resetting data");
         chart.series[0].setData(chart.options.navigator.series.data);
         chart.series[0].zoomed = false;
     }
