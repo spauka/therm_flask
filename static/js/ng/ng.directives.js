@@ -65,7 +65,6 @@ smartApp
                             name: sensor_name,
                             data: data,
                             type: "area",
-                            units: "K"
                         }]
                     };
                     // Set the navigator to a constant set of data

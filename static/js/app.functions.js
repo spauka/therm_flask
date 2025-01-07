@@ -28,13 +28,14 @@ resolveCssColor.cache = {};
 
 function tooltipFormatter(pointFormat) {
     var seriesOptions = this.series.userOptions;
+    var axisOptions = this.series.chart.yAxis[0].userOptions ;
     var name = seriesOptions.name;
-    var units = seriesOptions.units;
+    var units = axisOptions.title.unit;
     var number = "";
     if (this.y < 0.01)
-        number = this.y.toExponential(3) + units;
+        number = this.y.toExponential(3) + " " + units;
     else
-        number = this.y.toFixed(3) + units;
+        number = this.y.toFixed(3) + " " + units;
     var dt = new Date(this.x);
     var datetime = tooltipDateFormatter.format(dt);
     var tooltip = `

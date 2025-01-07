@@ -88,6 +88,7 @@ const defaultChartStyle = {
     yAxis: {
         title: {
             text: "Temperature (K)",
+            unit: "K",
         },
         startOnTick: true,
         endOnTick: true,
@@ -113,6 +114,12 @@ const customSensorStyles = {
         table: {
             color: "jarviswidget-color-blue",
         },
+        yAxis: {
+            title: {
+                text: "Temperature (mK)",
+                unit: "mK",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-blue"),
         }],
@@ -120,6 +127,12 @@ const customSensorStyles = {
     Four_K_Pt: {
         table: {
             color: "jarviswidget-color-green",
+        },
+        yAxis: {
+            title: {
+                text: "Temperature (mK)",
+                unit: "mK",
+            },
         },
         series: [{
             color: resolveCssColor("txt-color-green"),
@@ -129,6 +142,12 @@ const customSensorStyles = {
         table: {
             color: "jarviswidget-color-red",
         },
+        yAxis: {
+            title: {
+                text: "Temperature (mK)",
+                unit: "mK",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-red"),
         }],
@@ -136,6 +155,12 @@ const customSensorStyles = {
     Still_RuO: {
         table: {
             color: "jarviswidget-color-orange",
+        },
+        yAxis: {
+            title: {
+                text: "Temperature (mK)",
+                unit: "mK",
+            },
         },
         series: [{
             color: resolveCssColor("txt-color-orange"),
@@ -145,6 +170,12 @@ const customSensorStyles = {
         table: {
             color: "jarviswidget-color-green",
         },
+        yAxis: {
+            title: {
+                text: "Temperature (mK)",
+                unit: "mK",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-green"),
         }],
@@ -152,6 +183,12 @@ const customSensorStyles = {
     MC_Speer: {
         table: {
             color: "jarviswidget-color-blue",
+        },
+        yAxis: {
+            title: {
+                text: "Temperature (mK)",
+                unit: "mK",
+            },
         },
         series: [{
             color: resolveCssColor("txt-color-blue"),
@@ -161,6 +198,12 @@ const customSensorStyles = {
         table: {
             color: "jarviswidget-color-blue",
         },
+        yAxis: {
+            title: {
+                text: "Temperature (mK)",
+                unit: "mK",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-blue"),
         }],
@@ -168,6 +211,12 @@ const customSensorStyles = {
     CMN: {
         table: {
             color: "jarviswidget-color-blue",
+        },
+        yAxis: {
+            title: {
+                text: "Temperature (mK)",
+                unit: "mK",
+            },
         },
         series: [{
             color: resolveCssColor("txt-color-blue"),
@@ -177,6 +226,12 @@ const customSensorStyles = {
         table: {
             color: "jarviswidget-color-blue",
         },
+        yAxis: {
+            title: {
+                text: "Temperature (mK)",
+                unit: "mK",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-blue"),
         }],
@@ -185,6 +240,12 @@ const customSensorStyles = {
         table: {
             color: "jarviswidget-color-purple",
         },
+        yAxis: {
+            title: {
+                text: "Temperature (mK)",
+                unit: "mK",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-purple"),
         }],
@@ -192,6 +253,12 @@ const customSensorStyles = {
     MC_RuO: {
         table: {
             color: "jarviswidget-color-pink",
+        },
+        yAxis: {
+            title: {
+                text: "Temperature (mK)",
+                unit: "mK",
+            },
         },
         series: [{
             color: resolveCssColor("txt-color-pink"),
@@ -203,8 +270,6 @@ const customSensorStyles = {
         },
         series: [{
             color: resolveCssColor("txt-color-purple"),
-            axisLabel: "Temperature (K)",
-            tickLabel: "K",
         }],
     },
     Four_K: {
@@ -213,8 +278,6 @@ const customSensorStyles = {
         },
         series: [{
             color: resolveCssColor("txt-color-red"),
-            axisLabel: "Temperature (K)",
-            tickLabel: "K",
         }],
     },
     Still: {
@@ -223,8 +286,6 @@ const customSensorStyles = {
         },
         series: [{
             color: resolveCssColor("txt-color-yellow"),
-            axisLabel: "Temperature (K)",
-            tickLabel: "K",
         }],
     },
     MC: {
@@ -233,8 +294,6 @@ const customSensorStyles = {
         },
         series: [{
             color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Temperature (K)",
-            tickLabel: "K",
         }],
     },
     Sample: {
@@ -243,8 +302,6 @@ const customSensorStyles = {
         },
         series: [{
             color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Temperature (K)",
-            tickLabel: "K",
         }],
     },
     Probe: {
@@ -253,8 +310,6 @@ const customSensorStyles = {
         },
         series: [{
             color: resolveCssColor("txt-color-teal"),
-            axisLabel: "Temperature (K)",
-            tickLabel: "K",
         }],
     },
     Magnet: {
@@ -263,8 +318,6 @@ const customSensorStyles = {
         },
         series: [{
             color: resolveCssColor("txt-color-green"),
-            axisLabel: "Temperature (K)",
-            tickLabel: "K",
         }],
     },
     ExtraProbe: {
@@ -273,8 +326,6 @@ const customSensorStyles = {
         },
         series: [{
             color: resolveCssColor("txt-color-magenta"),
-            axisLabel: "Temperature (K)",
-            tickLabel: "K",
         }],
     },
     Four_K_Pt_Front: {
@@ -283,8 +334,6 @@ const customSensorStyles = {
         },
         series: [{
             color: resolveCssColor("txt-color-pink"),
-            axisLabel: "Temperature (K)",
-            tickLabel: "K",
         }],
     },
     Fifty_K_Pt_Front: {
@@ -293,8 +342,6 @@ const customSensorStyles = {
         },
         series: [{
             color: resolveCssColor("txt-color-magenta"),
-            axisLabel: "Temperature (K)",
-            tickLabel: "K",
         }],
     },
     Noise_Head: {
@@ -309,247 +356,339 @@ const customSensorStyles = {
         table: {
             color: "jarviswidget-color-pink",
         },
+        yAxis: {
+            title: {
+                text: "Pressure (mbar)",
+                unit: "mbar",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-pink"),
-            axisLabel: "Pressure (mbar)",
-            tickLabel: "mbar",
+            text: "Pressure (mbar)",
+            unit: "mbar",
         }],
     },
     P5: {
         table: {
             color: "jarviswidget-color-red",
         },
+        yAxis: {
+            title: {
+                text: "Pressure (mbar)",
+                unit: "mbar",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-red"),
-            axisLabel: "Pressure (mbar)",
-            tickLabel: "mbar",
         }],
     },
     Flow: {
         table: {
             color: "jarviswidget-color-orange",
         },
+        yAxis: {
+            title: {
+                text: "Flow",
+                unit: "A.U.",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-orange"),
-            axisLabel: "Flow",
-            tickLabel: "A.U.",
         }],
     },
     Dump4: {
         table: {
             color: "jarviswidget-color-green",
         },
+        yAxis: {
+            title: {
+                text: "Pressure (mbar)",
+                unit: "mbar",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-green"),
-            axisLabel: "Pressure (mbar)",
-            tickLabel: "mbar",
         }],
     },
     Dump3: {
         table: {
             color: "jarviswidget-color-blue",
         },
+        yAxis: {
+            title: {
+                text: "Pressure (mbar)",
+                unit: "mbar",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Pressure (mbar)",
-            tickLabel: "mbar",
         }],
     },
     PProbe: {
         table: {
             color: "jarviswidget-color-blueLight",
         },
+        yAxis: {
+            title: {
+                text: "Pressure (mbar)",
+                unit: "mbar",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Pressure (mbar)",
-            tickLabel: "mbar",
         }],
     },
     PIVC: {
         table: {
             color: "jarviswidget-color-redLight",
         },
+        yAxis: {
+            title: {
+                text: "Pressure (mbar)",
+                unit: "mbar",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-red"),
-            axisLabel: "Pressure (mbar)",
-            tickLabel: "mbar",
         }],
     },
     POVC: {
         table: {
             color: "jarviswidget-color-greenLight",
         },
+        yAxis: {
+            title: {
+                text: "Pressure (mbar)",
+                unit: "mbar",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-green"),
-            axisLabel: "Pressure (mbar)",
-            tickLabel: "mbar",
         }],
     },
     STILL: {
         table: {
             color: "jarviswidget-color-blue",
         },
+        yAxis: {
+            title: {
+                text: "Pressure (mbar)",
+                unit: "mbar",
+            },
+            type: "logarithmic",
+        },
         series: [{
             color: resolveCssColor("txt-color-blue"),
-            axisType: "logarithmic",
-            axisLabel: "Pressure (mbar)",
-            tickLabel: "mbar",
+
         }],
     },
     IVC: {
         table: {
             color: "jarviswidget-color-green",
         },
+        yAxis: {
+            title: {
+                text: "Pressure (mbar)",
+                unit: "mbar",
+            },
+            type: "logarithmic",
+        },
         series: [{
             color: resolveCssColor("txt-color-green"),
-            axisType: "logarithmic",
-            axisLabel: "Pressure (mbar)",
-            tickLabel: "mbar",
         }],
     },
     OVC: {
         table: {
             color: "jarviswidget-color-pink",
         },
+        yAxis: {
+            title: {
+                text: "Pressure (mbar)",
+                unit: "mbar",
+            },
+            type: "logarithmic",
+        },
         series: [{
             color: resolveCssColor("txt-color-pink"),
-            axisType: "logarithmic",
-            axisLabel: "Pressure (mbar)",
-            tickLabel: "mbar",
         }],
     },
     PStill: {
         table: {
             color: "jarviswidget-color-red",
         },
+        yAxis: {
+            title: {
+                text: "Pressure (mbar)",
+                unit: "mbar",
+            },
+            type: "logarithmic",
+        },
         series: [{
             color: resolveCssColor("txt-color-red"),
-            axisType: "logarithmic",
-            axisLabel: "Pressure (mbar)",
-            tickLabel: "mbar",
         }],
     },
     Condensing: {
         table: {
             color: "jarviswidget-color-pink",
         },
+        yAxis: {
+            title: {
+                text: "Pressure (mbar)",
+                unit: "mbar",
+            },
+            type: "logarithmic",
+        },
         series: [{
             color: resolveCssColor("txt-color-pink"),
-            axisType: "logarithmic",
-            axisLabel: "Pressure (mbar)",
-            tickLabel: "mbar",
         }],
     },
     Backing: {
         table: {
             color: "jarviswidget-color-yellow",
         },
+        yAxis: {
+            title: {
+                text: "Pressure (mbar)",
+                unit: "mbar",
+            },
+            type: "logarithmic",
+        },
         series: [{
             color: resolveCssColor("txt-color-yellow"),
-            axisType: "logarithmic",
-            axisLabel: "Pressure (mbar)",
-            tickLabel: "mbar",
         }],
     },
     Tank: {
         table: {
             color: "jarviswidget-color-green",
         },
+        yAxis: {
+            title: {
+                text: "Pressure (mbar)",
+                unit: "mbar",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-green"),
-            axisLabel: "Pressure (mbar)",
-            tickLabel: "mbar",
         }],
     },
     AirBacking: {
         table: {
             color: "jarviswidget-color-blueLight",
         },
+        yAxis: {
+            title: {
+                text: "Pressure (mbar)",
+                unit: "mbar",
+            },
+            type: "logarithmic",
+        },
         series: [{
             color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Pressure (mbar)",
-            tickLabel: "mbar",
-            axisType: "logarithmic",
         }],
     },
     VC: {
         table: {
             color: "jarviswidget-color-purple",
         },
+        yAxis: {
+            title: {
+                text: "Pressure (mbar)",
+                unit: "mbar",
+            },
+            type: "logarithmic",
+        },
         series: [{
             color: resolveCssColor("txt-color-purple"),
-            axisType: "logarithmic",
-            axisLabel: "Pressure (mbar)",
-            tickLabel: "mbar",
         }],
     },
     PROBE: {
         table: {
             color: "jarviswidget-color-orange",
         },
+        yAxis: {
+            title: {
+                text: "Pressure (mbar)",
+                unit: "mbar",
+            },
+            type: "logarithmic",
+        },
         series: [{
             color: resolveCssColor("txt-color-purple"),
-            axisType: "logarithmic",
-            axisLabel: "Pressure (mbar)",
-            tickLabel: "mbar",
         }],
     },
     DryPumpCurrent: {
         table: {
             color: "jarviswidget-color-blue",
         },
-        series: [{
-            color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Current (amps)",
-            tickLabel: "Amps",
+        yAxis: {
+            title: {
+                text: "Current (Amps)",
+                unit: "A",
+            },
             min: 0,
             max: 5,
+        },
+        series: [{
+            color: resolveCssColor("txt-color-blue"),
         }],
     },
     BoosterPumpCurrent: {
         table: {
             color: "jarviswidget-color-teal",
         },
-        series: [{
-            color: resolveCssColor("txt-color-teal"),
-            axisLabel: "Current (amps)",
-            tickLabel: "Amps",
+        yAxis: {
+            title: {
+                text: "Current (Amps)",
+                unit: "A",
+            },
             min: 0,
             max: 5,
+        },
+        series: [{
+            color: resolveCssColor("txt-color-teal"),
         }],
     },
     DryPumpSpeed: {
         table: {
             color: "jarviswidget-color-orange",
         },
-        series: [{
-            color: resolveCssColor("txt-color-orange"),
-            axisLabel: "Speed (Hz)",
-            tickLabel: "Hz",
+        yAxis: {
+            title: {
+                text: "Speed (Hz)",
+                unit: "Hz",
+            },
             min: 0,
             max: 120,
+        },
+        series: [{
+            color: resolveCssColor("txt-color-orange"),
         }],
     },
     BoosterSpeed: {
         table: {
             color: "jarviswidget-color-orangeDark",
         },
+        yAxis: {
+            title: {
+                text: "Speed (Hz)",
+                unit: "Hz",
+            },
+            min: 0,
+            max: 120,
+        },
         series: [{
             color: resolveCssColor("txt-color-orangeDark"),
-            axisLabel: "Speed (Hz)",
-            tickLabel: "Hz",
-            min: 0,
-            max: 100,
         }],
     },
     DryPumpTemp: {
         table: {
             color: "jarviswidget-color-purple",
         },
-        series: [{
-            color: resolveCssColor("txt-color-purple"),
-            axisLabel: "Temperature (°C)",
-            tickLabel: "°C",
+        yAxis: {
+            title: {
+                text: "Temperature (°C)",
+                unit: "°C",
+            },
             min: 0,
             max: 165,
             plotBands: [{ // Warning
@@ -566,18 +705,21 @@ const customSensorStyles = {
                 label: {
                     text: "Error",
                 }
-            },
-            ],
+            }],
+        },
+        series: [{
+            color: resolveCssColor("txt-color-purple"),
         }],
     },
     DryPumpCoolingBlockTemp: {
         table: {
             color: "jarviswidget-color-magenta",
         },
-        series: [{
-            color: resolveCssColor("txt-color-magenta"),
-            axisLabel: "Temperature (°C)",
-            tickLabel: "°C",
+        yAxis: {
+            title: {
+                text: "Temperature (°C)",
+                unit: "°C",
+            },
             min: 0,
             max: 75,
             plotBands: [{ // Warning
@@ -594,18 +736,21 @@ const customSensorStyles = {
                 label: {
                     text: "Error",
                 }
-            },
-            ],
+            }],
+        },
+        series: [{
+            color: resolveCssColor("txt-color-magenta"),
         }],
     },
     BoosterPumpTemp: {
         table: {
             color: "jarviswidget-color-redLight",
         },
-        series: [{
-            color: resolveCssColor("txt-color-redLight"),
-            axisLabel: "Temperature (°C)",
-            tickLabel: "°C",
+        yAxis: {
+            title: {
+                text: "Temperature (°C)",
+                unit: "°C",
+            },
             min: 0,
             max: 175,
             plotBands: [{ // Warning
@@ -622,18 +767,21 @@ const customSensorStyles = {
                 label: {
                     text: "Error",
                 }
-            },
-            ],
+            }],
+        },
+        series: [{
+            color: resolveCssColor("txt-color-redLight"),
         }],
     },
     BoosterCoolingBlockTemp: {
         table: {
             color: "jarviswidget-color-red",
         },
-        series: [{
-            color: resolveCssColor("txt-color-red"),
-            axisLabel: "Temperature (°C)",
-            tickLabel: "°C",
+        yAxis: {
+            title: {
+                text: "Temperature (°C)",
+                unit: "°C",
+            },
             min: 0,
             max: 75,
             plotBands: [{ // Warning
@@ -650,8 +798,10 @@ const customSensorStyles = {
                 label: {
                     text: "Error",
                 }
-            },
-            ],
+            }],
+        },
+        series: [{
+            color: resolveCssColor("txt-color-red"),
         }],
     },
     ProbeTemp: {
@@ -660,8 +810,6 @@ const customSensorStyles = {
         },
         series: [{
             color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Temperature (K)",
-            tickLabel: "K",
         }],
     },
     Setpoint: {
@@ -670,120 +818,162 @@ const customSensorStyles = {
         },
         series: [{
             color: resolveCssColor("txt-color-orangeDark"),
-            axisLabel: "Temperature (K)",
-            tickLabel: "K",
         }],
     },
     Heater: {
         table: {
             color: "jarviswidget-color-red",
         },
-        series: [{
-            color: resolveCssColor("txt-color-red"),
-            axisLabel: "Output Percentage (%)",
-            tickLabel: "%",
+        yAxis: {
+            title: {
+                text: "Output Percentage (%)",
+                unit: "%",
+            },
             min: 0,
             max: 100,
+        },
+        series: [{
+            color: resolveCssColor("txt-color-red"),
         }],
     },
     Corridor: {
         table: {
             color: "jarviswidget-color-blue",
         },
+        yAxis: {
+            title: {
+                text: "Temperature (C)",
+                unit: "°C",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Temperature (C)",
-            tickLabel: "°C",
         }],
     },
     High: {
         table: {
-            color: "jarviswidget-color-blue",
+            color: "jarviswidget-color-orange",
+        },
+        yAxis: {
+            title: {
+                text: "Pressure (PSI)",
+                unit: "PSI",
+            },
         },
         series: [{
-            color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Pressure (PSI)",
-            tickLabel: "PSI",
+            color: resolveCssColor("txt-color-orange"),
         }],
     },
     Low: {
         table: {
-            color: "jarviswidget-color-blue",
+            color: "jarviswidget-color-teal",
+        },
+        yAxis: {
+            title: {
+                text: "Pressure (PSI)",
+                unit: "PSI",
+            },
         },
         series: [{
-            color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Pressure (PSI)",
-            tickLabel: "PSI",
+            color: resolveCssColor("txt-color-teal"),
         }],
     },
     Delta: {
         table: {
-            color: "jarviswidget-color-blue",
+            color: "jarviswidget-color-pinkDark",
+        },
+        yAxis: {
+            title: {
+                text: "Pressure (PSI)",
+                unit: "PSI",
+            },
         },
         series: [{
-            color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Pressure (PSI)",
-            tickLabel: "PSI",
+            color: resolveCssColor("txt-color-pinkDark"),
         }],
     },
     Bounce: {
         table: {
-            color: "jarviswidget-color-blue",
+            color: "jarviswidget-color-purple",
+        },
+        yAxis: {
+            title: {
+                text: "Pressure (PSI)",
+                unit: "PSI",
+            },
         },
         series: [{
-            color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Pressure (PSI)",
-            tickLabel: "PSI",
+            color: resolveCssColor("txt-color-purple"),
         }],
     },
     WaterIn: {
         table: {
             color: "jarviswidget-color-blue",
         },
+        yAxis: {
+            title: {
+                text: "Temperature (C)",
+                unit: "°C",
+            },
+        },
         series: [{
-            color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Temperature (C)",
-            tickLabel: "°C",
+            color: resolveCssColor("txt-color-blueDarkBright"),
         }],
     },
     WaterOut: {
         table: {
-            color: "jarviswidget-color-blue",
+            color: "jarviswidget-color-red",
+        },
+        yAxis: {
+            title: {
+                text: "Temperature (C)",
+                unit: "°C",
+            },
         },
         series: [{
-            color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Temperature (C)",
-            tickLabel: "°C",
+            color: resolveCssColor("txt-color-red"),
         }],
     },
     Helium: {
         table: {
-            color: "jarviswidget-color-blue",
+            color: "jarviswidget-color-redLight",
+        },
+        yAxis: {
+            title: {
+                text: "Temperature (C)",
+                unit: "°C",
+            },
         },
         series: [{
-            color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Temperature (C)",
-            tickLabel: "°C",
+            color: resolveCssColor("txt-color-redLight"),
         }],
     },
     Oil: {
         table: {
-            color: "jarviswidget-color-blue",
+            color: "jarviswidget-color-magenta",
+        },
+        yAxis: {
+            title: {
+                text: "Temperature (C)",
+                unit: "°C",
+            },
         },
         series: [{
-            color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Temperature (C)",
-            tickLabel: "°C",
+            color: resolveCssColor("txt-color-magenta"),
         }],
     },
     Current: {
         table: {
-            color: "jarviswidget-color-blue",
+            color: "jarviswidget-color-greenLight",
+        },
+        yAxis: {
+            title: {
+                text: "Current (A)",
+                unit: "A",
+            },
         },
         series: [{
-            color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Current (A)",
-            tickLabel: "A",
+            color: resolveCssColor("txt-color-greenLight"),
         }],
     },
     Dewar_Temp: {
@@ -792,68 +982,90 @@ const customSensorStyles = {
         },
         series: [{
             color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Temperature (K)",
-            tickLabel: "K",
         }],
     },
     Dewar_Volume: {
         table: {
             color: "jarviswidget-color-blue",
         },
+        yAxis: {
+            title: {
+                text: "Volume (L)",
+                unit: "L",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Volume (L)",
-            tickLabel: "L",
         }],
     },
     Dewar_Level: {
         table: {
             color: "jarviswidget-color-blue",
         },
+        yAxis: {
+            title: {
+                text: "Level (cm)",
+                unit: "cm",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Level (cm)",
-            tickLabel: "cm",
         }],
     },
     Dewar_Pressure: {
         table: {
             color: "jarviswidget-color-blue",
         },
+        yAxis: {
+            title: {
+                text: "Pressure (PSI)",
+                unit: "PSI",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Pressure (PSI)",
-            tickLabel: "PSI",
         }],
     },
     Purity_Sensor: {
         table: {
             color: "jarviswidget-color-blue",
         },
+        yAxis: {
+            title: {
+                text: "Purity (nA)",
+                unit: "nA",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Purity (nA)",
-            tickLabel: "nA",
         }],
     },
     LN2_Level: {
         table: {
             color: "jarviswidget-color-blue",
         },
+        yAxis: {
+            title: {
+                text: "Level (%)",
+                unit: "%",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Level (%)",
-            tickLabel: "%",
         }],
     },
     Storage_Pressure: {
         table: {
             color: "jarviswidget-color-blue",
         },
+        yAxis: {
+            title: {
+                text: "Pressure (PSI)",
+                unit: "PSI",
+            },
+        },
         series: [{
             color: resolveCssColor("txt-color-blue"),
-            axisLabel: "Pressure (PSI)",
-            tickLabel: "PSI",
         }],
     },
 };
