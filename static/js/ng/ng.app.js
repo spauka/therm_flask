@@ -49,5 +49,5 @@ smartApp.config(['$routeProvider', function ($routeProvider) {
         });
 }]);
 
-smartApp.run(['$rootScope', 'settings', function ($rootScope, settings) {
+smartApp.run(['$rootScope', function ($rootScope) {
 }])

@@ -21,31 +21,25 @@ smartApp
             // Load settings
             var count = detectmob() ? pointCountMobile : pointCountDesktop;
             var customStyle = (thermid in customSensorStyles) ? customSensorStyles[thermid] : {};
-            var chartStyle = Highcharts.merge(false, customStyle, defaultChartStyle);
+            var thermChartStyle = $.extend(true, structuredClone(defaultChartStyle), customStyle);
             var dataURL = new URL(thermid, scope.baseURL);
             dataURL.searchParams.append("count", count);
-
-            // If the color of the series is given as a CSS color, resolve it here
-            if ("cssColor" in chartStyle.plotOptions.series) {
-                element.classList.add(chartStyle.plotOptions.series.cssColor);
-                var lineColor = element.css('color');
-                chartStyle.plotOptions.series.color = lineColor;
-                chartStyle.plotOptions.series.fillColor = new Highcharts.Color(lineColor).setOpacity(0.25).get("rgba");
-            }
 
             // Fill in data for the template
             scope.sensor = sensor_name;
             scope.col_name = thermid;
-            scope.table_color = chartStyle.table.color;
+            scope.table_color = thermChartStyle.table.color;
 
-            var createChart = function (series) {
-                // Calculate ranges for historic and nonhistoric graphs
-                var ranges = historic ? historicRanges : normalRanges;
-                chartStyle.rangeSelector.buttons = ranges;
-                chartStyle.rangeSelector.selected = (historic ? 6 : 1);
-
-                // Get custom options for the line if they exist
-                chartStyle.series = series;
+            var createChart = function (chartStyle, overwriteRanges=true) {
+                // Merge chart styles with default
+                chartStyle = $.extend(true, chartStyle, thermChartStyle);
+                if (overwriteRanges) {
+                    // Calculate ranges for historic and nonhistoric graphs
+                    var ranges = historic ? historicRanges : normalRanges;
+                    chartStyle.rangeSelector.buttons = ranges;
+                    chartStyle.rangeSelector.selected = (historic ? 6 : 1);
+                }
+                console.debug(chartStyle);
                 var chart = $('#' + thermid).highcharts('StockChart', chartStyle);
 
                 // Add the chart to the list of charts
@@ -58,12 +52,14 @@ smartApp
                     var data = response.data;
 
                     // Construct the series
-                    var series = [{
-                        name: sensor_name,
-                        data: data,
-                        type: "area",
-                        units: "K"
-                    }];
+                    var series = {
+                        series: [{
+                            name: sensor_name,
+                            data: data,
+                            type: "area",
+                            units: "K"
+                    }]
+                };
                     createChart(series);
                 });
 
