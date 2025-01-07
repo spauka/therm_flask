@@ -36,10 +36,12 @@
 <div>
     <div class="row" ng-repeat="i in range(sensors.length/2) track by $index">
         <div class="col-md-6">
-            <highchart data-thermid="{{sensors[$index*2].column_name}}" data-therm="{{sensors[$index*2].name}}"></highchart>
+            <highchart data-thermid="{{sensors[$index*2].column_name}}" data-therm="{{sensors[$index*2].name}}">
+            </highchart>
         </div>
         <div class="col-md-6" ng-if="$index*2+1 < sensors.length">
-            <highchart data-thermid="{{sensors[$index*2+1].column_name}}" data-therm="{{sensors[$index*2+1].name}}"></highchart>
+            <highchart data-thermid="{{sensors[$index*2+1].column_name}}" data-therm="{{sensors[$index*2+1].name}}">
+            </highchart>
         </div>
     </div>
 </div>

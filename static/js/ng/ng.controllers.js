@@ -62,7 +62,9 @@ angular.module('app.controllers', [])
                         for (var therm in data) {
                             if (therm in charts) {
                                 var chart = charts[therm].highcharts();
+                                chart.linkedUpdate = true;
                                 chart.series[0].addPoint([time.getTime(), data[therm]], true, true);
+                                chart.linkedUpdate = false;
                             }
                         }
                     }

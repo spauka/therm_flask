@@ -10,7 +10,7 @@ smartApp
         };
     }])
     .directive('highchart', ["$http", function ($http) {
-        function link(scope, element, attrs, outerDir) {
+        function link(scope, element, attrs) {
             // Get shortcuts to useful values
             var historic = scope.historic;
             var sensors = scope.sensors;
@@ -21,16 +21,20 @@ smartApp
             // Load settings
             var count = detectmob() ? pointCountMobile : pointCountDesktop;
             var customStyle = (thermid in customSensorStyles) ? customSensorStyles[thermid] : {};
-            var thermChartStyle = $.extend(true, structuredClone(defaultChartStyle), customStyle);
+            var thermChartStyle = $.extend(true, structuredClone(defaultChartStyle), defaultChartFunctions);
+            thermChartStyle = $.extend(true, thermChartStyle, customStyle);
             var dataURL = new URL(thermid, scope.baseURL);
-            dataURL.searchParams.append("count", count);
+            if (!historic)
+                dataURL.searchParams.append("count", count);
+            else
+                dataURL.searchParams.append("hourly", "");
 
             // Fill in data for the template
             scope.sensor = sensor_name;
             scope.col_name = thermid;
             scope.table_color = thermChartStyle.table.color;
 
-            var createChart = function (chartStyle, overwriteRanges=true) {
+            var createChart = function (chartStyle, overwriteRanges = true) {
                 // Merge chart styles with default
                 chartStyle = $.extend(true, chartStyle, thermChartStyle);
                 if (overwriteRanges) {
@@ -39,7 +43,6 @@ smartApp
                     chartStyle.rangeSelector.buttons = ranges;
                     chartStyle.rangeSelector.selected = (historic ? 6 : 1);
                 }
-                console.debug(chartStyle);
                 var chart = $('#' + thermid).highcharts('StockChart', chartStyle);
 
                 // Add the chart to the list of charts
@@ -52,15 +55,29 @@ smartApp
                     var data = response.data;
 
                     // Construct the series
-                    var series = {
+                    var chartData = {
+                        scope: scope,
+                        navigator: {},
+                        tooltip: {
+                            formatter: tooltipFormatter,
+                        },
                         series: [{
                             name: sensor_name,
                             data: data,
                             type: "area",
                             units: "K"
-                    }]
-                };
-                    createChart(series);
+                        }]
+                    };
+                    // Set the navigator to a constant set of data
+                    if (historic) {
+                        // Disable the navigator updating
+                        chartData.navigator.adaptToUpdatedData = false;
+                        chartData.navigator.series = {
+                            data: data,
+                        };
+                    }
+
+                    createChart(chartData);
                 });
 
             element.on('$destroy', function () {

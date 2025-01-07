@@ -31,19 +31,6 @@ const tooltipDateFormatter = new Intl.DateTimeFormat(undefined, tooltipDateForma
 /*
  * Define default chart format
  */
-function tooltipFormatter() {
-    var seriesOptions = this.series.userOptions;
-    var name = seriesOptions.name;
-    var units = seriesOptions.units;
-    var number = "";
-    if (this.y < 0.01)
-        number = this.y.toExponential(3) + units;
-    else
-        number = this.y.toFixed(3) + units;
-    var dt = new Date(this.x);
-    var dts = tooltipDateFormatter.format(dt);
-    return "<span style=\"font-size: xx-small\">" + dts + "</span><br/> + name + : <b>" + number + "</b>";
-};
 const currentTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const normalRanges = [
     new HighStockRangeSelector("minute", 10, "10m"),
@@ -84,9 +71,6 @@ const defaultChartStyle = {
     time: {
         timezone: currentTimezone,
     },
-    tooltip: {
-        // formatter: tooltipFormatter,
-    },
     plotOptions: {
         series: {
             connectNulls: false
@@ -108,6 +92,20 @@ const defaultChartStyle = {
         startOnTick: true,
         endOnTick: true,
         type: "linear",
+    },
+};
+// Functions can't be deepcopied, so we define them separately. We will
+// need to merge defaultChartStyle and defaultChartFunctions together
+// to get a full set of defaults.
+const defaultChartFunctions = {
+    tooltip: {
+        formatter: tooltipFormatter,
+    },
+    xAxis: {
+        events: {
+            setExtremes: setExtremes,
+            afterSetExtremes: afterSetExtremes,
+        },
     },
 };
 const customSensorStyles = {
