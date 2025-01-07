@@ -1,3 +1,29 @@
+/*         ______________________________________
+  ________|                                      |_______
+  \       |           SmartAdmin WebApp          |      /
+   \      |      Copyright © 2014 MyOrange       |     /
+   /      |______________________________________|     \
+  /__________)                                (_________\
+
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ * =======================================================================
+ * SmartAdmin is FULLY owned and LICENSED by MYORANGE INC.
+ * This script may NOT be RESOLD or REDISTRUBUTED under any
+ * circumstances, and is only to be used with this purchased
+ * copy of SmartAdmin Template.
+ * =======================================================================
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * =======================================================================
+ * author: Sunny (@bootstraphunt)
+ * email: info@myorange.ca
+ */
+
 // APP DIRECTIVES
 // main directives
 angular.module('app.main', [])

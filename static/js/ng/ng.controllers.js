@@ -1,3 +1,6 @@
+// (c) 2025 Sebsatian Pauka
+// This code is licensed under MIT license (see LICENSE file for details)
+
 angular.module('app.controllers', [])
     .factory('settings', ['$rootScope', function ($rootScope) {
         // supported languages
