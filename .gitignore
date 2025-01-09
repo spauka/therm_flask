@@ -98,9 +98,6 @@ ENV/
 # mypy
 .mypy_cache/
 
-# Config file
-config.py
-
 # OSX Stuff
 .DS_Store
 
