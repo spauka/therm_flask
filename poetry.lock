@@ -428,6 +428,16 @@ files = [
 ]
 
 [[package]]
+name = "uwsgi"
+version = "2.0.28"
+description = "The uWSGI server"
+optional = false
+python-versions = "*"
+files = [
+    {file = "uwsgi-2.0.28.tar.gz", hash = "sha256:79ca1891ef2df14508ab0471ee8c0eb94bd2d51d03f32f90c4bbe557ab1e99d0"},
+]
+
+[[package]]
 name = "werkzeug"
 version = "3.1.3"
 description = "The comprehensive WSGI web application library."
@@ -466,4 +476,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "7a66921e418fb0fbfe63435a08d4cc91c11a90efc95ef4dbba881dab789b3f07"
+content-hash = "071480a93fc6520b6ac6753e6736b8d35d1669df1e7cbd38bbd87262b3372522"

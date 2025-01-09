@@ -13,6 +13,11 @@ sqlalchemy = "^2.0.36"
 psycopg = "^3.2.3"
 dataclass-wizard = "^0.33.0"
 
+[tool.poetry.group.uwsgi]
+optional = true
+
+[tool.poetry.group.uwsgi.dependencies]
+uwsgi = "^2.0.28"
 
 [build-system]
 requires = ["poetry-core"]
