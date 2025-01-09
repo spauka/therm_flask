@@ -1,7 +1,7 @@
 import config
 
 from flask import Flask, request, render_template, render_template_string, Response, make_response, send_from_directory, redirect
-from flask_sqlalchemy import SQLAlchemy, get_debug_queries
+from flask_sqlalchemy import SQLAlchemy, get_recorded_queries
 
 from temp_log import *
 
@@ -21,9 +21,12 @@ db.init_app(app)
 
 @app.after_request
 def after_request(response):
-    if app.debug:
-        for query in get_debug_queries():
-            print("Query: %s\n\tParameters: %s\n\tDuration: %fs\n\tContext: %s\n" % (query.statement, query.parameters, query.duration, query.context))
+    if app.debug and config.record_queries:
+        for query in get_recorded_queries():
+            print((f"Query: {query.statement}\n"
+                   f"\tParameters: {query.parameters}\n"
+                   f"\tDuration: {query.duration} s\n"
+                   f"\tLocation: {query.location}"))
     return response
 
 @app.route('/')
