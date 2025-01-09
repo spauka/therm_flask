@@ -1,6 +1,5 @@
 {
     "db": "<database>://<path>",
-    "uri_base": "http://qphys1114.research.sydney.edu.au/therm_flask/",
     "debug": false,
     "record_queries": false,
     "track_modifications": false

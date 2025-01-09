@@ -12,7 +12,6 @@ else:
 @dataclass
 class Config(JSONFileWizard):
     db: str
-    uri_base: str
 
     debug: bool
     track_modifications: bool
