@@ -1,7 +1,8 @@
 import config
 
 from flask import Flask, request, render_template, render_template_string, Response, make_response, send_from_directory, redirect
-from flask_sqlalchemy import SQLAlchemy, get_recorded_queries
+from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy.record_queries import get_recorded_queries
 
 from temp_log import *
 
