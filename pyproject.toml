@@ -20,6 +20,12 @@ optional = true
 [tool.poetry.group.uwsgi.dependencies]
 uwsgi = "^2.0.28"
 
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+pylint = "^3.3.3"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
