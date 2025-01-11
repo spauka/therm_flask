@@ -12,5 +12,5 @@ for fridges and other equipment in a lab environment.
 ├── scripts/ - Scripts to run on equipment to upload data
 ├── tests/ - Test files
 ├── pyproject.toml
-└── config.json - Template config file for labmon
+└── labmon_config.json - Template config file for labmon
 ```
