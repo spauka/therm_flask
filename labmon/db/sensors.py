@@ -1,4 +1,5 @@
-from . import db, Fridges, FridgesSupplementary
+from . import db
+from .fridges import Fridges, FridgesSupplementary
 
 
 class Sensors(db.Model, db.Column):

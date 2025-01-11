@@ -1,7 +1,8 @@
 import string
 
-from . import db, Sensors, SensorsSupplementary
+from . import db
 from .fridge_table import FridgeTable
+from .sensors import Sensors, SensorsSupplementary
 
 
 class Fridges(db.Model, FridgeTable):

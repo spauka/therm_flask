@@ -21,16 +21,16 @@ def create_app():
     app.config.from_file("labmon_config.json", load=json.load)
 
     # Configure SQLAlchemy
-    app.config['SQLALCHEMY_DATABASE_URI'] = app.config.db
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = app.config.track_modifications
-    app.config['SQLALCHEMY_RECORD_QUERIES'] = app.config.record_queries
+    app.config['SQLALCHEMY_DATABASE_URI'] = app.config["db"]
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = app.config["track_modifications"]
+    app.config['SQLALCHEMY_RECORD_QUERIES'] = app.config["record_queries"]
 
+    # Initialize db
     db.init_app(app)
 
     # Create a blank homepage
     @app.route("/")
     def blank():
         return render_template("blank.html", title=app.name)
-
 
     return app
