@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "therm-flask"
+name = "labmon"
 version = "0.1.0"
 description = "Flask module for running thermomtry in QNL/QSYD lab"
 authors = ["Sebastian Pauka <spauka@gmail.com>"]
