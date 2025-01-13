@@ -16,12 +16,9 @@ RuntimeDirectory=uwsgi
 RuntimeDirectoryMode=0750
 
 ExecStart=/bin/bash -l -c "poetry run -C ./therm_flask uwsgi ./uwsgi.ini"
-StartLimitIntervalSec=60
 StartLimitBurst=3
 Restart=on-failure
 RestartSec=5
-RestartMaxDelaySec=60s
-RestartSteps=5
 KillSignal=SIGQUIT
-Type=notify
+Type=simple
 
