@@ -1,0 +1,27 @@
+[Unit]
+Description=Service for thermometry
+
+[Service]
+# Assume that a user called flask exists, and that the thermometry
+# program is installed in a directory called therm_flask under the
+# working directory
+User=flask
+Group=nginx
+WorkingDirectory=/var/lib/flask
+
+ProtectSystem=strict
+LogsDirectory=uwsgi
+LogsDirectoryMode=0750
+RuntimeDirectory=uwsgi
+RuntimeDirectoryMode=0750
+
+ExecStart=/bin/bash -l -c "poetry run -C ./therm_flask uwsgi ./uwsgi.ini"
+StartLimitIntervalSec=60
+StartLimitBurst=3
+Restart=on-failure
+RestartSec=5
+RestartMaxDelaySec=60s
+RestartSteps=5
+KillSignal=SIGQUIT
+Type=notify
+

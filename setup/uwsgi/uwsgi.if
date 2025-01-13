@@ -1,0 +1,160 @@
+
+## <summary>policy for uwsgi</summary>
+
+########################################
+## <summary>
+##	Execute uwsgi_exec_t in the uwsgi domain.
+## </summary>
+## <param name="domain">
+## <summary>
+##	Domain allowed to transition.
+## </summary>
+## </param>
+#
+interface(`uwsgi_domtrans',`
+	gen_require(`
+		type uwsgi_t, uwsgi_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	domtrans_pattern($1, uwsgi_exec_t, uwsgi_t)
+')
+
+######################################
+## <summary>
+##	Execute uwsgi in the caller domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`uwsgi_exec',`
+	gen_require(`
+		type uwsgi_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	can_exec($1, uwsgi_exec_t)
+')
+########################################
+## <summary>
+##	Read uwsgi's log files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`uwsgi_read_log',`
+	gen_require(`
+		type uwsgi_log_t;
+	')
+
+	logging_search_logs($1)
+	read_files_pattern($1, uwsgi_log_t, uwsgi_log_t)
+')
+
+########################################
+## <summary>
+##	Append to uwsgi log files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`uwsgi_append_log',`
+	gen_require(`
+		type uwsgi_log_t;
+	')
+
+	logging_search_logs($1)
+	append_files_pattern($1, uwsgi_log_t, uwsgi_log_t)
+')
+
+########################################
+## <summary>
+##	Manage uwsgi log files
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`uwsgi_manage_log',`
+	gen_require(`
+		type uwsgi_log_t;
+	')
+
+	logging_search_logs($1)
+	manage_dirs_pattern($1, uwsgi_log_t, uwsgi_log_t)
+	manage_files_pattern($1, uwsgi_log_t, uwsgi_log_t)
+	manage_lnk_files_pattern($1, uwsgi_log_t, uwsgi_log_t)
+')
+########################################
+## <summary>
+##	Read uwsgi PID files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`uwsgi_read_pid_files',`
+	gen_require(`
+		type uwsgi_var_run_t;
+	')
+
+	files_search_pids($1)
+	read_files_pattern($1, uwsgi_var_run_t, uwsgi_var_run_t)
+')
+
+
+########################################
+## <summary>
+##	All of the rules required to administrate
+##	an uwsgi environment
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	Role allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`uwsgi_admin',`
+	gen_require(`
+		type uwsgi_t;
+		type uwsgi_log_t;
+		type uwsgi_var_run_t;
+	')
+
+	allow $1 uwsgi_t:process { signal_perms };
+	ps_process_pattern($1, uwsgi_t)
+
+    tunable_policy(`deny_ptrace',`',`
+        allow $1 uwsgi_t:process ptrace;
+    ')
+
+	logging_search_logs($1)
+	admin_pattern($1, uwsgi_log_t)
+
+	files_search_pids($1)
+	admin_pattern($1, uwsgi_var_run_t)
+	optional_policy(`
+		systemd_passwd_agent_exec($1)
+		systemd_read_fifo_file_passwd_run($1)
+	')
+')

@@ -1,0 +1,290 @@
+.TH  "uwsgi_selinux"  "8"  "25-01-13" "uwsgi" "SELinux Policy uwsgi"
+.SH "NAME"
+uwsgi_selinux \- Security Enhanced Linux Policy for the uwsgi processes
+.SH "DESCRIPTION"
+
+Security-Enhanced Linux secures the uwsgi processes via flexible mandatory access control.
+
+The uwsgi processes execute with the uwsgi_t SELinux type. You can check if you have these processes running by executing the \fBps\fP command with the \fB\-Z\fP qualifier.
+
+For example:
+
+.B ps -eZ | grep uwsgi_t
+
+
+.SH "ENTRYPOINTS"
+
+The uwsgi_t SELinux type can be entered via the \fBuwsgi_exec_t\fP file type.
+
+The default entrypoint paths for the uwsgi_t domain are the following:
+
+/var/lib/flask/.cache/pypoetry/virtualenvs/therm-flask-oT0ltQ80-py3.13/bin/uwsgi
+.SH PROCESS TYPES
+SELinux defines process types (domains) for each process running on the system
+.PP
+You can see the context of a process using the \fB\-Z\fP option to \fBps\bP
+.PP
+Policy governs the access confined processes have to files.
+SELinux uwsgi policy is very flexible allowing users to setup their uwsgi processes in as secure a method as possible.
+.PP
+The following process types are defined for uwsgi:
+
+.EX
+.B uwsgi_t
+.EE
+.PP
+Note:
+.B semanage permissive -a uwsgi_t
+can be used to make the process type uwsgi_t permissive. SELinux does not deny access to permissive process types, but the AVC (SELinux denials) messages are still generated.
+
+.SH BOOLEANS
+SELinux policy is customizable based on least access required.  uwsgi policy is extremely flexible and has several booleans that allow you to manipulate the policy and run uwsgi with the tightest access possible.
+
+
+.PP
+If you want to dontaudit all daemons scheduling requests (setsched, sys_nice), you must turn on the daemons_dontaudit_scheduling boolean. Enabled by default.
+
+.EX
+.B setsebool -P daemons_dontaudit_scheduling 1
+
+.EE
+
+.PP
+If you want to allow all domains to execute in fips_mode, you must turn on the fips_mode boolean. Enabled by default.
+
+.EX
+.B setsebool -P fips_mode 1
+
+.EE
+
+.PP
+If you want to allow system to run with NIS, you must turn on the nis_enabled boolean. Disabled by default.
+
+.EX
+.B setsebool -P nis_enabled 1
+
+.EE
+
+.SH "MANAGED FILES"
+
+The SELinux process type uwsgi_t can manage files labeled with the following file types.  The paths listed are the default paths for these file types.  Note the processes UID still need to have DAC permissions.
+
+.br
+.B cluster_conf_t
+
+	/etc/cluster(/.*)?
+.br
+
+.br
+.B cluster_var_lib_t
+
+	/var/lib/pcsd(/.*)?
+.br
+	/var/lib/cluster(/.*)?
+.br
+	/var/lib/openais(/.*)?
+.br
+	/var/lib/pengine(/.*)?
+.br
+	/var/lib/corosync(/.*)?
+.br
+	/usr/lib/heartbeat(/.*)?
+.br
+	/var/lib/heartbeat(/.*)?
+.br
+	/var/lib/pacemaker(/.*)?
+.br
+
+.br
+.B cluster_var_run_t
+
+	/var/run/crm(/.*)?
+.br
+	/var/run/cman_.*
+.br
+	/var/run/rsctmp(/.*)?
+.br
+	/var/run/aisexec.*
+.br
+	/var/run/heartbeat(/.*)?
+.br
+	/var/run/pcsd-ruby.socket
+.br
+	/var/run/corosync-qnetd(/.*)?
+.br
+	/var/run/corosync-qdevice(/.*)?
+.br
+	/var/run/pcsd\.socket
+.br
+	/var/run/corosync\.pid
+.br
+	/var/run/cpglockd\.pid
+.br
+	/var/run/rgmanager\.pid
+.br
+	/var/run/cluster/rgmanager\.sk
+.br
+
+.br
+.B krb5_host_rcache_t
+
+	/var/tmp/krb5_0.rcache2
+.br
+	/var/cache/krb5rcache(/.*)?
+.br
+	/var/tmp/nfs_0
+.br
+	/var/tmp/DNS_25
+.br
+	/var/tmp/host_0
+.br
+	/var/tmp/imap_0
+.br
+	/var/tmp/HTTP_23
+.br
+	/var/tmp/HTTP_48
+.br
+	/var/tmp/ldap_55
+.br
+	/var/tmp/ldap_487
+.br
+	/var/tmp/ldapmap1_0
+.br
+
+.br
+.B root_t
+
+	/sysroot/ostree/deploy/.*-atomic/deploy(/.*)?
+.br
+	/
+.br
+	/initrd
+.br
+
+.br
+.B uwsgi_log_t
+
+	/var/log/uwsgi(/.*)?
+.br
+
+.br
+.B uwsgi_tmp_t
+
+
+.br
+.B uwsgi_var_lib_t
+
+	/var/lib/flask(/.*)?
+.br
+
+.br
+.B uwsgi_var_run_t
+
+	/var/run/uwsgi(/.*)?
+.br
+
+.SH FILE CONTEXTS
+SELinux requires files to have an extended attribute to define the file type.
+.PP
+You can see the context of a file using the \fB\-Z\fP option to \fBls\bP
+.PP
+Policy governs the access confined processes have to these files.
+SELinux uwsgi policy is very flexible allowing users to setup their uwsgi processes in as secure a method as possible.
+.PP
+
+.PP
+.B EQUIVALENCE DIRECTORIES
+
+.PP
+uwsgi policy stores data with multiple different file context types under the /var/lib/flask directory.  If you would like to store the data in a different directory you can use the semanage command to create an equivalence mapping.  If you wanted to store this data under the /srv directory you would execute the following command:
+.PP
+.B semanage fcontext -a -e /var/lib/flask /srv/flask
+.br
+.B restorecon -R -v /srv/flask
+.PP
+
+.PP
+.B STANDARD FILE CONTEXT
+
+SELinux defines the file context types for the uwsgi, if you wanted to
+store files with these types in a different paths, you need to execute the semanage command to specify alternate labeling and then use restorecon to put the labels on disk.
+
+.B semanage fcontext -a -t uwsgi_tmp_t '/srv/myuwsgi_content(/.*)?'
+.br
+.B restorecon -R -v /srv/myuwsgi_content
+
+Note: SELinux often uses regular expressions to specify labels that match multiple files.
+
+.I The following file types are defined for uwsgi:
+
+
+.EX
+.PP
+.B uwsgi_exec_t
+.EE
+
+- Set files with the uwsgi_exec_t type, if you want to transition an executable to the uwsgi_t domain.
+
+
+.EX
+.PP
+.B uwsgi_log_t
+.EE
+
+- Set files with the uwsgi_log_t type, if you want to treat the data as uwsgi log data, usually stored under the /var/log directory.
+
+
+.EX
+.PP
+.B uwsgi_tmp_t
+.EE
+
+- Set files with the uwsgi_tmp_t type, if you want to store uwsgi temporary files in the /tmp directories.
+
+
+.EX
+.PP
+.B uwsgi_var_lib_t
+.EE
+
+- Set files with the uwsgi_var_lib_t type, if you want to store the uwsgi files under the /var/lib directory.
+
+
+.EX
+.PP
+.B uwsgi_var_run_t
+.EE
+
+- Set files with the uwsgi_var_run_t type, if you want to store the uwsgi files under the /run or /var/run directory.
+
+
+.PP
+Note: File context can be temporarily modified with the chcon command.  If you want to permanently change the file context you need to use the
+.B semanage fcontext
+command.  This will modify the SELinux labeling database.  You will need to use
+.B restorecon
+to apply the labels.
+
+.SH "COMMANDS"
+.B semanage fcontext
+can also be used to manipulate default file context mappings.
+.PP
+.B semanage permissive
+can also be used to manipulate whether or not a process type is permissive.
+.PP
+.B semanage module
+can also be used to enable/disable/install/remove policy modules.
+
+.B semanage boolean
+can also be used to manipulate the booleans
+
+.PP
+.B system-config-selinux
+is a GUI tool available to customize SELinux policy settings.
+
+.SH AUTHOR
+This manual page was auto-generated using
+.B "sepolicy manpage".
+
+.SH "SEE ALSO"
+selinux(8), uwsgi(8), semanage(8), restorecon(8), chcon(1), sepolicy(8), setsebool(8)

@@ -1,0 +1,72 @@
+policy_module(uwsgi, 1.0.0)
+
+########################################
+#
+# Declarations
+#
+
+type uwsgi_t;
+type uwsgi_exec_t;
+init_daemon_domain(uwsgi_t, uwsgi_exec_t)
+
+type uwsgi_var_lib_t;
+files_type(uwsgi_var_lib_t);
+
+type uwsgi_log_t;
+logging_log_file(uwsgi_log_t)
+
+type uwsgi_var_run_t;
+files_pid_file(uwsgi_var_run_t)
+
+type uwsgi_tmp_t;
+files_tmp_file(uwsgi_tmp_t);
+
+gen_require(type httpd_t;)
+gen_require(type kernel_t;)
+
+########################################
+#
+# uwsgi local policy
+#
+allow uwsgi_t self:capability { chown setgid setuid sys_admin sys_chroot };
+allow uwsgi_t self:process { fork setrlimit signal_perms };
+allow uwsgi_t self:fifo_file rw_fifo_file_perms;
+allow uwsgi_t self:unix_dgram_socket create;
+allow uwsgi_t self:unix_stream_socket { create_stream_socket_perms connectto };
+allow uwsgi_t uwsgi_var_run_t:sock_file { create getattr setattr };
+# Allow httpd_t to connect to socket
+allow httpd_t uwsgi_t:unix_stream_socket connectto;
+allow httpd_t uwsgi_var_run_t:sock_file write;
+allow httpd_t uwsgi_var_lib_t:file { getattr open read };
+# Allow Postgres connections
+postgresql_stream_connect(uwsgi_t)
+postgresql_tcp_connect(uwsgi_t)
+
+manage_dirs_pattern(uwsgi_t, uwsgi_var_lib_t, uwsgi_var_lib_t)
+manage_files_pattern(uwsgi_t, uwsgi_var_lib_t, uwsgi_var_lib_t)
+manage_lnk_files_pattern(uwsgi_t, uwsgi_var_lib_t, uwsgi_var_lib_t)
+allow uwsgi_t uwsgi_var_lib_t:file { map execute };
+
+manage_dirs_pattern(uwsgi_t, uwsgi_log_t, uwsgi_log_t)
+manage_files_pattern(uwsgi_t, uwsgi_log_t, uwsgi_log_t)
+manage_lnk_files_pattern(uwsgi_t, uwsgi_log_t, uwsgi_log_t)
+logging_log_filetrans(uwsgi_t, uwsgi_log_t, { dir file lnk_file })
+
+manage_dirs_pattern(uwsgi_t, uwsgi_var_run_t, uwsgi_var_run_t)
+manage_files_pattern(uwsgi_t, uwsgi_var_run_t, uwsgi_var_run_t)
+manage_lnk_files_pattern(uwsgi_t, uwsgi_var_run_t, uwsgi_var_run_t)
+manage_sock_files_pattern(uwsgi_t, uwsgi_var_run_t, uwsgi_var_run_t)
+files_pid_filetrans(uwsgi_t, uwsgi_var_run_t, { dir file lnk_file })
+
+manage_dirs_pattern(uwsgi_t, uwsgi_tmp_t, uwsgi_tmp_t)
+manage_files_pattern(uwsgi_t, uwsgi_tmp_t, uwsgi_tmp_t)
+files_tmp_filetrans(uwsgi_t, uwsgi_tmp_t, { dir file })
+allow uwsgi_t uwsgi_tmp_t:file map;
+fs_tmpfs_filetrans(uwsgi_t, uwsgi_tmp_t, { dir file })
+
+# Allow notify systemd
+allow uwsgi_t kernel_t:unix_dgram_socket sendto;
+
+# Allow DNS resolution
+sysnet_dns_name_resolve(uwsgi_t)
+

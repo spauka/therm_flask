@@ -1,0 +1,7 @@
+/var/lib/flask/.*/uwsgi		--	gen_context(system_u:object_r:uwsgi_exec_t,s0)
+
+/var/log/uwsgi(/.*)?		gen_context(system_u:object_r:uwsgi_log_t,s0)
+
+/var/run/uwsgi(/.*)?		gen_context(system_u:object_r:uwsgi_var_run_t,s0)
+
+/var/lib/flask(/.*)?            gen_context(system_u:object_r:uwsgi_var_lib_t,s0)
