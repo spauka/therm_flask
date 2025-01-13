@@ -1,4 +1,4 @@
-/var/lib/flask/.*/uwsgi		--	gen_context(system_u:object_r:uwsgi_exec_t,s0)
+/var/lib/flask/.cache/pypoetry/virtualenvs/therm-flask-oT0ltQ80-py3.13/bin/uwsgi		--	gen_context(system_u:object_r:uwsgi_exec_t,s0)
 
 /var/log/uwsgi(/.*)?		gen_context(system_u:object_r:uwsgi_log_t,s0)
 

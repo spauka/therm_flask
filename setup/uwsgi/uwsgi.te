@@ -21,8 +21,12 @@ files_pid_file(uwsgi_var_run_t)
 type uwsgi_tmp_t;
 files_tmp_file(uwsgi_tmp_t);
 
+gen_require(type bin_t;)
 gen_require(type httpd_t;)
 gen_require(type kernel_t;)
+gen_require(type sysctl_net_t;)
+gen_require(type ldconfig_exec_t;)
+gen_require(type sysctl_fs_t;)
 
 ########################################
 #
@@ -41,6 +45,9 @@ allow httpd_t uwsgi_var_lib_t:file { getattr open read };
 # Allow Postgres connections
 postgresql_stream_connect(uwsgi_t)
 postgresql_tcp_connect(uwsgi_t)
+# Allow dynamic linking of libpq
+allow uwsgi_t bin_t:file execute;
+allow uwsgi_t ldconfig_exec_t:file { open read map execute execute_no_trans };
 
 manage_dirs_pattern(uwsgi_t, uwsgi_var_lib_t, uwsgi_var_lib_t)
 manage_files_pattern(uwsgi_t, uwsgi_var_lib_t, uwsgi_var_lib_t)
@@ -61,11 +68,12 @@ files_pid_filetrans(uwsgi_t, uwsgi_var_run_t, { dir file lnk_file })
 manage_dirs_pattern(uwsgi_t, uwsgi_tmp_t, uwsgi_tmp_t)
 manage_files_pattern(uwsgi_t, uwsgi_tmp_t, uwsgi_tmp_t)
 files_tmp_filetrans(uwsgi_t, uwsgi_tmp_t, { dir file })
-allow uwsgi_t uwsgi_tmp_t:file map;
+# Need to allow execute since the dynamic libpq executable is placed here
+allow uwsgi_t uwsgi_tmp_t:file { map execute };
 fs_tmpfs_filetrans(uwsgi_t, uwsgi_tmp_t, { dir file })
 
-# Allow notify systemd
-allow uwsgi_t kernel_t:unix_dgram_socket sendto;
+# Allow change user
+auth_use_nsswitch(uwsgi_t)
 
 # Allow DNS resolution
 sysnet_dns_name_resolve(uwsgi_t)
