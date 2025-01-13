@@ -1,19 +1,23 @@
-from . import db
-from .fridges import Fridges, FridgesSupplementary
+from sqlalchemy import ForeignKey, Integer, Unicode, Identity
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from . import Base, db
 
 
-class Sensors(db.Model, db.Column):
+class Sensor(Base):
     """
     List of sensors attached to the fridge given by fridge_id
     """
-    id = db.Column(db.Integer(), primary_key=True)
-    fridge_id = db.Column(db.Integer(), db.ForeignKey('Fridges.id'))
-    column_name = db.Column(db.String(1024))
-    display_name = db.Column("name", db.String(1024))
-    view_order = db.Column(db.Integer())
-    visible = db.Column(db.Integer())
+    sensor_id: Mapped[int] = mapped_column("id", Identity("sensors_id_seq"), primary_key=True)
+    fridge_id: Mapped[int] = mapped_column(ForeignKey("fridges.id"))
+    fridge: Mapped["Fridge"] = relationship(back_populates="sensors", repr=None)
+    column_name: Mapped[str] = mapped_column(Unicode(1024))
+    display_name: Mapped[str] = mapped_column("name", Unicode(1024))
+    view_order: Mapped[int] = mapped_column()
+    visible: Mapped[bool] = mapped_column(Integer())
     __tablename__ = "sensors"
 
+class bla3:
     def __init__(self, display_name, column_name, fridge, view_order=1, visible=1):
         if isinstance(fridge, Fridges):
             self.fridge_id = fridge.id
@@ -46,18 +50,20 @@ class Sensors(db.Model, db.Column):
             raise KeyError("Sensor not found")
         return sensor.first()
 
-class SensorsSupplementary(db.Model):
+class SensorSupplementary(Base):
     """
     List of sensors attached to the supplementary sensor set
     """
-    id = db.Column(db.Integer(), primary_key=True)
-    fridge_suppl_id = db.Column(db.Integer(), db.ForeignKey('FridgesSupplementary.id'))
-    column_name = db.Column(db.String(1024))
-    display_name = db.Column("name", db.String(1024))
-    view_order = db.Column(db.Integer())
-    visible = db.Column(db.Integer())
+    sensor_id: Mapped[int] = mapped_column("id", Identity("sensors_supplementary_id_seq"), primary_key=True)
+    fridge_suppl_id: Mapped[int] = mapped_column(ForeignKey("fridges_supplementary.id"))
+    fridge_supp: Mapped["FridgeSupplementary"] = relationship(repr=False)
+    column_name: Mapped[str] = mapped_column(Unicode(1024))
+    display_name: Mapped[str] = mapped_column("name", Unicode(1024))
+    view_order: Mapped[int] = mapped_column()
+    visible: Mapped[bool] = mapped_column(Integer())
     __tablename__ = "sensors_supplementary"
 
+class bla4:
     def __init__(self, name, fridge_suppl, column_name=None, view_order=1, visible=1):
         if isinstance(fridge_suppl, FridgesSupplementary):
             self.fridge_suppl_id = fridge_suppl.id

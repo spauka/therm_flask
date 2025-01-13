@@ -1,18 +1,20 @@
 import string
+from typing import List
+from sqlalchemy import Sequence, Integer, Unicode, UnicodeText, Identity, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from . import db
+from . import Base, db
 from .fridge_table import FridgeTable
-from .sensors import Sensors, SensorsSupplementary
 
-
-class Fridges(db.Model, FridgeTable):
-    id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(255), unique=True)
-    comment = db.Column(db.UnicodeText())
-    sensors = db.relationship('Sensors', backref='fridge', lazy='dynamic')
-    supplementary = db.relationship('Fridges_Supplementary', backref='fridge', lazy='dynamic')
+class Fridge(Base):
+    fridge_id: Mapped[int] = mapped_column("id", Identity("fridge_id_seq"), primary_key=True)
+    name: Mapped[str] = mapped_column(Unicode(255), unique=True)
+    comment: Mapped[str] = mapped_column(UnicodeText)
+    sensors: Mapped[List["Sensor"]] = relationship(back_populates='fridge')
+    supplementary: Mapped[List["FridgeSupplementary"]] = relationship(back_populates='fridge')
     __tablename__ = "fridges"
 
+class Bla:
     # Cache of existing table definitions
     __tables__ = {}
 
@@ -44,23 +46,24 @@ class Fridges(db.Model, FridgeTable):
     def get_fridge(cls, name):
         # Sanitize name by replacing all spacial characters
         name = "".join(c if c in string.ascii_letters+string.digits else " " for c in name)
-        res = Fridges.query.filter(Fridges.name==name).first()
+        res = Fridge.query.filter(Fridge.name==name).first()
         if res is None:
             raise KeyError("Unable to find fridge")
         return res
 
 
-class FridgesSupplementary(db.Model, FridgeTable):
-    id = db.Column(db.Integer(), primary_key=True)
-    fridge_id = db.Column(db.Integer(), db.ForeignKey('Fridges.id'))
-    table_name = db.Column(db.String(1024))
-    name = db.Column(db.String(1024))
-    label = db.Column(db.String(1024))
-    comment = db.Column(db.UnicodeText())
-    sensors = db.relationship('Sensors_Supplementary', backref='fridge_suppl', lazy='dynamic')
-    _suppl_table = None
+class FridgeSupplementary(Base):
+    supp_id: Mapped[int] = mapped_column("id", Integer, Sequence("fridges_supplementary_id_seq"), primary_key=True)
+    fridge_id: Mapped[int] = mapped_column(ForeignKey("fridges.id"))
+    fridge: Mapped["Fridge"] = relationship(repr=False)
+    table_name: Mapped[str] = mapped_column(Unicode(1024))
+    name: Mapped[str] = mapped_column(Unicode(1024))
+    label: Mapped[str] = mapped_column(Unicode(1024))
+    comment: Mapped[str] = mapped_column(UnicodeText())
+    sensors: Mapped[List["SensorSupplementary"]] = relationship(back_populates='fridge_supp')
     __tablename__ = "fridges_supplementary"
 
+class bla2:
     def __init__(self, name, table_name, label, sensors, comment=None):
         self.table_name = table_name
         self.name = name
