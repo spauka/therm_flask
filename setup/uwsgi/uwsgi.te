@@ -42,6 +42,7 @@ allow uwsgi_t uwsgi_var_run_t:sock_file { create getattr setattr };
 allow httpd_t uwsgi_t:unix_stream_socket connectto;
 allow httpd_t uwsgi_var_run_t:sock_file write;
 allow httpd_t uwsgi_var_lib_t:file { getattr open read };
+allow httpd_t uwsgi_var_lib_t:dir { read open getattr search };
 # Allow Postgres connections
 postgresql_stream_connect(uwsgi_t)
 postgresql_tcp_connect(uwsgi_t)
