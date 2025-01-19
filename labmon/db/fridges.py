@@ -96,7 +96,7 @@ class FridgeSupplementary(Base):
     )
     fridge_id: Mapped[int] = mapped_column(ForeignKey("fridges.id"))
     fridge: Mapped["Fridge"] = relationship(repr=False)
-    table_name: Mapped[str] = mapped_column(Unicode(1024))
+    supp_table_name: Mapped[str] = mapped_column(Unicode(1024))
     name: Mapped[str] = mapped_column(Unicode(1024))
     label: Mapped[str] = mapped_column(Unicode(1024))
     comment: Mapped[str] = mapped_column(UnicodeText())
@@ -105,31 +105,31 @@ class FridgeSupplementary(Base):
     )
     __tablename__ = "fridges_supplementary"
 
-
-class bla2:
-    def __init__(self, name, table_name, label, sensors, comment=None):
-        self.table_name = table_name
+    def __init__(self, name, supp_table_name, label, sensors, comment=None):
         self.name = name
+        self.supp_table_name = supp_table_name
         self.label = label
         for sensor in sensors:
-            self.sensors.append(SensorsSupplementary.get_sensor(sensor, self, True))
+            self.sensors.append(sensor)
         self.comment = comment
 
-    def get_sensor(self, sensor):
-        return SensorsSupplementary.get_sensor(sensor, self, False)
-
-    def __repr__(self):
-        return f"<Supplementary for {self.fridge}: {self.table_name}>"
-
     def fridge_table(self):
-        # Sanitize name by replacing all spacial characters
-        if self.table_name in db.metadata.tables:
-            return db.metadata.tables[self.table_name]
-        if self._suppl_table is None:
-            self._suppl_table = db.Table(
-                self.table_name,
-                db.metadata,
-                db.Column("Time", db.TIMESTAMP, primary_key=True),
-                *[db.Column(sensor.column_name, db.Float) for sensor in self.sensors],
-            )
-            return self._suppl_table
+        # Check if we have an instance of the fridge table in cache
+        if self.supp_table_name in _fridge_classes:
+            return _fridge_classes[self.supp_table_name]
+        # Otherwise we create an instance of the fridge table
+        new_supp_fridge_table = Table(
+            self.fridge_table_name,
+            Base.registry.metadata,
+            Column("time", TIMESTAMP, primary_key=True),
+            *(Column(sensor.column_name, Float) for sensor in self.sensors),
+        )
+
+        # Create a new class to represent the fridge
+        supp_fridge_class = type(self.supp_table_name, (SensorReading,), {})
+
+        # Map the class to the table
+        Base.registry.map_imperatively(supp_fridge_class, new_supp_fridge_table)
+
+        _fridge_classes[self.supp_table_name] = supp_fridge_class
+        return supp_fridge_class

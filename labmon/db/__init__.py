@@ -4,4 +4,4 @@ from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass
 class Base(DeclarativeBase, MappedAsDataclass):
     pass
 
-db = SQLAlchemy(model_class=Base, engine_options={"echo": True})
+db = SQLAlchemy(model_class=Base)
