@@ -1,5 +1,6 @@
 from datetime import datetime
 from sqlalchemy import Column, Table, DateTime, select, insert, func
+from sqlalchemy.orm import aliased
 
 from . import SQLAlchemy, db
 
@@ -17,8 +18,13 @@ class SensorReading:
     def __init__(self):
         pass
 
+    def __repr__(self):
+        columns = self.__table__.columns
+        values = ", ".join((f"{c.name}={getattr(self, c.name)!r}" for c in columns))
+        return f"{self.__class__.__name__}({values})"
+
     @classmethod
-    def __len__(cls):
+    def size(cls):
         query = select(func.count()).select_from(cls)
         return db.session.scalar(query)
 
@@ -50,11 +56,10 @@ class SensorReading:
         if n <= 0:
             raise ValueError(f"n must be a positive integer. Got {n}.")
         query = select(cls).order_by(cls.time.desc()).limit(n)
-        #subq = query.subquery()
-        #ordered_query = select(subq).order_by(subq.c.time.asc())
-        #res = db.session.execute(ordered_query)
-        res = db.session.execute(query)
-        return iter(res)
+        subq = aliased(cls, query.subquery())
+        ordered_query = select(subq).order_by(subq.time.asc())
+        res = db.session.execute(ordered_query)
+        return res.scalars()
 
     @classmethod
     def get_between(cls, start: datetime, stop: datetime):
@@ -62,10 +67,10 @@ class SensorReading:
         Return sensor readings taken between the start and stop times
         """
         query = select(cls).where(cls.time.between(start, stop)).order_by(cls.time.desc())
-        subq = query.subquery()
-        ordered_query = select(subq).order_by(subq.c.time.asc())
+        subq = aliased(cls, query.subquery())
+        ordered_query = select(subq).order_by(subq.time.asc())
         res = db.session.execute(ordered_query)
-        return iter(res)
+        return res.scalars()
 
     @classmethod
     def hourly_avg(cls, sensor):
@@ -81,4 +86,4 @@ class SensorReading:
         # Construct the query. Note we don't worry about ordering descending since we are returning
         # the entire dataset.
         query = select(dategroup, sensor_q).group_by(dategroup).order_by(dategroup.asc())
-        return iter(db.session.execute(query))
+        return db.session.execute(query).scalars()
