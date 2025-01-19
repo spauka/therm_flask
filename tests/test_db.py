@@ -10,7 +10,7 @@ db = labmon.db.db
 
 with app.app_context():
     engine = db.engine
-    # Base.metadata.create_all(engine)
-    fridge_query = db.select(Fridge).where(Fridge.fridge_id == 1)
-    fridge = db.session.execute(fridge_query).fetchone()
-    print(fridge)
+    fridge = Fridge.get_fridge_by_name("Blue Fridge")
+    print(fridge.name)
+    fridge_table = fridge.fridge_table()
+    print(fridge_table)
