@@ -1,5 +1,5 @@
 import string
-from typing import List
+from typing import List, Type, TYPE_CHECKING
 from sqlalchemy import (
     Sequence,
     Integer,
@@ -11,18 +11,21 @@ from sqlalchemy import (
     Float,
     Table,
     Column,
-    select
+    select,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.exc import NoResultFound
 
-from . import Base, db
+from .db import db, Base
+from .abc import FridgeModel, SensorReadingT
 from .fridge_table import SensorReading
+if TYPE_CHECKING:
+    from .sensors import Sensor, SensorSupplementary
 
-_fridge_classes: dict[str, SensorReading] = {}
+_fridge_classes: dict[str, Type[SensorReadingT]] = {}
 
 
-class Fridge(Base):
+class Fridge(FridgeModel):
     fridge_id: Mapped[int] = mapped_column(
         "id", Identity("fridge_id_seq"), primary_key=True
     )
@@ -56,19 +59,34 @@ class Fridge(Base):
         )
 
     @classmethod
-    def get_fridge_by_name(cls, name):
+    def get_by_table_name(cls, name) -> "Fridge":
+        """
+        Return a supplementary fridge object from the given name
+        """
+        return cls.get_fridge_by_name(name)
+
+    @classmethod
+    def get_fridge_by_name(cls, name) -> "Fridge":
         """
         Return a fridge object from the given name
         """
         try:
-            query = select(cls).where(cls.name == name)
+            query = select(cls).where(cls.fridge_table_name == name)
             fridge = db.session.execute(query).scalar_one()
             return fridge
         except NoResultFound as exc:
             raise KeyError(f"Fridge {name} not found") from exc
 
+    def get_supp_by_name(self, name) -> "FridgeSupplementary":
+        """
+        Return a supplementary sensor attached to this fridge
+        """
+        for supp in self.supplementary:
+            if supp.name == name:
+                return supp
+        raise KeyError(f"Supplementary sensor {name} not found in fridge {self.name}")
 
-    def fridge_table(self) -> SensorReading:
+    def fridge_table(self) -> Type[SensorReadingT]:
         # Check if we have an instance of the fridge table in cache
         if self.fridge_table_name in _fridge_classes:
             return _fridge_classes[self.fridge_table_name]
@@ -90,7 +108,7 @@ class Fridge(Base):
         return fridge_class
 
 
-class FridgeSupplementary(Base):
+class FridgeSupplementary(FridgeModel):
     supp_id: Mapped[int] = mapped_column(
         "id", Integer, Sequence("fridges_supplementary_id_seq"), primary_key=True
     )
@@ -106,14 +124,33 @@ class FridgeSupplementary(Base):
     __tablename__ = "fridges_supplementary"
 
     def __init__(self, name, supp_table_name, label, sensors, comment=None):
-        self.name = name
+        self.supp_name = name
         self.supp_table_name = supp_table_name
         self.label = label
         for sensor in sensors:
             self.sensors.append(sensor)
         self.comment = comment
 
-    def fridge_table(self):
+    @classmethod
+    def get_by_table_name(cls, name) -> "FridgeSupplementary":
+        """
+        Return a supplementary fridge object from the given name
+        """
+        return cls.get_fridge_supp_by_name(name)
+
+    @classmethod
+    def get_fridge_supp_by_name(cls, name) -> "FridgeSupplementary":
+        """
+        Return a supplementary fridge object from the given name
+        """
+        try:
+            query = select(cls).where(cls.supp_table_name == name)
+            fridge = db.session.execute(query).scalar_one()
+            return fridge
+        except NoResultFound as exc:
+            raise KeyError(f"Supplementary fridge {name} not found") from exc
+
+    def fridge_table(self) -> Type[SensorReadingT]:
         # Check if we have an instance of the fridge table in cache
         if self.supp_table_name in _fridge_classes:
             return _fridge_classes[self.supp_table_name]

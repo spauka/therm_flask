@@ -1,7 +1,5 @@
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass
+from .db import db
+from .fridges import Fridge, FridgeSupplementary
+from .sensors import Sensor, SensorSupplementary
 
-class Base(DeclarativeBase, MappedAsDataclass):
-    pass
-
-db = SQLAlchemy(model_class=Base)
+__all__ = ["db", "Fridge", "FridgeSupplementary", "Sensor", "SensorSupplementary"]

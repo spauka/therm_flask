@@ -2,7 +2,7 @@ from datetime import datetime
 from sqlalchemy import Column, Table, DateTime, select, insert, func
 from sqlalchemy.orm import aliased
 
-from . import SQLAlchemy, db
+from .db import SQLAlchemy, db
 
 class SensorReading:
     """
@@ -12,6 +12,7 @@ class SensorReading:
     an ascending query as it removes the need to do a full scan over the table/index to obtain a count.
     """
     # All fridges have a Time column
+    __abstract__ = True
     time: Column
     __table__: Table
 
