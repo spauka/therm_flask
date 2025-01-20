@@ -14,8 +14,10 @@ LogsDirectory=uwsgi
 LogsDirectoryMode=0750
 RuntimeDirectory=uwsgi
 RuntimeDirectoryMode=0750
+PrivateTmp=true
+ReadWritePaths=/var/lib/flask/.cache
 
-ExecStart=/bin/bash -l -c "poetry run -C ./therm_flask uwsgi ./uwsgi.ini"
+ExecStart=/bin/bash -l -c "poetry install -C ./therm_flask --with=uwsgi && poetry run -C ./therm_flask uwsgi ./uwsgi.ini"
 StartLimitBurst=3
 Restart=on-failure
 RestartSec=5
