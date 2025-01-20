@@ -19,6 +19,7 @@ ExecStart=/bin/bash -l -c "poetry run -C ./therm_flask uwsgi ./uwsgi.ini"
 StartLimitBurst=3
 Restart=on-failure
 RestartSec=5
+ExecReload=/bin/kill -HUP $MAINPID
 KillSignal=SIGQUIT
 Type=simple
 
