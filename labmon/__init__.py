@@ -27,5 +27,9 @@ def create_app():
     @app.route("/")
     def blank():
         return render_template("blank.html", title=app.name)
+    
+    # Load fridge data
+    from . import fridge_data
+    app.register_blueprint(fridge_data.fridge_bp)
 
     return app

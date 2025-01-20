@@ -2,16 +2,17 @@ from pprint import pprint
 from datetime import datetime
 
 import labmon
-from labmon.db import Base
-from labmon.db.fridges import Fridge, FridgeSupplementary
-from labmon.db.sensors import Sensor, SensorSupplementary
+from labmon.db import (
+    Fridge, FridgeSupplementary,
+    Sensor, SensorSupplementary,
+)
 
 app = labmon.create_app()
 db = labmon.db.db
 
 with app.app_context():
     engine = db.engine
-    fridge = Fridge.get_fridge_by_name("Blue Fridge")
+    fridge = Fridge.get_fridge_by_name("blue_fridge")
     print(fridge.name)
     fridge_table = fridge.fridge_table()
     print(f"Fridge table: {fridge_table} with {fridge_table.size()} records")
