@@ -3,8 +3,6 @@ import json
 from pathlib import Path
 
 from flask import Flask, render_template
-from werkzeug.middleware.proxy_fix import ProxyFix
-
 
 import labmon.db as db
 
@@ -32,5 +30,4 @@ def create_app():
 
     app.register_blueprint(fridge_data.fridge_bp)
 
-    app.wsgi_app = ProxyFix(app.wsgi_app)
     return app
