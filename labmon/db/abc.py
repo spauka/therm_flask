@@ -9,19 +9,17 @@ from sqlalchemy.orm import Mapped, mapped_column, declared_attr
 from .db import Base
 from .fridge_table import SensorReading
 
-SensorReadingT = TypeVar('SensorReadingT', bound=SensorReading)
+SensorReadingT = TypeVar("SensorReadingT", bound=SensorReading)
+
 
 class FridgeModel(Base):
     __abstract__ = True
     name: Mapped[str] = mapped_column(Unicode(255), unique=True)
+    label: Mapped[str] = mapped_column(Unicode(255))
     comment: Mapped[str] = mapped_column(UnicodeText)
 
     @declared_attr
     def sensors(cls) -> List["SensorModel"]:
-        raise NotImplementedError("Not implemented in ABC")
-
-    @classmethod
-    def get_by_table_name(cls, name) -> "FridgeModel":
         raise NotImplementedError("Not implemented in ABC")
 
     def fridge_table(self) -> Type[SensorReadingT]:

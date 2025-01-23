@@ -30,6 +30,7 @@ class Fridge(FridgeModel):
         "id", Identity("fridge_id_seq"), primary_key=True
     )
     name: Mapped[str] = mapped_column(Unicode(255), unique=True)
+    label: Mapped[str] = mapped_column(Unicode(255))
     fridge_table_name: Mapped[str] = mapped_column(Unicode(255), unique=True)
     comment: Mapped[str] = mapped_column(UnicodeText)
     sensors: Mapped[List["Sensor"]] = relationship(back_populates="fridge")
@@ -59,19 +60,12 @@ class Fridge(FridgeModel):
         )
 
     @classmethod
-    def get_by_table_name(cls, name) -> "Fridge":
-        """
-        Return a supplementary fridge object from the given name
-        """
-        return cls.get_fridge_by_name(name)
-
-    @classmethod
     def get_fridge_by_name(cls, name) -> "Fridge":
         """
         Return a fridge object from the given name
         """
         try:
-            query = select(cls).where(cls.fridge_table_name == name)
+            query = select(cls).where(cls.name == name)
             fridge = db.session.execute(query).scalar_one()
             return fridge
         except NoResultFound as exc:
@@ -81,10 +75,7 @@ class Fridge(FridgeModel):
         """
         Return a supplementary sensor attached to this fridge
         """
-        for supp in self.supplementary:
-            if supp.name == name:
-                return supp
-        raise KeyError(f"Supplementary sensor {name} not found in fridge {self.name}")
+        return FridgeSupplementary.get_fridge_supp_by_name(self, name)
 
     def fridge_table(self) -> Type[SensorReadingT]:
         # Check if we have an instance of the fridge table in cache
@@ -112,11 +103,11 @@ class FridgeSupplementary(FridgeModel):
     supp_id: Mapped[int] = mapped_column(
         "id", Integer, Sequence("fridges_supplementary_id_seq"), primary_key=True
     )
-    fridge_id: Mapped[int] = mapped_column(ForeignKey("fridges.id"))
-    fridge: Mapped["Fridge"] = relationship(repr=False)
-    supp_table_name: Mapped[str] = mapped_column(Unicode(1024))
     name: Mapped[str] = mapped_column(Unicode(1024))
     label: Mapped[str] = mapped_column(Unicode(1024))
+    supp_table_name: Mapped[str] = mapped_column(Unicode(1024))
+    fridge_id: Mapped[int] = mapped_column(ForeignKey("fridges.id"))
+    fridge: Mapped["Fridge"] = relationship(repr=False)
     comment: Mapped[str] = mapped_column(UnicodeText())
     sensors: Mapped[List["SensorSupplementary"]] = relationship(
         back_populates="fridge_supp"
@@ -132,21 +123,14 @@ class FridgeSupplementary(FridgeModel):
         self.comment = comment
 
     @classmethod
-    def get_by_table_name(cls, name) -> "FridgeSupplementary":
-        """
-        Return a supplementary fridge object from the given name
-        """
-        return cls.get_fridge_supp_by_name(name)
-
-    @classmethod
-    def get_fridge_supp_by_name(cls, name) -> "FridgeSupplementary":
+    def get_fridge_supp_by_name(cls, fridge, name) -> "FridgeSupplementary":
         """
         Return a supplementary fridge object from the given name
         """
         try:
-            query = select(cls).where(cls.supp_table_name == name)
-            fridge = db.session.execute(query).scalar_one()
-            return fridge
+            query = select(cls).where(cls.fridge == fridge and cls.name == name)
+            supp = db.session.execute(query).scalar_one()
+            return supp
         except NoResultFound as exc:
             raise KeyError(f"Supplementary fridge {name} not found") from exc
 
