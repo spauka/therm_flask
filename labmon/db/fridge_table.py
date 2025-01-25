@@ -1,6 +1,6 @@
 from datetime import datetime
 from dataclasses import fields
-from sqlalchemy import Column, DateTime, select, insert, func
+from sqlalchemy import Column, TIMESTAMP, select, insert, func
 from sqlalchemy.orm import aliased
 
 from .db import SQLAlchemy, db
@@ -110,10 +110,10 @@ class SensorReading:
         This can be "hour", "day", or "month" (or year but this is kind of useless)
         TODO: Rewrite for timescaledb functions
         """
-        dategroup = func.date_trunc(time_period, func.timezone("UTC", cls.time)).label(
+        dategroup = func.date_trunc(time_period, cls.time).label(
             "time"
         )
-        dategroup.type = DateTime()
+        dategroup.type = TIMESTAMP(timezone=True)
         table_fields = []
         for field in fields(cls):
             name = field.name
@@ -136,4 +136,4 @@ class SensorReading:
         subq = aliased(cls, alias=query.subquery(), adapt_on_names=True)
         ordered_query = select(subq).order_by(subq.time)
         res = db.session.execute(ordered_query)
-        return res.all()
+        return res.scalars()
