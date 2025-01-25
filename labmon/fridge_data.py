@@ -1,5 +1,5 @@
 import json
-import datetime
+from datetime import datetime
 from math import isnan, isinf
 from typing import Optional, Iterable, TypeVar
 from dataclasses import asdict, fields
@@ -13,7 +13,7 @@ from flask import (
 from flask.views import MethodView
 
 from .db import Fridge, FridgeSupplementary
-from .db.abc import FridgeModel
+from .db.abc import FridgeModel, SensorReadingT, SensorReading
 
 
 fridge_bp = Blueprint("fridge_data", __name__)
@@ -76,13 +76,7 @@ class FridgeView(MethodView):
         r.headers["Access-Control-Allow-Origin"] = "*"
         return r
 
-    def _count_view(self, data_source: FridgeModel, count: int=1):
-        """
-        Return the latest "n" fields from the data
-        """
-        fridge_table = data_source.fridge_table()
-        latest_n_data = fridge_table.get_last(count)
-
+    def _format_data(self, fridge_table: SensorReadingT, rows: Iterable[SensorReading]):
         # Format the data correctly
         data = {}
         columns = []
@@ -90,13 +84,48 @@ class FridgeView(MethodView):
             data[field.name] = []
             if field.name != "time":
                 columns.append(field.name)
-        for row in latest_n_data:
+        for row in rows:
             data["time"].append(row.time.isoformat())
             for field in columns:
                 field_data = getattr(row, field)
                 if field_data is not None and (isnan(field_data) or isinf(field_data)):
                     field_data = None
                 data[field].append(field_data)
+
+        return data
+
+    def _count_view(
+        self, data_source: FridgeModel, count: int = 1, avg_period: Optional[str] = None
+    ):
+        """
+        Return the latest "n" fields from the data
+        """
+        fridge_table = data_source.fridge_table()
+        if avg_period is None:
+            latest_n_data = fridge_table.get_last(count)
+        else:
+            latest_n_data = fridge_table.avg_data(avg_period, count=count)
+        data = self._format_data(fridge_table, latest_n_data)
+
+        # Construct response
+        r = Response(json.dumps(data))
+        r.mimetype = "application/json"
+        r.headers["Access-Control-Allow-Origin"] = "*"
+        return r
+
+    def _date_view(
+        self,
+        data_source: FridgeModel,
+        start: Optional[datetime] = None,
+        stop: Optional[datetime] = None,
+        avg_period: Optional[str] = None,
+    ):
+        fridge_table = data_source.fridge_table()
+        if avg_period is None:
+            fridge_data = fridge_table.get_between(start, stop)
+        else:
+            fridge_data = fridge_table.avg_data(avg_period, start, stop)
+        data = self._format_data(fridge_table, fridge_data)
 
         # Construct response
         r = Response(json.dumps(data))
@@ -111,6 +140,17 @@ class FridgeView(MethodView):
                 f"Unable to find fridge {fridge_name}, supp: {supp}.", status=404
             )
 
+        avg_period = request.args.get("avg_period", None)
+        if avg_period is not None:
+            if avg_period not in ("hour", "day", "month"):
+                return Response(
+                    (
+                        "Data can only be summarized by 'hour', 'day' or 'month'. "
+                        f"Requested {avg_period}."
+                    ),
+                    status=400,
+                )
+
         if "sensors" in request.args:
             return self._sensors_view(data_source)
         elif "current" in request.args:
@@ -118,12 +158,29 @@ class FridgeView(MethodView):
         elif "count" in request.args:
             try:
                 count = int(request.args["count"])
-                return self._count_view(data_source, count)
             except ValueError:
                 return Response(
                     f"Count must be a positive integer. Got {request.args[count]}",
-                    status=400
+                    status=400,
                 )
+            return self._count_view(data_source, count, avg_period=avg_period)
+        elif "start" in request.args or "stop" in request.args:
+            try:
+                if start in request.args:
+                    start = datetime.fromtimestamp(float(request.args["start"]) / 1000)
+                else:
+                    start = None
+                if stop in request.args:
+                    stop = datetime.fromtimestamp(float(request.args["stop"]) / 1000)
+                else:
+                    stop = None
+            except ValueError:
+                return Response("Invalid start or stop date.", status=400)
+
+            return self._date_view(data_source, start, stop, avg_period=avg_period)
+        elif avg_period is not None:
+            # Can also return all data if we're asking for averaged data
+            return self._date_view(data_source, avg_period=avg_period)
         else:
             return Response("Unknown request", status=421)
 
