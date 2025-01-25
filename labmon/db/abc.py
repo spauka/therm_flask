@@ -73,5 +73,5 @@ class SensorModel(Base):
     visible: Mapped[bool] = mapped_column(Integer())
 
     @classmethod
-    def get_sensor(cls, column_name, fridge) -> "SensorModel":
+    def get_sensor(cls, column_name: str, fridge: FridgeModel) -> "SensorModel":
         raise NotImplementedError("Not implemented in ABC")

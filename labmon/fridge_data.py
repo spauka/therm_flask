@@ -43,7 +43,7 @@ class FridgeView(MethodView):
         except KeyError:
             return None
 
-    def _sensors_view(self, data_source: FridgeModel):
+    def _sensors_view(self, data_source: FridgeModel) -> Response:
         """
         Return a list of sensors and their friendly label
         """
@@ -61,7 +61,7 @@ class FridgeView(MethodView):
         r.headers["Access-Control-Allow-Origin"] = "*"
         return r
 
-    def _current_view(self, data_source: FridgeModel):
+    def _current_view(self, data_source: FridgeModel) -> Response:
         """
         Return the current data from the fridge
         """
@@ -78,7 +78,9 @@ class FridgeView(MethodView):
         r.headers["Access-Control-Allow-Origin"] = "*"
         return r
 
-    def _format_data(self, fridge_table: SensorReadingT, rows: Iterable[SensorReading]):
+    def _format_data(
+        self, fridge_table: SensorReadingT, rows: Iterable[SensorReading]
+    ) -> dict[str, list]:
         # Format the data correctly
         data = {}
         columns = []
@@ -98,7 +100,7 @@ class FridgeView(MethodView):
 
     def _count_view(
         self, data_source: FridgeModel, count: int = 1, avg_period: Optional[str] = None
-    ):
+    ) -> Response:
         """
         Return the latest "n" fields from the data
         """
@@ -121,7 +123,7 @@ class FridgeView(MethodView):
         start: Optional[datetime] = None,
         stop: Optional[datetime] = None,
         avg_period: Optional[str] = None,
-    ):
+    ) -> Response:
         fridge_table = data_source.fridge_table()
         if avg_period is None:
             fridge_data = fridge_table.get_between(start, stop)
@@ -135,7 +137,7 @@ class FridgeView(MethodView):
         r.headers["Access-Control-Allow-Origin"] = "*"
         return r
 
-    def get(self, fridge_name, supp):
+    def get(self, fridge_name, supp) -> Response:
         data_source = self._get_data_source(fridge_name, supp)
         if data_source is None:
             return Response(
@@ -186,7 +188,7 @@ class FridgeView(MethodView):
         else:
             return Response("Unknown request", status=421)
 
-    def post(self, fridge_name, supp):
+    def post(self, fridge_name, supp) -> Response:
         data_source = self._get_data_source(fridge_name, supp)
         valid_sensors = set(sensor.name for sensor in data_source.sensors)
 
@@ -204,9 +206,14 @@ class FridgeView(MethodView):
             data["Time"] = datetime.fromtimestamp(float(data["Time"]))
 
         # Add to db
-        data_source.fridge_table().append(**data)
-
-        return Response("OK")
+        try:
+            result = data_source.fridge_table().append(**data)
+            if result:
+                return Response("OK")
+            else:
+                return Response("OK but duplicate")
+        except KeyError as e:
+            return Response(str(e), status=400)
 
 
 fridge_bp.add_url_rule(

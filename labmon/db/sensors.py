@@ -34,7 +34,7 @@ class Sensor(SensorModel):
         self.visible = visible
 
     @classmethod
-    def get_sensor(cls, column_name, fridge):
+    def get_sensor(cls, column_name, fridge) -> "Sensor":
         query = select(cls).where(
             cls.fridge == fridge and cls.column_name == column_name
         )
@@ -66,7 +66,7 @@ class SensorSupplementary(SensorModel):
         self.visible = visible
 
     @classmethod
-    def get_sensor(cls, column_name, fridge):
+    def get_sensor(cls, column_name, fridge) -> "SensorSupplementary":
         query = select(cls).where(
             cls.fridge_supp == fridge and cls.column_name == column_name
         )

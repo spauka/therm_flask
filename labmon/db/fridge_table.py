@@ -1,3 +1,4 @@
+from typing import Iterable
 from datetime import datetime
 from dataclasses import fields
 from sqlalchemy import Column, TIMESTAMP, select, insert, func
@@ -32,7 +33,7 @@ class SensorReading:
         return db.session.scalar(query)
 
     @classmethod
-    def append(cls, **values):
+    def append(cls, **values) -> bool:
         if "Time" in values:
             time = values["Time"]
             del values["Time"]
@@ -43,6 +44,7 @@ class SensorReading:
             query = insert(cls).values(time=time, **values)
             db.session.execute(query)
             db.session.commit()
+            return True
         except SQLAlchemy.exc.CompileError as exc:
             raise KeyError("Invalid column name") from exc
         except SQLAlchemy.exc.IntegrityError:
@@ -51,7 +53,7 @@ class SensorReading:
             return False
 
     @classmethod
-    def get_last(cls, n: int = 1):
+    def get_last(cls, n: int = 1) -> Iterable["SensorReading"]:
         """
         Return the most recent `n` sensor readings. If n is greater than the number
         of readings stored, return the all the readings.
@@ -65,7 +67,9 @@ class SensorReading:
         return res.scalars()
 
     @classmethod
-    def get_between(cls, start: datetime = None, stop: datetime = None):
+    def get_between(
+        cls, start: datetime = None, stop: datetime = None
+    ) -> Iterable["SensorReading"]:
         """
         Return sensor readings taken between the start and stop times
         """
@@ -90,7 +94,7 @@ class SensorReading:
     @classmethod
     def hourly_avg(
         cls, start: datetime = None, stop: datetime = None, count: int = None
-    ):
+    ) -> Iterable["SensorReading"]:
         """
         Return hourly average
         TODO: Rewrite for timescaledb functions
@@ -104,15 +108,13 @@ class SensorReading:
         start: datetime = None,
         stop: datetime = None,
         count: int = None,
-    ):
+    ) -> Iterable["SensorReading"]:
         """
         Averaged data over a time period given by time_period
         This can be "hour", "day", or "month" (or year but this is kind of useless)
         TODO: Rewrite for timescaledb functions
         """
-        dategroup = func.date_trunc(time_period, cls.time).label(
-            "time"
-        )
+        dategroup = func.date_trunc(time_period, cls.time).label("time")
         dategroup.type = TIMESTAMP(timezone=True)
         table_fields = []
         for field in fields(cls):

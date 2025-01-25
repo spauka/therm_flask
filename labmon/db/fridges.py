@@ -1,5 +1,5 @@
 import string
-from typing import List, TYPE_CHECKING
+from typing import List, Iterable, TYPE_CHECKING
 from sqlalchemy import (
     Unicode,
     UnicodeText,
@@ -33,7 +33,13 @@ class Fridge(FridgeModel):
     )
     __tablename__ = "fridges"
 
-    def __init__(self, name, table_name=None, sensors=(), comment=""):
+    def __init__(
+        self,
+        name: str,
+        table_name: str = None,
+        sensors: Iterable[Sensor] = (),
+        comment="",
+    ):
         self.name = name
         # Derive a table name if not given
         if table_name is None:
@@ -44,7 +50,7 @@ class Fridge(FridgeModel):
         self.comment = comment
 
     @staticmethod
-    def _sanitize_name(name):
+    def _sanitize_name(name: str) -> str:
         """
         Sanitize a name to a format acceptable for table names
         """
@@ -54,7 +60,7 @@ class Fridge(FridgeModel):
         )
 
     @classmethod
-    def get_fridge_by_name(cls, name) -> "Fridge":
+    def get_fridge_by_name(cls, name: str) -> "Fridge":
         """
         Return a fridge object from the given name
         """
@@ -65,7 +71,7 @@ class Fridge(FridgeModel):
         except NoResultFound as exc:
             raise KeyError(f"Fridge {name} not found") from exc
 
-    def get_supp_by_name(self, name) -> "FridgeSupplementary":
+    def get_supp_by_name(self, name: str) -> "FridgeSupplementary":
         """
         Return a supplementary sensor attached to this fridge
         """
@@ -87,7 +93,14 @@ class FridgeSupplementary(FridgeModel):
     )
     __tablename__ = "fridges_supplementary"
 
-    def __init__(self, name, table_name, label, sensors, comment=None):
+    def __init__(
+        self,
+        name: str,
+        table_name: str,
+        label: str,
+        sensors: Iterable[SensorSupplementary] = (),
+        comment=None,
+    ):
         self.supp_name = name
         self.table_name = table_name
         self.label = label
@@ -96,7 +109,9 @@ class FridgeSupplementary(FridgeModel):
         self.comment = comment
 
     @classmethod
-    def get_fridge_supp_by_name(cls, fridge, name) -> "FridgeSupplementary":
+    def get_fridge_supp_by_name(
+        cls, fridge: Fridge, name: str
+    ) -> "FridgeSupplementary":
         """
         Return a supplementary fridge object from the given name
         """

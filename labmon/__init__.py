@@ -10,7 +10,7 @@ DEFAULT_CONF_LOC = Path("~").expanduser()
 CONF_LOC = os.environ.get("THERM_CONFIG", DEFAULT_CONF_LOC)
 
 
-def create_app():
+def create_app() -> Flask:
     # Create and configure the app
     app = Flask(__name__, instance_relative_config=True, instance_path=CONF_LOC)
 
