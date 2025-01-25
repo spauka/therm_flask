@@ -1,8 +1,9 @@
 from datetime import datetime
-from sqlalchemy import Column, Table, DateTime, select, insert, func
+from sqlalchemy import Column, DateTime, select, insert, func
 from sqlalchemy.orm import aliased
 
 from .db import SQLAlchemy, db
+
 
 class SensorReading:
     """
@@ -11,10 +12,10 @@ class SensorReading:
     and then sorted in a subquery if they should be ordered ascending. This is far more efficient than doing
     an ascending query as it removes the need to do a full scan over the table/index to obtain a count.
     """
+
     # All fridges have a Time column
     __abstract__ = True
     time: Column
-    __table__: Table
 
     def __init__(self):
         pass
@@ -49,7 +50,7 @@ class SensorReading:
             return False
 
     @classmethod
-    def get_last(cls, n: int=1):
+    def get_last(cls, n: int = 1):
         """
         Return the most recent `n` sensor readings. If n is greater than the number
         of readings stored, return the all the readings.
@@ -67,7 +68,9 @@ class SensorReading:
         """
         Return sensor readings taken between the start and stop times
         """
-        query = select(cls).where(cls.time.between(start, stop)).order_by(cls.time.desc())
+        query = (
+            select(cls).where(cls.time.between(start, stop)).order_by(cls.time.desc())
+        )
         subq = aliased(cls, query.subquery())
         ordered_query = select(subq).order_by(subq.time.asc())
         res = db.session.execute(ordered_query)
@@ -79,12 +82,16 @@ class SensorReading:
         Return hourly average
         TODO: Rewrite for timescaledb functions
         """
-        dategroup = func.date_trunc('hour', func.timezone('UTC', cls.time)).label("Time")
+        dategroup = func.date_trunc("hour", func.timezone("UTC", cls.time)).label(
+            "Time"
+        )
         dategroup.type = DateTime()
         if sensor not in cls.__table__.c:
             raise KeyError("Sensor not found")
         sensor_q = func.avg(cls.__table__.c[sensor]).label(sensor)
         # Construct the query. Note we don't worry about ordering descending since we are returning
         # the entire dataset.
-        query = select(dategroup, sensor_q).group_by(dategroup).order_by(dategroup.asc())
+        query = (
+            select(dategroup, sensor_q).group_by(dategroup).order_by(dategroup.asc())
+        )
         return db.session.execute(query).scalars()
