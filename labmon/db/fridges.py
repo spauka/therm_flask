@@ -37,7 +37,7 @@ class Fridge(FridgeModel):
         self,
         name: str,
         table_name: str = None,
-        sensors: Iterable[Sensor] = (),
+        sensors: Iterable["Sensor"] = (),
         comment="",
     ):
         self.name = name
@@ -98,7 +98,7 @@ class FridgeSupplementary(FridgeModel):
         name: str,
         table_name: str,
         label: str,
-        sensors: Iterable[SensorSupplementary] = (),
+        sensors: Iterable["SensorSupplementary"] = (),
         comment=None,
     ):
         self.supp_name = name
