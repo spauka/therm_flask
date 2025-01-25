@@ -4,7 +4,7 @@
 /*
  * Define data uri
  */
-const data_uri = "https://qsyd.sydney.edu.au/therm/data/";
+const data_uri = "https://qsyd.sydney.edu.au/data/";
 
 /*
  * Default number of points to load on live charts
