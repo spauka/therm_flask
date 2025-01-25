@@ -45,6 +45,21 @@ function tooltipFormatter(pointFormat) {
     return tooltip;
 }
 
+function fetchWithAbort(request, controllers) {
+    const abrt = new AbortController();
+    controllers.push(abrt);
+
+    var get = fetch(request, { signal: abrt.signal }).finally(() => {
+        // Remove controller when done
+        const idx = controllers.indexOf(abrt);
+        if (idx > -1) {
+            controllers.splice(idx, 1);
+        }
+    });
+
+    return get;
+}
+
 function setExtremes(e) {
     var chart = e.target.chart;
     e.rangeChanged = true;
@@ -71,7 +86,7 @@ function afterSetExtremes(e) {
         url.searchParams.append("start", xMin);
         url.searchParams.append("stop", xMax);
         chart.showLoading('Loading Data...');
-        var request = new Request(url, {destination: "json", cache: "no-store"});
+        var request = new Request(url, {destination: "json"});
         fetch(request)
             .then((response) => response.json())
             .then((data) => {
@@ -91,7 +106,7 @@ function afterSetExtremes(e) {
     }
     var charts = scope.charts;
     $.each(charts, function (i, setChart) {
-        setChart = setChart.highcharts();
+        setChart = setChart;
         if (setChart.container == chart.container) {
             return;
         }

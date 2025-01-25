@@ -9,7 +9,7 @@ smartApp
             templateUrl: 'includes/thermtable.html',
         };
     }])
-    .directive('highchart', ["$http", function ($http) {
+    .directive('highchart', ["$timeout", function ($timeout) {
         function link(scope, element, attrs) {
             // Get shortcuts to useful values
             var historic = scope.historic;
@@ -34,7 +34,7 @@ smartApp
             scope.col_name = thermid;
             scope.table_color = thermChartStyle.table.color;
 
-            var createChart = function (chartStyle, overwriteRanges = true) {
+            function createChart(chartStyle, overwriteRanges = true) {
                 // Merge chart styles with default
                 chartStyle = $.extend(true, chartStyle, thermChartStyle);
                 if (overwriteRanges) {
@@ -43,43 +43,43 @@ smartApp
                     chartStyle.rangeSelector.buttons = ranges;
                     chartStyle.rangeSelector.selected = (historic ? 6 : 1);
                 }
-                var chart = $('#' + thermid).highcharts('StockChart', chartStyle);
+                var chart = $('#' + thermid).highcharts('StockChart', chartStyle).highcharts();
 
                 // Add the chart to the list of charts
                 scope.charts[thermid] = chart;
+                return chart;
             };
 
-            // Get the data for the chart and then create the chart
-            $http({ method: 'GET', url: dataURL.href, cache: false, responseType: 'json' })
-                .then(function (response) {
-                    var data = response.data;
+            // Create the charts and set them to "laoding"
+            var chartData = {
+                scope: scope,
+                navigator: {},
+                tooltip: {
+                    formatter: tooltipFormatter,
+                },
+                series: [{
+                    name: sensor_name,
+                    data: [],
+                    type: "area",
+                }]
+            };
+            // Set the navigator to a constant set of data
+            if (historic) {
+                // For historic datasets, disable the navigator updating
+                chartData.navigator.adaptToUpdatedData = false;
+            }
 
-                    // Construct the series
-                    var chartData = {
-                        scope: scope,
-                        navigator: {},
-                        tooltip: {
-                            formatter: tooltipFormatter,
-                        },
-                        series: [{
-                            name: sensor_name,
-                            data: data,
-                            type: "area",
-                        }]
-                    };
-                    // Set the navigator to a constant set of data
-                    if (historic) {
-                        // Disable the navigator updating
-                        chartData.navigator.adaptToUpdatedData = false;
-                        chartData.navigator.series = {
-                            data: data,
-                        };
-                    }
-
-                    createChart(chartData);
-                });
+            // Defer execution until after the template has finished rendering
+            $timeout(function() {
+                var chart = createChart(chartData);
+                chart.showLoading('Loading Data...');
+            }, 0);
 
             element.on('$destroy', function () {
+                if (thermid in scope.charts && scope.charts[thermid] !== null) {
+                    scope.charts[thermid].destroy();
+                    scope.charts[thermid] = null;
+                }
             });
         }
         return {

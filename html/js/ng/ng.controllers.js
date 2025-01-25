@@ -14,25 +14,35 @@ angular.module('app.controllers', [])
         // This should be a property since it's shared globally
         $scope.lastUpdated = 'Never';
     }])
-    .controller('FridgeViewController', ['$scope', '$routeParams', '$http', '$interval', function ($scope, $routeParams, $http, $interval) {
+    .controller('FridgeViewController', ['$scope', '$routeParams', '$interval', '$timeout', function ($scope, $routeParams, $interval, $timeout) {
         $scope.pagetitle = $routeParams.fridge.replace('_', ' ');
         $scope.params = $routeParams;
         $scope.sensors = [];
         $scope.values = {};
         $scope.charts = {};
+        $scope.initialData = null;
+        const requests = [];
 
         // Figure out the data URL's for the fridge
         $scope.fridge = $routeParams.fridge;
         $scope.historic = 'historic' in $routeParams;
         if ('supp' in $routeParams) {
             $scope.supp = $routeParams.supp;
-            $scope.baseURL = new URL($routeParams.fridge+"/"+$scope.supp+"/", data_uri);
+            $scope.baseURL = new URL($routeParams.fridge + "/supp/" + $scope.supp, data_uri);
         } else {
             $scope.supp = null;
-            $scope.baseURL = new URL($routeParams.fridge+"/data/", data_uri);
+            $scope.baseURL = new URL($routeParams.fridge, data_uri);
         }
         $scope.currentURL = new URL("?current", $scope.baseURL);
         $scope.sensorURL = new URL("?sensors", $scope.baseURL);
+
+        // Create parameters to load initial data
+        var count = detectmob() ? pointCountMobile : pointCountDesktop;
+        $scope.dataURL = new URL($scope.baseURL);
+        if (!$scope.historic)
+            $scope.dataURL.searchParams.append("count", count);
+        else
+            $scope.dataURL.searchParams.append("avg_period", "hour");
 
         // Create a function to update values on a regular interval
         $scope._lastUpdated = "Never";
@@ -43,10 +53,11 @@ angular.module('app.controllers', [])
             $scope._lastUpdated = time;
             $scope.$parent.lastUpdated = time;
         };
-        function fetch(updateCharts) {
-            $http({ method: 'GET', url: $scope.currentURL.href, cache: false, responseType: 'json' })
-                .then(function (response) {
-                    var data = response.data;
+        function fetchCurrent(updateCharts) {
+            var request = new Request($scope.currentURL, { destination: "json", cache: "no-store" });
+            var res = fetchWithAbort(request, requests)
+                .then((response) => response.json())
+                .then((data) => {
                     var time = new Date(data.Time);
                     var new_update = time.toString();
 
@@ -61,41 +72,117 @@ angular.module('app.controllers', [])
                         var charts = $scope.charts;
                         for (var therm in data) {
                             if (therm in charts) {
-                                var chart = charts[therm].highcharts();
+                                var chart = charts[therm];
                                 chart.linkedUpdate = true;
                                 chart.series[0].addPoint([time.getTime(), data[therm]], true, true);
                                 chart.linkedUpdate = false;
                             }
                         }
                     }
-                }, function (response) {
-                    // Do something smarter here on failure
-                    return;
+                }).catch((error) => {
+                    if (error.name === 'AbortError') {
+                        console.log('Request aborted.');
+                    } else {
+                        console.error('Request failed:', error);
+                    }
                 });
         };
-        // Create a periodic update if we are not looking at historic data
-        if (!$scope.historic) {
-            var fetchInterval = $interval(function () {
-                fetch(true);
-            }, 5000);
-            $scope.$on("$destroy", function () {
-                // Cancel downloading new data
-                $interval.cancel(fetchInterval);
-                // Reset last updated
-                $scope.$parent.lastUpdated = "Never";
+
+        function populateGraphs(charts, data) {
+            // Get the number of elements
+            const count = data["time"].length;
+            const time_arr = Array.from(data["time"], (timestamp) => new Date(timestamp).getTime());
+            // Load each sensor
+            $scope.sensors.forEach(element => {
+                const sens_arr = data[element.column_name];
+                // Prepare the data for the sensor
+                const data_arr = Array.from({ length: count }, (_, i) => [time_arr[i], sens_arr[i]]);
+                if (element.column_name in charts) {
+                    const chart = charts[element.column_name];
+                    chart.linkedUpdate = true;
+                    chart.series[0].setData(data_arr);
+                    if ($scope.historic)
+                        chart.navigator.series[0].setData(data_arr);
+                    chart.hideLoading();
+                    chart.linkedUpdate = false;
+                } else {
+                    console.warn("Couldn't find chart for column: " + element.column_name);
+                }
             });
         }
 
+        // Load the initial data
+        var request = new Request($scope.dataURL, { destination: "json", cache: "no-store" });
+        var res = fetchWithAbort(request, requests)
+            .then((response) => response.json())
+            .then((data) => {
+                // Check that sensors has returned successfully, if so we are ready to populate graphs
+                // with data, otherwise let sensors return before we call populateGraphs
+                console.log($scope.sensors);
+                if ($scope.sensors.length > 0) {
+                    populateGraphs($scope.charts, data);
+                    $scope.initialData = null; // Delete initial data load, not needed any more
+                } else {
+                    $scope.initialData = data;
+                }
+            }).catch((error) => {
+                if (error.name === 'AbortError') {
+                    console.log('Request aborted.');
+                } else {
+                    console.error('Request failed:', error);
+                }
+            });
+
         // Load the sensors for the fridge
-        $http({ method: 'GET', url: $scope.sensorURL.href, cache: true, responseType: 'json' })
-            .then(function (response) {
-                var data = response.data;
+        var request = new Request($scope.sensorURL, { destination: "json", cache: "no-store" });
+        res = fetchWithAbort(request, requests)
+            .then((response) => response.json())
+            .then((data) => {
                 $scope.sensors = data;
                 data.forEach(element => {
                     $scope.values[element.column_name] = NaN;
                 });
                 // Perform an initial fetch of the values. This occurs even for historic datasets
-                fetch(false);
+                fetchCurrent(true);
+                // Trigger an update of the page with the new sensor values
+                $scope.$apply();
+
+                // Check if we've already loaded our initial dataset. If we have, set an update once
+                // we've finished rendering
+                if ($scope.initialData !== null) {
+                    $timeout(function () {
+                        populateGraphs($scope.charts, $scope.initialData);
+                        $scope.initialData = null;
+                    }, 1);
+                }
+
+                // Create a periodic update if we are not looking at historic data. This is not worth setting
+                // up until the sensors are loaded
+                if (!$scope.historic) {
+                    var fetchInterval = $interval(function () {
+                        fetchCurrent(true);
+                    }, 5000);
+                    $scope.$on("$destroy", function () {
+                        // Cancel downloading new data
+                        $interval.cancel(fetchInterval);
+                        // Reset last updated
+                        $scope.$parent.lastUpdated = "Never";
+                    });
+                }
+
+                console.log("Sensors done");
+            }).catch((error) => {
+                if (error.name === 'AbortError') {
+                    console.log('Request aborted.');
+                } else {
+                    console.error('Request failed:', error);
+                }
             });
 
+        // Abort all in-progress requests when the scope is destroyed
+        $scope.$on('$destroy', function () {
+            requests.forEach(controller => controller.abort()); // Abort all requests
+            requests.length = 0; // Clear the array
+            console.log('All in-progress requests cancelled');
+        });
     }]);
