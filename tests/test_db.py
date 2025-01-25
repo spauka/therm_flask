@@ -3,8 +3,10 @@ from datetime import datetime
 
 import labmon
 from labmon.db import (
-    Fridge, FridgeSupplementary,
-    Sensor, SensorSupplementary,
+    Fridge,
+    FridgeSupplementary,
+    Sensor,
+    SensorSupplementary,
 )
 
 app = labmon.create_app()
@@ -18,5 +20,9 @@ with app.app_context():
     print(f"Fridge table: {fridge_table} with {fridge_table.size()} records")
     last_3 = list(fridge_table.get_last(3))
     pprint(last_3)
-    last_year = list(fridge_table.get_between(datetime(2023, 1, 1, 9, 0, 0), datetime(2023, 1, 1, 9, 5, 0)))
+    last_year = list(
+        fridge_table.get_between(
+            datetime(2023, 1, 1, 9, 0, 0), datetime(2023, 1, 1, 9, 5, 0)
+        )
+    )
     pprint(last_year)
