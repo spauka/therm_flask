@@ -14,7 +14,7 @@ db = labmon.db.db
 
 with app.app_context():
     engine = db.engine
-    fridge = Fridge.get_fridge_by_name("blue_fridge")
+    fridge = Fridge.get_fridge_by_name("Blue_Fridge")
     print(fridge.name)
     fridge_table = fridge.fridge_table()
     print(f"Fridge table: {fridge_table} with {fridge_table.size()} records")
@@ -26,3 +26,5 @@ with app.app_context():
         )
     )
     pprint(last_year)
+    hourly = list(fridge_table.hourly_avg(count=10))
+    pprint(hourly)
