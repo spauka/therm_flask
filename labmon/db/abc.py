@@ -6,10 +6,11 @@ from sqlalchemy import (
     Float,
     Unicode,
     UnicodeText,
+    inspect,
 )
 from sqlalchemy.orm import Mapped, mapped_column, declared_attr
 
-from .db import Base
+from .db import db, Base
 from .fridge_table import SensorReading
 
 SensorReadingT = TypeVar("SensorReadingT", bound=SensorReading)
@@ -49,8 +50,16 @@ class FridgeModel(Base):
         for sensor in self.sensors:
             new_fridge_table["__annotations__"][sensor.column_name] = Column
             new_fridge_table[sensor.column_name] = mapped_column(Float)
-
         fridge_class = type(self.table_name, (Base, SensorReading), new_fridge_table)
+
+        # Finally, double check that the table exists
+        inspector = inspect(db.engine)
+        exists = inspector.has_table(self.table_name)
+        if not exists:
+            raise KeyError(
+                (f"Could not find fridge table {self.table_name} in the database "
+                 "even though it exists in the fridges table.")
+            )
 
         _fridge_classes[self.table_name] = fridge_class
         return fridge_class

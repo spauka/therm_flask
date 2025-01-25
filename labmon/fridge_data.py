@@ -34,9 +34,11 @@ class FridgeView(MethodView):
                 g.fridge_supp = FridgeSupplementary.get_fridge_supp_by_name(
                     g.fridge, supp
                 )
+                g.fridge_table = g.fridge_supp.fridge_table()
                 return g.fridge_supp
             else:
                 g.fridge_supp = None
+                g.fridge_table = g.fridge.fridge_table()
                 return g.fridge
         except KeyError:
             return None
