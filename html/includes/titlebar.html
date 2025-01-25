@@ -50,37 +50,41 @@
         const temp_label = "#" + fridge.fridge_js_name + "-summary-text";
         const temp_line = "#" + fridge.fridge_js_name + "-summary";
 
-        $.getJSON(fridge.fridge_data_uri(), data => {
+        var request = new Request(fridge.fridge_data_uri(), { destination: "json", cache: "no-store" });
+        fetch(request)
+            .then((response) => response.json())
+            .then((data) => {
+                // Set the temperature label
+                $(temp_label).text(format_temp(data[data.length - 1], fridge.multiplier));
 
-            // Set the temperature label
-            $(temp_label).text(format_temp(data[data.length - 1], fridge.multiplier));
-
-            // Create sparkline
-            var customOptions = {
-                series: [{
-                    data: data,
-                    color: fridge.color,
-                }],
-                tooltip: {
-                    headerFormat: '',
-                    pointFormatter: function () {
-                        formatted_temp = format_temp(this.y, fridge.multiplier);
-                        return `<b>${formatted_temp}</b>`;
+                // Create sparkline
+                var customOptions = {
+                    series: [{
+                        data: data,
+                        color: fridge.color,
+                    }],
+                    tooltip: {
+                        headerFormat: '',
+                        pointFormatter: function () {
+                            formatted_temp = format_temp(this.y, fridge.multiplier);
+                            return `<b>${formatted_temp}</b>`;
+                        }
                     }
-                }
-            };
-            let chart_options = $.extend(true, customOptions, defaultSparkStyle);
-            let chart = $(temp_line).highcharts("Chart", chart_options);
+                };
+                let chart_options = $.extend(true, customOptions, defaultSparkStyle);
+                let chart = $(temp_line).highcharts("Chart", chart_options);
 
-            // Create a callback to update every 10s
-            setInterval(() => {
-                $.getJSON(fridge.fridge_data_uri(), data => {
-                    // Set the temperature label
-                    $(temp_label).text(format_temp(data[data.length - 1], fridge.multiplier));
-                    $(temp_line).highcharts().series[0].setData(data);
-                })
-            }, 10000);
-        });
+                // Create a callback to update every 10s
+                setInterval(() => {
+                    fetch(request)
+                        .then((response) => response.json())
+                        .then((data) => {
+                            // Set the temperature label
+                            $(temp_label).text(format_temp(data[data.length - 1], fridge.multiplier));
+                            $(temp_line).highcharts().series[0].setData(data);
+                        })
+                }, 10000);
+            });
     }
     )
 </script>
