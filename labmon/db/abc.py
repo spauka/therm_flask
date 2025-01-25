@@ -1,6 +1,9 @@
 from typing import List, Type, TypeVar
 from sqlalchemy import (
+    Column,
+    TIMESTAMP,
     Integer,
+    Float,
     Unicode,
     UnicodeText,
 )
@@ -11,10 +14,14 @@ from .fridge_table import SensorReading
 
 SensorReadingT = TypeVar("SensorReadingT", bound=SensorReading)
 
+# Cache of created fridge classes
+_fridge_classes: dict[str, Type[SensorReadingT]] = {}
+
 
 class FridgeModel(Base):
     __abstract__ = True
     name: Mapped[str] = mapped_column(Unicode(255), unique=True)
+    table_name: Mapped[str] = mapped_column(Unicode(255), unique=True)
     label: Mapped[str] = mapped_column(Unicode(255))
     comment: Mapped[str] = mapped_column(UnicodeText)
 
@@ -23,7 +30,30 @@ class FridgeModel(Base):
         raise NotImplementedError("Not implemented in ABC")
 
     def fridge_table(self) -> Type[SensorReadingT]:
-        raise NotImplementedError("Not implemented in ABC")
+        """
+        Return a reference to the table associated with a fridge or
+        supplementary fridge dataset
+        """
+        # Check if we have an instance of the fridge table in cache
+        if self.table_name in _fridge_classes:
+            return _fridge_classes[self.table_name]
+
+        # Otherwise we create an instance of the fridge table
+        # We have to fill in the annotations such that SQLAlchemy knows
+        # to map the columns to the dataclass
+        new_fridge_table = {
+            "__tablename__": self.table_name,
+            "__annotations__": {"time": Column},
+            "time": mapped_column(TIMESTAMP, primary_key=True),
+        }
+        for sensor in self.sensors:
+            new_fridge_table["__annotations__"][sensor.column_name] = Column
+            new_fridge_table[sensor.column_name] = mapped_column(Float)
+
+        fridge_class = type(self.table_name, (Base, SensorReading), new_fridge_table)
+
+        _fridge_classes[self.table_name] = fridge_class
+        return fridge_class
 
 
 class SensorModel(Base):
