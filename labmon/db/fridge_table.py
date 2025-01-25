@@ -1,4 +1,5 @@
 from datetime import datetime
+from dataclasses import fields
 from sqlalchemy import Column, DateTime, select, insert, func
 from sqlalchemy.orm import aliased
 
@@ -64,34 +65,60 @@ class SensorReading:
         return res.scalars()
 
     @classmethod
-    def get_between(cls, start: datetime, stop: datetime):
+    def get_between(cls, start: datetime = None, stop: datetime = None):
         """
         Return sensor readings taken between the start and stop times
         """
-        query = (
-            select(cls).where(cls.time.between(start, stop)).order_by(cls.time.desc())
-        )
+        # Construct the correct select query
+        query = select(cls)
+        if start is not None and stop is not None:
+            query = query.where(cls.time.between(start, stop))
+        elif start is not None:
+            query = query.where(cls.time > start)
+        elif stop is not None:
+            query = query.where(cls.time < stop)
+        else:
+            raise ValueError("Either start, stop or both must be given")
+        query = query.order_by(cls.time.desc())
+
+        # Order data by time ascending
         subq = aliased(cls, query.subquery())
         ordered_query = select(subq).order_by(subq.time.asc())
         res = db.session.execute(ordered_query)
         return res.scalars()
 
     @classmethod
-    def hourly_avg(cls, sensor):
+    def hourly_avg(
+        cls, start: datetime = None, stop: datetime = None, count: int = None
+    ):
         """
         Return hourly average
         TODO: Rewrite for timescaledb functions
         """
         dategroup = func.date_trunc("hour", func.timezone("UTC", cls.time)).label(
-            "Time"
+            "time"
         )
         dategroup.type = DateTime()
-        if sensor not in cls.__table__.c:
-            raise KeyError("Sensor not found")
-        sensor_q = func.avg(cls.__table__.c[sensor]).label(sensor)
-        # Construct the query. Note we don't worry about ordering descending since we are returning
-        # the entire dataset.
-        query = (
-            select(dategroup, sensor_q).group_by(dategroup).order_by(dategroup.asc())
-        )
-        return db.session.execute(query).scalars()
+        table_fields = []
+        for field in fields(cls):
+            name = field.name
+            if name == "time":
+                continue
+            table_fields.append(func.avg(getattr(cls, name)).label(name))
+
+        # Construct the query
+        query = select(dategroup, *table_fields)
+        if start is not None and stop is not None:
+            query = query.where(dategroup.between(start, stop))
+        elif start is not None:
+            query = query.where(dategroup > start)
+        elif stop is not None:
+            query = query.where(dategroup < stop)
+        if count is not None:
+            query = query.limit(count)
+        query = query.group_by(dategroup).order_by(dategroup.desc())
+
+        subq = aliased(cls, alias=query.subquery(), adapt_on_names=True)
+        ordered_query = select(subq).order_by(subq.time)
+        res = db.session.execute(ordered_query)
+        return res.all()
