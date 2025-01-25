@@ -2,7 +2,7 @@ import json
 import datetime
 from math import isnan, isinf
 from typing import Optional, Iterable, TypeVar
-from dataclasses import asdict
+from dataclasses import asdict, fields
 
 from flask import (
     Blueprint,
@@ -42,6 +42,9 @@ class FridgeView(MethodView):
             return None
 
     def _sensors_view(self, data_source: FridgeModel):
+        """
+        Return a list of sensors and their friendly label
+        """
         data = []
         for sensor in data_source.sensors:
             data.append(
@@ -57,12 +60,43 @@ class FridgeView(MethodView):
         return r
 
     def _current_view(self, data_source: FridgeModel):
+        """
+        Return the current data from the fridge
+        """
         latest_data = _first(data_source.fridge_table().get_last(1))
         data = asdict(latest_data)
         data["time"] = data["time"].isoformat()
         for k in data:
             if isinstance(data[k], float) and (isinf(data[k]) or isnan(data[k])):
                 data[k] = None
+
+        # Construct response
+        r = Response(json.dumps(data))
+        r.mimetype = "application/json"
+        r.headers["Access-Control-Allow-Origin"] = "*"
+        return r
+
+    def _count_view(self, data_source: FridgeModel, count: int=1):
+        """
+        Return the latest "n" fields from the data
+        """
+        fridge_table = data_source.fridge_table()
+        latest_n_data = fridge_table.get_last(count)
+
+        # Format the data correctly
+        data = {}
+        columns = []
+        for field in fields(fridge_table):
+            data[field.name] = []
+            if field.name != "time":
+                columns.append(field.name)
+        for row in latest_n_data:
+            data["time"].append(row.time.isoformat())
+            for field in columns:
+                field_data = getattr(row, field)
+                if field_data is not None and (isnan(field_data) or isinf(field_data)):
+                    field_data = None
+                data[field].append(field_data)
 
         # Construct response
         r = Response(json.dumps(data))
@@ -81,6 +115,15 @@ class FridgeView(MethodView):
             return self._sensors_view(data_source)
         elif "current" in request.args:
             return self._current_view(data_source)
+        elif "count" in request.args:
+            try:
+                count = int(request.args["count"])
+                return self._count_view(data_source, count)
+            except ValueError:
+                return Response(
+                    f"Count must be a positive integer. Got {request.args[count]}",
+                    status=400
+                )
         else:
             return Response("Unknown request", status=421)
 
