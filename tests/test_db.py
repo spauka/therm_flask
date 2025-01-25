@@ -28,3 +28,5 @@ with app.app_context():
     pprint(last_year)
     hourly = list(fridge_table.hourly_avg(count=10))
     pprint(hourly)
+    monthly = list(fridge_table.avg_data("month", count=10))
+    pprint(monthly)

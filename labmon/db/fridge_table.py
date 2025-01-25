@@ -95,7 +95,22 @@ class SensorReading:
         Return hourly average
         TODO: Rewrite for timescaledb functions
         """
-        dategroup = func.date_trunc("hour", func.timezone("UTC", cls.time)).label(
+        return cls.avg_data("hour", start, stop, count)
+
+    @classmethod
+    def avg_data(
+        cls,
+        time_period: str = "hour",
+        start: datetime = None,
+        stop: datetime = None,
+        count: int = None,
+    ):
+        """
+        Averaged data over a time period given by time_period
+        This can be "hour", "day", or "month" (or year but this is kind of useless)
+        TODO: Rewrite for timescaledb functions
+        """
+        dategroup = func.date_trunc(time_period, func.timezone("UTC", cls.time)).label(
             "time"
         )
         dategroup.type = DateTime()
