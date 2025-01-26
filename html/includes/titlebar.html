@@ -16,7 +16,7 @@
 <script type="text/javascript">
     function format_temp(temp, multiplier) {
         if (temp == null) {
-            return "Und";
+            return "None";
         }
         temp *= multiplier;
         if (temp > 100000) {
@@ -61,7 +61,8 @@
             })
             .then((data) => {
                 // Set the temperature label
-                $(temp_label).text(format_temp(data[data.length - 1], fridge.multiplier));
+                const current_temp = format_temp(data[data.length - 1], fridge.multiplier);
+                $(temp_label).text(current_temp);
 
                 // Create sparkline
                 var customOptions = {
@@ -79,6 +80,8 @@
                 };
                 let chart_options = $.extend(true, customOptions, defaultSparkStyle);
                 let chart = $(temp_line).highcharts("Chart", chart_options);
+                if (current_temp == "None")
+                $(temp_line).hide();
 
                 // Create a callback to update every 10s
                 setInterval(() => {
@@ -86,8 +89,17 @@
                         .then((response) => response.json())
                         .then((data) => {
                             // Set the temperature label
-                            $(temp_label).text(format_temp(data[data.length - 1], fridge.multiplier));
-                            $(temp_line).highcharts().series[0].setData(data);
+                            const current_temp = format_temp(data[data.length - 1], fridge.multiplier);
+                            const chart = $(temp_line).highcharts()
+                            $(temp_label).text(current_temp);
+                            if (current_temp == "None" && $(temp_line).is(":visible")) {
+                                $(temp_line).hide();
+                            } else if (current_temp != "None" && $(temp_line).is(":hidden")) {
+                                $(temp_line).show();
+                                chart.series[0].setData(data);
+                            } else if (current_temp != "None") {
+                                chart.series[0].setData(data);
+                            }
                         })
                 }, 10000);
             }).catch((e) => {console.log(e.message)});
