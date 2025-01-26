@@ -242,7 +242,15 @@ class FridgeView(MethodView):
 
         # Make sure time is converted to a timestamp
         if "Time" in data:
-            data["Time"] = datetime.fromtimestamp(float(data["Time"]))
+            # Try convert from ISO format
+            try:
+                data["Time"] = datetime.fromisoformat(data["Time"])
+            except ValueError:
+                # Try converting from timestamp instead
+                try:
+                    data["Time"] = datetime.fromtimestamp(float(data["Time"]))
+                except ValueError:
+                    return Response(f"Invalid time format: {data["Time"]}", status=400)
 
         # Add to db
         try:
