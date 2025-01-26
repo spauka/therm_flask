@@ -39,6 +39,17 @@ class FridgeModel(Base):
         if self.table_name in _fridge_classes:
             return _fridge_classes[self.table_name]
 
+        # double check that the table exists
+        inspector = inspect(db.engine)
+        exists = inspector.has_table(self.table_name)
+        if not exists:
+            raise KeyError(
+                (
+                    f"Could not find fridge table {self.table_name} in the database "
+                    "even though it exists in the fridges table."
+                )
+            )
+
         # Otherwise we create an instance of the fridge table
         # We have to fill in the annotations such that SQLAlchemy knows
         # to map the columns to the dataclass
@@ -51,15 +62,6 @@ class FridgeModel(Base):
             new_fridge_table["__annotations__"][sensor.column_name] = Column
             new_fridge_table[sensor.column_name] = mapped_column(Float)
         fridge_class = type(self.table_name, (Base, SensorReading), new_fridge_table)
-
-        # Finally, double check that the table exists
-        inspector = inspect(db.engine)
-        exists = inspector.has_table(self.table_name)
-        if not exists:
-            raise KeyError(
-                (f"Could not find fridge table {self.table_name} in the database "
-                 "even though it exists in the fridges table.")
-            )
 
         _fridge_classes[self.table_name] = fridge_class
         return fridge_class
