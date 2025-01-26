@@ -116,7 +116,6 @@ class FridgeSupplementary(FridgeModel):
         Return a supplementary fridge object from the given name
         """
         try:
-            print(f"Querying fridge {fridge.name} for column {name}")
             query = select(cls).where(cls.fridge == fridge, cls.name == name)
             res = db.session.execute(query)
             supp = res.scalar_one()
