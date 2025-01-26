@@ -46,14 +46,14 @@ with app.app_context():
         # Construct a new table with the right name. Luckily we can take
         # advantage of the ORM we've defined
         fridge = Fridge.get_fridge_by_name(old_name)
-        fridge_table = fridge.fridge_table()
+        fridge_table = fridge.fridge_table(check_exists=False)
 
         # Transition the table
         transition_table(fridge_table, old_name, new_name)
 
         # Do this for all supplementary sensors
         for supp in fridge.supplementary:
-            supp_table = supp.fridge_table()
+            supp_table = supp.fridge_table(check_exists=False)
             old_name = supp.table_name
             new_name = old_name.lower()
             transition_table(supp_table, old_name, new_name)

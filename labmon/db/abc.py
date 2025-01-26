@@ -30,7 +30,7 @@ class FridgeModel(Base):
     def sensors(cls) -> List["SensorModel"]:
         raise NotImplementedError("Not implemented in ABC")
 
-    def fridge_table(self) -> Type[SensorReadingT]:
+    def fridge_table(self, check_exists=True) -> Type[SensorReadingT]:
         """
         Return a reference to the table associated with a fridge or
         supplementary fridge dataset
@@ -39,16 +39,18 @@ class FridgeModel(Base):
         if self.table_name in _fridge_classes:
             return _fridge_classes[self.table_name]
 
-        # double check that the table exists
-        inspector = inspect(db.engine)
-        exists = inspector.has_table(self.table_name)
-        if not exists:
-            raise KeyError(
-                (
-                    f"Could not find fridge table {self.table_name} in the database "
-                    "even though it exists in the fridges table."
+        # double check that the table exists. We can ignore this check if
+        # we are ignoring this for the purpose of creating the table.
+        if check_exists:
+            inspector = inspect(db.engine)
+            exists = inspector.has_table(self.table_name)
+            if not exists:
+                raise KeyError(
+                    (
+                        f"Could not find fridge table {self.table_name} in the database "
+                        "even though it exists in the fridges table."
+                    )
                 )
-            )
 
         # Otherwise we create an instance of the fridge table
         # We have to fill in the annotations such that SQLAlchemy knows
