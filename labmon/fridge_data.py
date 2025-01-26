@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from math import isnan, isinf
 from typing import Optional, Iterable, TypeVar
 from dataclasses import asdict, fields
@@ -74,6 +74,43 @@ class FridgeView(MethodView):
 
         # Construct response
         r = Response(json.dumps(data))
+        r.mimetype = "application/json"
+        r.headers["Access-Control-Allow-Origin"] = "*"
+        return r
+
+    def _summary_view(self, data_source: FridgeModel, count=1000) -> Response:
+        """
+        Try to return a useful summary of the most useful thermometer associated with
+        a data source. By default, we return the last 2 hours of data.
+        """
+        sensors = data_source.sensors
+        stop = datetime.now()
+        start = stop - timedelta(hours=2)
+        latest_data = data_source.fridge_table().get_between(start, stop)
+
+        # For most situations, the coldest thermometer is usually the right one to return
+        # Let's preprocess out the minimum value from the sensor.
+        summary_data = []
+        for data in latest_data:
+            min_val = float("inf")
+            for sensor in sensors:
+                # Time is not sensor data
+                if sensor.column_name == "time":
+                    continue
+                val = getattr(data, sensor.column_name)
+                # Ignore NaN or inf values
+                if val is None or isnan(val) or isinf(val) or val == 0:
+                    continue
+                if val < min_val:
+                    min_val = val
+            # If we didn't find any readings, add None
+            if isinf(min_val):
+                summary_data.append(None)
+            else:
+                summary_data.append(min_val)
+
+        # Construct response
+        r = Response(json.dumps(summary_data))
         r.mimetype = "application/json"
         r.headers["Access-Control-Allow-Origin"] = "*"
         return r
@@ -159,6 +196,8 @@ class FridgeView(MethodView):
             return self._sensors_view(data_source)
         elif "current" in request.args:
             return self._current_view(data_source)
+        elif "summary" in request.args:
+            return self._summary_view(data_source)
         elif "count" in request.args:
             try:
                 count = int(request.args["count"])
