@@ -53,8 +53,11 @@ with app.app_context():
 
         # Do this for all supplementary sensors
         for supp in fridge.supplementary:
-            supp_table = supp.fridge_table(check_exists=False)
             old_name = supp.table_name
             new_name = old_name.lower()
+
+            supp.table_name = new_name
+            supp_table = supp.fridge_table(check_exists=False)
+
             transition_table(supp_table, old_name, new_name)
 
