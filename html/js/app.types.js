@@ -16,15 +16,14 @@ class FridgeSparkLine {
     }
 
     fridge_data_uri() {
-        var constructed_url = new URL(data_uri);
-        constructed_url.pathname += this.fridge_db_name + "/data/";
+        var constructed_url = new URL(this.fridge_db_name, data_uri);
         constructed_url.searchParams.set("summary", "");
         return constructed_url.toString();
     }
 }
 
 // Date ranges in HighStock
-// Note: Can be extended with additional options from 
+// Note: Can be extended with additional options from
 // https://api.highcharts.com/highstock/rangeSelector.buttons
 class HighStockRangeSelector {
     type;
