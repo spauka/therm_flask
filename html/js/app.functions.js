@@ -167,9 +167,9 @@ function afterSetExtremes(e) {
         });
     } else {
         // Otherwise in a normal chart view, just update each other chart to the right range
-        var charts = scope.charts;
-        $.each(charts, function (i, setChart) {
-            if (setChart.container == chart.container) {
+        Object.keys(charts).forEach(chartName => {
+            const setChart = charts[chartName];
+            if (setChart.container === chart.container) {
                 return;
             }
             setChart.linkedUpdate = true;

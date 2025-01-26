@@ -58,7 +58,7 @@ angular.module('app.controllers', [])
             fetchWithAbort(request, $scope.requests)
                 .then((response) => response.json())
                 .then((data) => {
-                    var time = new Date(data.Time);
+                    var time = new Date(data.time);
                     var new_update = time.toString();
 
                     if ($scope.getLastUpdated() == new_update)
