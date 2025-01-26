@@ -170,11 +170,11 @@ class FridgeView(MethodView):
             return self._count_view(data_source, count, avg_period=avg_period)
         elif "start" in request.args or "stop" in request.args:
             try:
-                if start in request.args:
+                if "start" in request.args:
                     start = datetime.fromtimestamp(float(request.args["start"]) / 1000)
                 else:
                     start = None
-                if stop in request.args:
+                if "stop" in request.args:
                     stop = datetime.fromtimestamp(float(request.args["stop"]) / 1000)
                 else:
                     stop = None
