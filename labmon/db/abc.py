@@ -56,11 +56,11 @@ class FridgeModel(Base):
         new_fridge_table = {
             "__tablename__": self.table_name,
             "__annotations__": {"time": Column},
-            "time": mapped_column(TIMESTAMP, primary_key=True),
+            "time": mapped_column(TIMESTAMP(timezone=True), primary_key=True),
         }
         for sensor in self.sensors:
             new_fridge_table["__annotations__"][sensor.column_name] = Column
-            new_fridge_table[sensor.column_name] = mapped_column(Float)
+            new_fridge_table[sensor.column_name] = mapped_column(Float, nullable=True)
         fridge_class = type(self.table_name, (Base, SensorReading), new_fridge_table)
 
         _fridge_classes[self.table_name] = fridge_class
