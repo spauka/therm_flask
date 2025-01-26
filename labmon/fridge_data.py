@@ -234,6 +234,9 @@ class FridgeView(MethodView):
         # Put the data in a json array
         data = {}
         for field, value in request.form.items():
+            if field == "Time": # Convert upper case Time to "time"
+                data["time"] = value
+                continue
             if field not in valid_sensors:
                 return Response(
                     f"Sensor {field} not found in {data_source.name}", status=400
@@ -241,16 +244,16 @@ class FridgeView(MethodView):
             data[field] = value
 
         # Make sure time is converted to a timestamp
-        if "Time" in data:
+        if "time" in data:
             # Try convert from ISO format
             try:
-                data["Time"] = datetime.fromisoformat(data["Time"])
+                data["time"] = datetime.fromisoformat(data["time"])
             except ValueError:
                 # Try converting from timestamp instead
                 try:
-                    data["Time"] = datetime.fromtimestamp(float(data["Time"]))
+                    data["time"] = datetime.fromtimestamp(float(data["time"]))
                 except ValueError:
-                    return Response(f"Invalid time format: {data["Time"]}", status=400)
+                    return Response(f"Invalid time format: {data["time"]}", status=400)
 
         # Add to db
         try:

@@ -34,9 +34,13 @@ class SensorReading:
 
     @classmethod
     def append(cls, **values) -> bool:
+        # Handle both "Time" and "time" for legacy reasons
         if "Time" in values:
             time = values["Time"]
             del values["Time"]
+        elif "time" in values:
+            time = values["time"]
+            del values["time"]
         else:
             time = datetime.now()
 
