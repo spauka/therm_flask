@@ -49,6 +49,8 @@ postgresql_tcp_connect(uwsgi_t)
 # Allow dynamic linking of libpq
 allow uwsgi_t bin_t:file execute;
 allow uwsgi_t ldconfig_exec_t:file { open read map execute execute_no_trans };
+# Allow reloading
+allow uwsgi_t uwsgi_exec_t:file execute_no_trans;
 
 manage_dirs_pattern(uwsgi_t, uwsgi_var_lib_t, uwsgi_var_lib_t)
 manage_files_pattern(uwsgi_t, uwsgi_var_lib_t, uwsgi_var_lib_t)
