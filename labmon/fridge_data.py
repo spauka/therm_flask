@@ -59,6 +59,7 @@ class FridgeView(MethodView):
         r = Response(json.dumps(data))
         r.mimetype = "application/json"
         r.headers["Access-Control-Allow-Origin"] = "*"
+        r.headers["Cache-Control"] = "public, max-age=60"
         return r
 
     def _current_view(self, data_source: FridgeModel) -> Response:
@@ -76,6 +77,7 @@ class FridgeView(MethodView):
         r = Response(json.dumps(data))
         r.mimetype = "application/json"
         r.headers["Access-Control-Allow-Origin"] = "*"
+        r.headers["Cache-Control"] = "public, max-age=5"
         return r
 
     def _summary_view(self, data_source: FridgeModel, count=1000) -> Response:
@@ -113,6 +115,7 @@ class FridgeView(MethodView):
         r = Response(json.dumps(summary_data))
         r.mimetype = "application/json"
         r.headers["Access-Control-Allow-Origin"] = "*"
+        r.headers["Cache-Control"] = "public, max-age=5"
         return r
 
     def _format_data(
@@ -152,6 +155,7 @@ class FridgeView(MethodView):
         r = Response(json.dumps(data))
         r.mimetype = "application/json"
         r.headers["Access-Control-Allow-Origin"] = "*"
+        r.headers["Cache-Control"] = "public, max-age=30"
         return r
 
     def _date_view(
@@ -172,6 +176,7 @@ class FridgeView(MethodView):
         r = Response(json.dumps(data))
         r.mimetype = "application/json"
         r.headers["Access-Control-Allow-Origin"] = "*"
+        r.headers["Cache-Control"] = "public, max-age=300"
         return r
 
     def get(self, fridge_name, supp) -> Response:
