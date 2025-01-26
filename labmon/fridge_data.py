@@ -229,7 +229,7 @@ class FridgeView(MethodView):
 
     def post(self, fridge_name, supp) -> Response:
         data_source = self._get_data_source(fridge_name, supp)
-        valid_sensors = set(sensor.name for sensor in data_source.sensors)
+        valid_sensors = set(sensor.column_name for sensor in data_source.sensors)
 
         # Put the data in a json array
         data = {}
