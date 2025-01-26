@@ -35,6 +35,8 @@ def transition_table(fridge, fridge_table, old_name, new_name):
     print(insert)
     db.session.execute(insert)
 
+    db.session.commit()
+
     print(f"Done {new_name}")
 
 with app.app_context():
