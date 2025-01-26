@@ -21,7 +21,7 @@ angular.module('app.controllers', [])
         $scope.values = {};
         $scope.charts = {};
         $scope.initialData = null;
-        const requests = [];
+        $scope.requests = [];
 
         // Figure out the data URL's for the fridge
         $scope.fridge = $routeParams.fridge;
@@ -55,7 +55,7 @@ angular.module('app.controllers', [])
         };
         function fetchCurrent(updateCharts) {
             var request = new Request($scope.currentURL, { destination: "json", cache: "no-store" });
-            var res = fetchWithAbort(request, requests)
+            fetchWithAbort(request, $scope.requests)
                 .then((response) => response.json())
                 .then((data) => {
                     var time = new Date(data.Time);
@@ -88,39 +88,15 @@ angular.module('app.controllers', [])
                 });
         };
 
-        function populateGraphs(charts, data) {
-            // Get the number of elements
-            const count = data["time"].length;
-            const time_arr = Array.from(data["time"], (timestamp) => new Date(timestamp).getTime());
-            // Load each sensor
-            $scope.sensors.forEach(element => {
-                const sens_arr = data[element.column_name];
-                // Prepare the data for the sensor
-                const data_arr = Array.from({ length: count }, (_, i) => [time_arr[i], sens_arr[i]]);
-                if (element.column_name in charts) {
-                    const chart = charts[element.column_name];
-                    chart.linkedUpdate = true;
-                    chart.series[0].setData(data_arr);
-                    if ($scope.historic)
-                        chart.navigator.series[0].setData(data_arr);
-                    chart.hideLoading();
-                    chart.linkedUpdate = false;
-                } else {
-                    console.warn("Couldn't find chart for column: " + element.column_name);
-                }
-            });
-        }
-
         // Load the initial data
         var request = new Request($scope.dataURL, { destination: "json", cache: "no-store" });
-        var res = fetchWithAbort(request, requests)
+        fetchWithAbort(request, $scope.requests)
             .then((response) => response.json())
             .then((data) => {
                 // Check that sensors has returned successfully, if so we are ready to populate graphs
                 // with data, otherwise let sensors return before we call populateGraphs
-                console.log($scope.sensors);
                 if ($scope.sensors.length > 0) {
-                    populateGraphs($scope.charts, data);
+                    populateGraphs($scope.sensors, $scope.charts, data, $scope.historic);
                     $scope.initialData = null; // Delete initial data load, not needed any more
                 } else {
                     $scope.initialData = data;
@@ -135,7 +111,7 @@ angular.module('app.controllers', [])
 
         // Load the sensors for the fridge
         var request = new Request($scope.sensorURL, { destination: "json", cache: "no-store" });
-        res = fetchWithAbort(request, requests)
+        fetchWithAbort(request, $scope.requests)
             .then((response) => response.json())
             .then((data) => {
                 $scope.sensors = data;
@@ -151,7 +127,7 @@ angular.module('app.controllers', [])
                 // we've finished rendering
                 if ($scope.initialData !== null) {
                     $timeout(function () {
-                        populateGraphs($scope.charts, $scope.initialData);
+                        populateGraphs($scope.sensors, $scope.charts, $scope.initialData, $scope.historic);
                         $scope.initialData = null;
                     }, 1);
                 }
@@ -169,8 +145,7 @@ angular.module('app.controllers', [])
                         $scope.$parent.lastUpdated = "Never";
                     });
                 }
-
-                console.log("Sensors done");
+                console.log("Loaded",$scope.sensors.length,"sensors for Fridge",$scope.fridge,"("+$scope.supp+")");
             }).catch((error) => {
                 if (error.name === 'AbortError') {
                     console.log('Request aborted.');
@@ -181,8 +156,8 @@ angular.module('app.controllers', [])
 
         // Abort all in-progress requests when the scope is destroyed
         $scope.$on('$destroy', function () {
-            requests.forEach(controller => controller.abort()); // Abort all requests
-            requests.length = 0; // Clear the array
+            $scope.requests.forEach(controller => controller.abort()); // Abort all requests
+            $scope.requests.length = 0; // Clear the array
             console.log('All in-progress requests cancelled');
         });
     }]);

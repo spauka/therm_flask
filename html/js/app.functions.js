@@ -49,15 +49,48 @@ function fetchWithAbort(request, controllers) {
     const abrt = new AbortController();
     controllers.push(abrt);
 
+    // Calculate how long the request takes and log this
+    const startTime = performance.now();
+
     var get = fetch(request, { signal: abrt.signal }).finally(() => {
         // Remove controller when done
         const idx = controllers.indexOf(abrt);
         if (idx > -1) {
             controllers.splice(idx, 1);
         }
+
+        // Log the time for the request to finish
+        const requestTime = (performance.now() - startTime).toFixed(2);
+        console.debug("Request to", request.url, "took", requestTime, "ms");
     });
 
     return get;
+}
+
+function populateGraphs(sensors, charts, data, historic=false) {
+    // Get the number of elements
+    const count = data["time"].length;
+    const time_arr = Array.from(data["time"], (timestamp) => new Date(timestamp).getTime());
+    // Load each sensor
+    sensors.forEach(element => {
+        const sens_arr = data[element.column_name];
+        // Prepare the data for the sensor
+        const data_arr = Array.from({ length: count }, (_, i) => [time_arr[i], sens_arr[i]]);
+        if (element.column_name in charts) {
+            const chart = charts[element.column_name];
+            const linkedUpdateState = chart.linkedUpdate;
+            chart.linkedUpdate = true;
+            chart.series[0].setData(data_arr);
+            if (historic) {
+                chart.originalData = data_arr;
+                chart.navigator.series[0].setData(data_arr);
+            }
+            chart.hideLoading();
+            chart.linkedUpdate = linkedUpdateState;
+        } else {
+            console.warn("Couldn't find chart for column: " + element.column_name);
+        }
+    });
 }
 
 function setExtremes(e) {
@@ -71,47 +104,77 @@ function setExtremes(e) {
 function afterSetExtremes(e) {
     var chart = e.target.chart;
     var scope = chart.userOptions.scope;
+    var charts = scope.charts;
     var historic = scope.historic;
 
     var xMin = chart.xAxis[0].min;
     var xMax = chart.xAxis[0].max;
 
+    // Don't update ranges on other charts on a linkedUpdate -
+    // true if we are resizing or adding data to all charts.
+    if (chart.linkedUpdate) {
+        return;
+    }
+
     if (e.rangeChanged === false) {
         return;
     }
 
-    // Set up historic chart updater
-    if (historic && (xMax - xMin) <= (5 * 86400000) + 1000) {
-        var url = new URL(scope.col_name, scope.baseURL);
+    // Set up historic chart updater (plus 1s so that 5d range definitely fires)
+    const fiveDays = (5 * 1000 * 60 * 60 * 24) + 1000;
+    if (historic && (xMax - xMin) <= fiveDays) {
+        // Update all charts to a linked update that are showing loading
+        Object.keys(charts).forEach(chartName => {
+            const setChart = charts[chartName];
+            setChart.linkedUpdate = true;
+            setChart.xAxis[0].setExtremes(xMin, xMax, true, false);
+            setChart.showLoading('Loading Data...');
+        });
+
+        // Make a request for data in the right range
+        var url = new URL(scope.baseURL);
         url.searchParams.append("start", xMin);
         url.searchParams.append("stop", xMax);
-        chart.showLoading('Loading Data...');
         var request = new Request(url, {destination: "json"});
-        fetch(request)
+        fetchWithAbort(request, scope.requests)
             .then((response) => response.json())
             .then((data) => {
-                chart.series[0].setData(data);
-                chart.hideLoading();
-                chart.series[0].zoomed = true;
+                // Update all charts to a linked update that are showing loading
+                populateGraphs(scope.sensors, charts, data, false);
+                Object.keys(charts).forEach(chartName => {
+                    const setChart = charts[chartName];
+                    setChart.hideLoading();
+                    setChart.linkedUpdate = false;
+                    setChart.series[0].zoomed = true;
+                });
             });
     } else if (historic && chart.series[0].zoomed === true) {
-        // Restore original data
-        chart.series[0].setData(chart.options.navigator.series.data);
-        chart.series[0].zoomed = false;
-    }
+        // Update all charts to a linked update that are showing loading
+        Object.keys(charts).forEach(chartName => {
+            const setChart = charts[chartName];
+            setChart.linkedUpdate = true;
+            setChart.xAxis[0].setExtremes(xMin, xMax, true, false);
+            setChart.showLoading('Loading Data...');
+        });
 
-    // Don't update ranges on a linkedUpdate - true if we are resizing or adding data to all charts.
-    if (chart.linkedUpdate) {
-        return;
+        // Update all charts to a linked update that are showing loading
+        Object.keys(charts).forEach(chartName => {
+            const setChart = charts[chartName];
+            setChart.series[0].setData(chart.originalData);
+            setChart.hideLoading();
+            setChart.linkedUpdate = false;
+            setChart.series[0].zoomed = false;
+        });
+    } else {
+        // Otherwise in a normal chart view, just update each other chart to the right range
+        var charts = scope.charts;
+        $.each(charts, function (i, setChart) {
+            if (setChart.container == chart.container) {
+                return;
+            }
+            setChart.linkedUpdate = true;
+            setChart.xAxis[0].setExtremes(xMin, xMax, true, false);
+            setChart.linkedUpdate = false;
+        });
     }
-    var charts = scope.charts;
-    $.each(charts, function (i, setChart) {
-        setChart = setChart;
-        if (setChart.container == chart.container) {
-            return;
-        }
-        setChart.linkedUpdate = true;
-        setChart.xAxis[0].setExtremes(xMin, xMax, true, false);
-        setChart.linkedUpdate = false;
-    });
 }
