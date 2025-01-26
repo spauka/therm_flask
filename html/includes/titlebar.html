@@ -52,7 +52,13 @@
 
         var request = new Request(fridge.fridge_data_uri(), { destination: "json", cache: "no-store" });
         fetch(request)
-            .then((response) => response.json())
+            .then((response) => {
+                if (response.status == 200)
+                    return response.json();
+                $(temp_label).html(`<span style="font-size: x-small">Failed to Load<br />(${response.status})</span>`);
+                $(temp_line).hide();
+                throw new Error(`Failed to load sparkline for fridge ${fridge.fridge_name}.`)
+            })
             .then((data) => {
                 // Set the temperature label
                 $(temp_label).text(format_temp(data[data.length - 1], fridge.multiplier));
@@ -84,7 +90,6 @@
                             $(temp_line).highcharts().series[0].setData(data);
                         })
                 }, 10000);
-            });
-    }
-    )
+            }).catch((e) => {console.log(e.message)});
+    });
 </script>
