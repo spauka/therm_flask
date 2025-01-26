@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
-import config
 from wsgiref.handlers import CGIHandler
-from app import app
 
-import sys
+from . import create_app
 
 try:
+    app = create_app()
     CGIHandler().run(app)
 except Exception as e:
     print(e)
