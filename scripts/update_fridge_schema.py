@@ -12,7 +12,7 @@ from labmon.db.db import Base
 app = labmon.create_app()
 db = labmon.db.db
 
-def transition_table(fridge_table, old_name, new_name):
+def transition_table(fridge, fridge_table, old_name, new_name):
     print(f"Transitioning {old_name} -> {new_name}")
 
     # First, drop the new table if it exists
@@ -49,7 +49,7 @@ with app.app_context():
         fridge_table = fridge.fridge_table(check_exists=False)
 
         # Transition the table
-        transition_table(fridge_table, old_name, new_name)
+        transition_table(fridge, fridge_table, old_name, new_name)
 
         # Do this for all supplementary sensors
         for supp in fridge.supplementary:
@@ -59,5 +59,5 @@ with app.app_context():
             supp.table_name = new_name
             supp_table = supp.fridge_table(check_exists=False)
 
-            transition_table(supp_table, old_name, new_name)
+            transition_table(supp, supp_table, old_name, new_name)
 
