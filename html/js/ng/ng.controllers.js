@@ -18,6 +18,7 @@ angular.module('app.controllers', [])
         $scope.pagetitle = $routeParams.fridge.replace('_', ' ');
         $scope.params = $routeParams;
         $scope.sensors = [];
+	$scope.sensorsLoaded = false;
         $scope.values = {};
         $scope.charts = {};
         $scope.initialData = null;
@@ -95,7 +96,7 @@ angular.module('app.controllers', [])
             .then((data) => {
                 // Check that sensors has returned successfully, if so we are ready to populate graphs
                 // with data, otherwise let sensors return before we call populateGraphs
-                if ($scope.sensors.length > 0) {
+                if ($scope.sensorsLoaded) {
                     populateGraphs($scope.sensors, $scope.charts, data, $scope.historic);
                     $scope.initialData = null; // Delete initial data load, not needed any more
                 } else {
@@ -122,6 +123,7 @@ angular.module('app.controllers', [])
                 fetchCurrent(true);
                 // Trigger an update of the page with the new sensor values
                 $scope.$apply();
+		$scope.sensorsLoaded = true;
 
                 // Check if we've already loaded our initial dataset. If we have, set an update once
                 // we've finished rendering
