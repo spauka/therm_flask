@@ -227,14 +227,14 @@ class FridgeView(MethodView):
 
             if start >= stop:
                 return Response(
-                    "Start occurs after stop ({start.isoformat()} - {stop.isoformat()})",
+                    f"Start occurs after stop ({start.isoformat()} - {stop.isoformat()})",
                     status=400,
                 )
             if stop - start > timedelta(days=30) and avg_period is None:
                 return Response(
                     (
                         "An averaging period must be given for intervals longer than 30 days. "
-                        "Requested interval: {str(stop-start)}"
+                        f"Requested interval: {str(stop-start)}"
                     ),
                     status=400,
                 )
