@@ -80,7 +80,7 @@ class FridgeView(MethodView):
         r.headers["Cache-Control"] = "public, max-age=5"
         return r
 
-    def _summary_view(self, data_source: FridgeModel, count=1000) -> Response:
+    def _summary_view(self, data_source: FridgeModel) -> Response:
         """
         Try to return a useful summary of the most useful thermometer associated with
         a data source. By default, we return the last 2 hours of data.
@@ -208,24 +208,43 @@ class FridgeView(MethodView):
                 count = int(request.args["count"])
             except ValueError:
                 return Response(
-                    f"Count must be a positive integer. Got {request.args[count]}",
+                    f"Count must be a positive integer. Got {request.args["count"]}",
                     status=400,
                 )
             return self._count_view(data_source, count, avg_period=avg_period)
-        elif "start" in request.args or "stop" in request.args:
+        elif "start" in request.args and "stop" in request.args:
             try:
-                if "start" in request.args:
+                try:
+                    start = datetime.fromisoformat(request.args["start"])
+                except ValueError:
                     start = datetime.fromtimestamp(float(request.args["start"]) / 1000)
-                else:
-                    start = None
-                if "stop" in request.args:
+                try:
+                    stop = datetime.fromisoformat(request.args["start"])
+                except ValueError:
                     stop = datetime.fromtimestamp(float(request.args["stop"]) / 1000)
-                else:
-                    stop = None
             except ValueError:
                 return Response("Invalid start or stop date.", status=400)
 
+            if start >= stop:
+                return Response(
+                    "Start occurs after stop ({start.isoformat()} - {stop.isoformat()})",
+                    status=400,
+                )
+            if stop - start > timedelta(days=30) and avg_period is None:
+                return Response(
+                    (
+                        "An averaging period must be given for intervals longer than 30 days. "
+                        "Requested interval: {str(stop-start)}"
+                    ),
+                    status=400,
+                )
+
             return self._date_view(data_source, start, stop, avg_period=avg_period)
+        elif "start" in request.args or "stop" in request.args:
+            return Response(
+                "Both start and stop must be provided when requesting a date range",
+                status=400,
+            )
         elif avg_period is not None:
             # Can also return all data if we're asking for averaged data
             return self._date_view(data_source, avg_period=avg_period)
@@ -239,7 +258,7 @@ class FridgeView(MethodView):
         # Put the data in a json array
         data = {}
         for field, value in request.form.items():
-            if field == "Time": # Convert upper case Time to "time"
+            if field == "Time":  # Convert upper case Time to "time"
                 data["time"] = value
                 continue
             if field not in valid_sensors:
