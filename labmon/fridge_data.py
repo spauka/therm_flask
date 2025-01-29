@@ -219,7 +219,7 @@ class FridgeView(MethodView):
                 except ValueError:
                     start = datetime.fromtimestamp(float(request.args["start"]) / 1000)
                 try:
-                    stop = datetime.fromisoformat(request.args["start"])
+                    stop = datetime.fromisoformat(request.args["stop"])
                 except ValueError:
                     stop = datetime.fromtimestamp(float(request.args["stop"]) / 1000)
             except ValueError:
