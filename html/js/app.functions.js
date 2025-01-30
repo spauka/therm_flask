@@ -107,9 +107,6 @@ function afterSetExtremes(e) {
     var charts = scope.charts;
     var historic = scope.historic;
 
-    var xMin = chart.xAxis[0].min;
-    var xMax = chart.xAxis[0].max;
-
     // Don't update ranges on other charts on a linkedUpdate -
     // true if we are resizing or adding data to all charts.
     if (chart.linkedUpdate) {
@@ -120,6 +117,9 @@ function afterSetExtremes(e) {
         return;
     }
 
+    var xMin = new Date(chart.xAxis[0].min);
+    var xMax = new Date(chart.xAxis[0].max);
+
     // Set up historic chart updater (plus 1s so that 5d range definitely fires)
     const fiveDays = (5 * 1000 * 60 * 60 * 24) + 1000;
     if (historic && (xMax - xMin) <= fiveDays) {
@@ -127,14 +127,14 @@ function afterSetExtremes(e) {
         Object.keys(charts).forEach(chartName => {
             const setChart = charts[chartName];
             setChart.linkedUpdate = true;
-            setChart.xAxis[0].setExtremes(xMin, xMax, true, false);
+            setChart.xAxis[0].setExtremes(xMin.getTime(), xMax.getTime(), true, false);
             setChart.showLoading('Loading Data...');
         });
 
         // Make a request for data in the right range
         var url = new URL(scope.baseURL);
-        url.searchParams.append("start", xMin);
-        url.searchParams.append("stop", xMax);
+        url.searchParams.append("start", xMin.toISOString());
+        url.searchParams.append("stop", xMax.toISOString());
         var request = new Request(url, {destination: "json"});
         fetchWithAbort(request, scope.requests)
             .then((response) => response.json())
@@ -153,7 +153,7 @@ function afterSetExtremes(e) {
         Object.keys(charts).forEach(chartName => {
             const setChart = charts[chartName];
             setChart.linkedUpdate = true;
-            setChart.xAxis[0].setExtremes(xMin, xMax, true, false);
+            setChart.xAxis[0].setExtremes(xMin.getTime(), xMax.getTime(), true, false);
             setChart.showLoading('Loading Data...');
         });
 
@@ -173,7 +173,7 @@ function afterSetExtremes(e) {
                 return;
             }
             setChart.linkedUpdate = true;
-            setChart.xAxis[0].setExtremes(xMin, xMax, true, false);
+            setChart.xAxis[0].setExtremes(xMin.getTime(), xMax.getTime(), true, false);
             setChart.linkedUpdate = false;
         });
     }
