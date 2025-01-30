@@ -261,6 +261,8 @@ class FridgeView(MethodView):
             if field == "Time":  # Convert upper case Time to "time"
                 data["time"] = value
                 continue
+            elif field == "time":
+                continue # allow time as a field
             if field not in valid_sensors:
                 return Response(
                     f"Sensor {field} not found in {data_source.name}", status=400
