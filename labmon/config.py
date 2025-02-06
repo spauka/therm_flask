@@ -71,6 +71,8 @@ class Config(JSONFileWizard, JSONWizard):
 
     SERVER: ServerConfig = ServerConfig()
     UPLOAD: UploadConfig = UploadConfig()
+    LOGGING: bool = False
+    LOG_LEVEL: str = "WARNING"
 
 
 if not CONFIG_FILE.exists():
