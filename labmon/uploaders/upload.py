@@ -15,6 +15,7 @@ class Uploader:
     fridge: str
     supp: Optional[str]
     _url: str
+    latest: datetime
 
     def __init__(self, supp=None):
         self.fridge = config.UPLOAD.FRIDGE
@@ -27,6 +28,9 @@ class Uploader:
         if self.supp is not None:
             supp = quote_plus(self.supp)
             self._url = urljoin(self._url, f"data/{supp}")
+
+        # Store the time of the latest upload
+        self.latest = self.get_latest()
 
     @retry(exception=httpx.TimeoutException)
     def get_latest(self):
@@ -56,6 +60,16 @@ class Uploader:
                 f"Invalid format for time. Expecting datetime, got {values['time']:r}."
             )
 
+        if config.UPLOAD.MOCK:
+            logger.info(
+                "Mock upload data for fridge %s at time %s. Data was: %r",
+                self.fridge,
+                values["time"],
+                values,
+            )
+            return "OK"
+
+        # Upload to server
         res = httpx.post(self._url, data=values).raise_for_status()
         logger.info(
             "Uploaded data for fridge %s at time %s. Status: %d.",
