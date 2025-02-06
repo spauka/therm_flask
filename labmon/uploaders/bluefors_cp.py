@@ -66,6 +66,11 @@ class BlueForsCompressorMonitor(BlueForsSensorMonitor):
         next_val = self._status_log.return_next()
         if next_val:
             time, next_val = next_val
+
+            # Check if the dataset is old, if it is, don't upload
+            if time < self.latest:
+                return True
+
             # Map values into a dictionary
             values = {}
             values["time"] = time
