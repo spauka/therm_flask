@@ -15,6 +15,7 @@ DATE_FORMAT = "%d-%m-%y %H:%M:%S"
 logger = logging.getLogger(__name__)
 
 RawLogFileReading: TypeAlias = tuple[datetime, str]
+MapLogFileReading: TypeAlias = tuple[datetime, dict[str, float]]
 
 
 class BlueForsLogFile:
@@ -66,6 +67,37 @@ class BlueForsLogFile:
                 self._peek = (time, value)
                 return self._peek
         return None
+
+
+class BlueForsMapLogFile(BlueForsLogFile):
+    """
+    Extension of BlueForsLogFile for files which return a map of variables.
+    """
+
+    def return_next(self) -> Optional[MapLogFileReading]:
+        """
+        Return next value. Note that this will have been mapped to the right format
+        by the peek function.
+        """
+        return super().return_next()
+
+    def peek_next(self) -> Optional[MapLogFileReading]:
+        """
+        Return the next value without advancing in the file.
+        """
+        if self._peek:
+            return self._peek
+
+        value = super().peek_next()
+        if value:
+            time, values = value[0], value[1].split(",")
+            # Convert values to a mapping
+            mapped_values = {}
+            for name, value in zip(*[iter(values)] * 2):
+                mapped_values[name] = float(value)
+
+            self._peek = time, mapped_values
+        return self._peek
 
 
 class BlueForsSensorMonitor(Uploader):

@@ -12,7 +12,7 @@ FILE_PATTERN = "CH{n} T {date}.log"
 logger = logging.getLogger(__name__)
 
 
-RawSensorReading: TypeAlias = tuple[datetime, float]
+TempSensorReading: TypeAlias = tuple[datetime, float]
 
 
 @dataclasses.dataclass
@@ -26,7 +26,13 @@ class SensorReading:
 
 
 class BlueForsTempLogFile(BlueForsLogFile):
-    def peek_next(self) -> Optional[RawSensorReading]:
+    def return_next(self) -> Optional[TempSensorReading]:
+        """
+        Return next sensor reading.
+        """
+        return super().return_next()
+
+    def peek_next(self) -> Optional[TempSensorReading]:
         """
         Return the next sensor reading but do not advance. Convert to sensor reading
         """
@@ -64,7 +70,7 @@ class BlueForsTempMonitor(BlueForsSensorMonitor):
         """
         # Get a sorted list of new values for each sensor
         try:
-            next_value: Optional[tuple[RawSensorReading, str]] = min(
+            next_value: Optional[tuple[TempSensorReading, str]] = min(
                 (
                     (value, sensor)
                     for sensor in self._sensors

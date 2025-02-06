@@ -37,6 +37,11 @@ class BlueForsUploadConfig:
             "MXC": 6,
         }
     )
+    UPLOAD_COMPRESSORS: bool = True
+    NUM_COMPRESSORS: int = 1
+    # The number of points to use when calculating the bounce on the
+    # compressor pressure
+    COMPRESSOR_BOUNCE_N: int = 15
 
 
 @dataclass(frozen=True)

@@ -58,13 +58,14 @@ class Uploader:
         If "time" is not included, set the time to the current time.
         """
         if "time" not in values:
-            values["time"] = datetime.now().isoformat()
+            self.latest = datetime.now()
         elif isinstance(values["time"], datetime):
-            values["time"] = values["time"].isoformat()
+            self.latest = values["time"]
         else:
             raise ValueError(
                 f"Invalid format for time. Expecting datetime, got {values['time']:r}."
             )
+        values["time"] = self.latest.isoformat()
 
         if config.UPLOAD.MOCK:
             logger.info(
