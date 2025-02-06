@@ -1,10 +1,6 @@
 import logging
-from collections import deque
-from datetime import datetime, timedelta
-from typing import Optional
+from datetime import datetime
 
-from ..config import config
-from ..utility.hilbert import hilbert_amplitude
 from .bluefors_common import BlueForsLogFile, BlueForsSensorMonitor
 
 FILE_PATTERN = "maxigauge {date}.log"
