@@ -1,20 +1,14 @@
 import json
-from datetime import datetime, timedelta
-from math import isnan, isinf
-from typing import Optional, Iterable, TypeVar
 from dataclasses import asdict, fields
+from datetime import datetime, timedelta
+from math import isinf, isnan
+from typing import Iterable, Optional, TypeVar
 
-from flask import (
-    Blueprint,
-    Response,
-    request,
-    g,
-)
+from flask import Blueprint, Response, g, request
 from flask.views import MethodView
 
 from .db import Fridge, FridgeSupplementary
-from .db.abc import FridgeModel, SensorReadingT, SensorReading
-
+from .db.abc import FridgeModel, SensorReading, SensorReadingT
 
 fridge_bp = Blueprint("fridge_data", __name__)
 
@@ -36,10 +30,9 @@ class FridgeView(MethodView):
                 )
                 g.fridge_table = g.fridge_supp.fridge_table()
                 return g.fridge_supp
-            else:
-                g.fridge_supp = None
-                g.fridge_table = g.fridge.fridge_table()
-                return g.fridge
+            g.fridge_supp = None
+            g.fridge_table = g.fridge.fridge_table()
+            return g.fridge
         except KeyError:
             return None
 
@@ -103,8 +96,7 @@ class FridgeView(MethodView):
                 # Ignore NaN or inf values
                 if val is None or isnan(val) or isinf(val) or val == 0:
                     continue
-                if val < min_val:
-                    min_val = val
+                min_val = min(min_val, val)
             # If we didn't find any readings, add None
             if isinf(min_val):
                 summary_data.append(None)
@@ -258,36 +250,30 @@ class FridgeView(MethodView):
         # Put the data in a json array
         data = {}
         for field, value in request.form.items():
-            if field == "Time":  # Convert upper case Time to "time"
-                data["time"] = value
-                continue
-            elif field == "time":
-                continue # allow time as a field
-            if field not in valid_sensors:
+            # Convert all variants of time to lowercase time, and convert into timestamp
+            if field.lower() == "time":
+                try:
+                    data["time"] = datetime.fromisoformat(value)
+                except ValueError:
+                    try:
+                        data["time"] = datetime.fromtimestamp(float(value))
+                    except ValueError:
+                        return Response(
+                            f"Invalid time format: {data["time"]}", status=400
+                        )
+            elif field not in valid_sensors:
                 return Response(
                     f"Sensor {field} not found in {data_source.name}", status=400
                 )
-            data[field] = value
-
-        # Make sure time is converted to a timestamp
-        if "time" in data:
-            # Try convert from ISO format
-            try:
-                data["time"] = datetime.fromisoformat(data["time"])
-            except ValueError:
-                # Try converting from timestamp instead
-                try:
-                    data["time"] = datetime.fromtimestamp(float(data["time"]))
-                except ValueError:
-                    return Response(f"Invalid time format: {data["time"]}", status=400)
+            else:
+                data[field] = float(value)
 
         # Add to db
         try:
             result = data_source.fridge_table().append(**data)
             if result:
                 return Response("OK")
-            else:
-                return Response("OK but duplicate")
+            return Response("OK but duplicate")
         except KeyError as e:
             return Response(str(e), status=400)
 
