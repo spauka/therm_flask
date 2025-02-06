@@ -60,7 +60,9 @@ class UploadConfig:
     MOCK: bool = False  # Simulate upload only, don't actually upload
     BASE_URL: str = "https://qsyd.sydney.edu.au/data"
     FRIDGE: str = "?"  # Fill in with fridge name
-    ENABLED_UPLOADERS: list[str] = ["BlueFors"]  # Can also be Leiden
+    ENABLED_UPLOADERS: list[str] = field(
+        default_factory=lambda: ["BlueFors"]
+    )  # Can also be Leiden
     BLUEFORS_CONFIG: BlueForsUploadConfig = BlueForsUploadConfig()
 
 
@@ -71,8 +73,8 @@ class Config(JSONFileWizard, JSONWizard):
 
     SERVER: ServerConfig = ServerConfig()
     UPLOAD: UploadConfig = UploadConfig()
-    LOGGING: bool = False
-    LOG_LEVEL: str = "WARNING"
+    LOGGING: bool = True
+    LOG_LEVEL: str = "INFO"
 
 
 if not CONFIG_FILE.exists():
