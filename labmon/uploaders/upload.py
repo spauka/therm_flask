@@ -24,6 +24,9 @@ class Uploader:
         fridge_url_safe = quote_plus(self.fridge)
         self._url = urljoin(f"{config.UPLOAD.BASE_URL}/", f"{fridge_url_safe}")
 
+        # Create httpx client
+        self.client = httpx.Client()
+
         # Are we a supplementary sensor?
         if self.supp is not None:
             supp = quote_plus(self.supp)
@@ -37,7 +40,7 @@ class Uploader:
         """
         Return the timestamp of the latest uploaded dataset
         """
-        res = httpx.get(self._url, params={"current": ""})
+        res = self.client.get(self._url, params={"current": ""})
         data = res.json()
         latest = datetime.fromisoformat(data["time"])
         logger.info(
@@ -70,7 +73,7 @@ class Uploader:
             return "OK"
 
         # Upload to server
-        res = httpx.post(self._url, data=values).raise_for_status()
+        res = self.client.post(self._url, data=values).raise_for_status()
         logger.info(
             "Uploaded data for fridge %s at time %s. Status: %d.",
             self.fridge,
