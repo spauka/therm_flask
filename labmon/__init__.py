@@ -1,11 +1,18 @@
 import json
 import os
+from logging import getLevelName
 from pathlib import Path
 
 from flask import Flask, render_template
 
 from . import db
 from .config import CONF_LOC, CONFIG_FILE, config
+from .utility.logging import set_logging
+
+# Check and enable logging if set
+if config.LOGGING:
+    level = getLevelName(config.LOG_LEVEL)
+    set_logging(level)
 
 
 def create_app() -> Flask:
@@ -23,10 +30,10 @@ def create_app() -> Flask:
         )
 
     # Create and configure the app
-    app = Flask(__name__, instance_relative_config=True, instance_path=CONF_LOC)
+    app = Flask(__name__)
 
     # Load config file
-    app.config.from_file("labmon_config.json", load=json.load)
+    app.config.from_object(config.SERVER)
 
     # Initialize db
     db.db.init_app(app)
