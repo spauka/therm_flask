@@ -86,3 +86,9 @@ class Uploader:
         )
         logger.debug("Response: %s", res.text)
         return res.text
+
+    def poll(self):
+        """
+        Check for new values
+        """
+        raise NotImplementedError("Uploaders must implement this method to check logs")
