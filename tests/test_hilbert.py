@@ -13,6 +13,7 @@ npts = 40
 
 signal = np.ones(npts).cumsum() + rng.normal(scale=0.3, size=npts)
 signal = 10 * np.sin(2 * signal) + rng.normal(scale=0.5, size=npts)
+signal += 40
 
 plt.plot(signal)
 

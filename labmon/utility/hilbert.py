@@ -46,8 +46,10 @@ def hilbert_transform(in_arr):
 
 def hilbert_amplitude(in_arr):
     """
-    Estimate amplitude using the Hilbert Transform
+    Estimate p-p amplitude using the Hilbert Transform
     """
-    analytic = hilbert_transform(in_arr)
+    mean = sum(in_arr) / len(in_arr)
+    zero_mean_data = [x - mean for x in in_arr]
+    analytic = hilbert_transform(zero_mean_data)
     envelope = [abs(z) for z in analytic]
-    return sorted(envelope)[len(envelope) // 2]
+    return 2 * (sorted(envelope)[len(envelope) // 2])
