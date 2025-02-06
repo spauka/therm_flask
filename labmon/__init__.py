@@ -1,16 +1,27 @@
-import os
 import json
+import os
 from pathlib import Path
 
 from flask import Flask, render_template
 
-import labmon.db as db
-
-DEFAULT_CONF_LOC = Path("~").expanduser()
-CONF_LOC = os.environ.get("THERM_CONFIG", DEFAULT_CONF_LOC)
+from . import db
+from .config import CONF_LOC, CONFIG_FILE, config
 
 
 def create_app() -> Flask:
+    """
+    Create flask app if enabled, load the config and setup routes.
+    Otherwise throw an error.
+    """
+    # Ensure that the server is enabled
+    if not config.SERVER.ENABLED:
+        raise RuntimeError(
+            (
+                "Server is not enabled in the config file. "
+                f"Please enable the server in {CONFIG_FILE} and try again."
+            )
+        )
+
     # Create and configure the app
     app = Flask(__name__, instance_relative_config=True, instance_path=CONF_LOC)
 
@@ -26,7 +37,7 @@ def create_app() -> Flask:
         return render_template("blank.html", title=app.name)
 
     # Load fridge data
-    from . import fridge_data
+    from . import fridge_data  # pylint: disable=import-outside-toplevel
 
     app.register_blueprint(fridge_data.fridge_bp)
 
