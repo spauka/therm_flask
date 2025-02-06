@@ -42,6 +42,7 @@ class BlueForsUploadConfig:
     # The number of points to use when calculating the bounce on the
     # compressor pressure
     COMPRESSOR_BOUNCE_N: int = 15
+    UPLOAD_MAXIGAUGE: bool = True
 
 
 @dataclass(frozen=True)
