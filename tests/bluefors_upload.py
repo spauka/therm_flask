@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta, timezone
 from pprint import pprint
 
-from ..utility.logging import logging, set_logging
-from .bluefors_tc import BlueForsTempMonitor
+from labmon.uploaders.bluefors_tc import BlueForsTempMonitor
+from labmon.utility.logging import logging, set_logging
 
 if __name__ == "__main__":
     set_logging(logging.DEBUG)
@@ -23,3 +23,4 @@ if __name__ == "__main__":
     poll = True
     while poll:
         poll = fs.poll()
+        break
