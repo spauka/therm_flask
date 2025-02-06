@@ -47,7 +47,7 @@ class BlueForsUploadConfig:
 
 @dataclass(frozen=True)
 class UploadConfig:
-    ENABLED: bool = True
+    ENABLED: bool = False
     MOCK: bool = False  # Simulate upload only, don't actually upload
     BASE_URL: str = "https://qsyd.sydney.edu.au/data"
     FRIDGE: str = "?"  # Fill in with fridge name
