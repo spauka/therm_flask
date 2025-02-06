@@ -13,7 +13,7 @@ logger = getLogger(__name__)
 class BlueForsMonitor(Uploader):
     def __init__(self, *args, **kwargs):
         # Initialize
-        super().__init__()
+        super().__init__(*args, **kwargs)
 
         self.monitor: list[Uploader] = []
 
@@ -27,20 +27,22 @@ class BlueForsMonitor(Uploader):
             raise RuntimeError(f"Log directory {log_dir} must be a directory")
 
         # Enable temperature monitoring
-        self.monitor.append(BlueForsTempMonitor())
+        self.monitor.append(BlueForsTempMonitor(*args, **kwargs))
 
         # Check if compressor monitoring is enabled and how many there are
         if config.UPLOAD.BLUEFORS_CONFIG.UPLOAD_COMPRESSORS:
             num_comp = config.UPLOAD.BLUEFORS_CONFIG.NUM_COMPRESSORS
             if num_comp > 1:
                 for i in range(1, num_comp + 1):
-                    self.monitor.append(BlueForsCompressorMonitor(compressor_num=i))
+                    self.monitor.append(
+                        BlueForsCompressorMonitor(*args, compressor_num=i, **kwargs)
+                    )
             else:
-                self.monitor.append(BlueForsCompressorMonitor())
+                self.monitor.append(BlueForsCompressorMonitor(*args, **kwargs))
 
         # Check if maxigauge monitoring is enabled
         if config.UPLOAD.BLUEFORS_CONFIG.UPLOAD_MAXIGAUGE:
-            self.monitor.append(BlueForsMaxiGaugeMonitor())
+            self.monitor.append(BlueForsMaxiGaugeMonitor(*args, **kwargs))
 
     def poll(self):
         """
