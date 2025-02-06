@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Optional, TypeAlias
 
 from ..config import config
-from .upload import Uploader
+from .uploader import Uploader
 
 LOG_DIR = Path(config.UPLOAD.BLUEFORS_CONFIG.LOG_DIR)
 FOLDER_PATTERN = re.compile(r"([0-9]{2})-([0-9]{2})-([0-9]{2})")
