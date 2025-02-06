@@ -1,7 +1,0 @@
-{
-    "SQLALCHEMY_DATABASE_URI": "postgresql+psycopg://therm@/therm",
-    "APPLICATION_ROOT": "/data",
-    "DEBUG": false,
-    "SQLALCHEMY_RECORD_QUERIES": false,
-    "SQLALCHEMY_TRACK_MODIFICATIONS": false
-}
