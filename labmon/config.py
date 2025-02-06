@@ -1,3 +1,12 @@
+"""
+Labmon config definition
+
+WARNING: Do not edit the values below, these are just defaults. To change things,
+edit the JSON file which is created in your home directory. Be default, this is in
+Windows: %HOME%/labmon_config.json
+Linux: ~/labmon_config.json
+"""
+
 # pylint: disable=invalid-name
 import logging
 import os
