@@ -17,7 +17,7 @@ class Uploader:
     _url: str
     latest: datetime
 
-    def __init__(self, supp=None):
+    def __init__(self, supp=None, client: httpx.Client = None):
         self.fridge = config.UPLOAD.FRIDGE
         self.supp = supp
 
@@ -25,7 +25,10 @@ class Uploader:
         self._url = urljoin(f"{config.UPLOAD.BASE_URL}/", f"{fridge_url_safe}")
 
         # Create httpx client
-        self.client = httpx.Client()
+        if client is None:
+            self.client = httpx.Client(http2=True)
+        else:
+            self.client = client
 
         # Are we a supplementary sensor?
         if self.supp is not None:
