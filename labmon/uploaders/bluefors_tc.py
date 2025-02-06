@@ -1,19 +1,13 @@
 import dataclasses
 import logging
-import re
 from datetime import datetime, timedelta
-from io import FileIO
-from pathlib import Path
 from typing import Optional, TypeAlias
 
 from ..config import config
-from .upload import Uploader
+from .bluefors_common import BlueForsLogFile, BlueForsSensorMonitor
 
 MAX_AGE = timedelta(seconds=config.UPLOAD.BLUEFORS_CONFIG.MAX_AGE)
-LOG_DIR = Path(config.UPLOAD.BLUEFORS_CONFIG.LOG_DIR)
 FILE_PATTERN = "CH{n} T {date}.log"
-FOLDER_PATTERN = re.compile(r"([0-9]{2})-([0-9]{2})-([0-9]{2})")
-DATE_FORMAT = "%d-%m-%y %H:%M:%S"
 
 logger = logging.getLogger(__name__)
 
@@ -31,60 +25,23 @@ class SensorReading:
         return (datetime.now().astimezone() - self.last_read) > MAX_AGE
 
 
-class BlueForsLogFile:
-    def __init__(self, filename):
-        logger.debug("Opening sensor file %s", filename)
-        self.filename = filename
-        self._fhandle = None
-        self._peek = None
-
-    @property
-    def fhandle(self) -> Optional[FileIO]:
-        if self._fhandle is None:
-            try:
-                self._fhandle = open(self.filename, "r", encoding="utf-8")
-            except FileNotFoundError:
-                logger.warning(
-                    "Sensor file %s not found. May not exist yet. Will try again later.",
-                    self.filename,
-                )
-        return self._fhandle
-
-    def return_next(self) -> Optional[RawSensorReading]:
-        """
-        Return next sensor reading.
-        """
-
-        # We can reuse the code for peeking if we don't already have the value
-        # such that the parsing logic only needs to be implemented once. If
-        # there is no next value, then peek is set to None anyway so the behaviour
-        # is the same as expected.
-        if not self._peek:
-            self.peek_next()
-        next_val = self._peek
-        self._peek = None
-        return next_val
-
+class BlueForsTempLogFile(BlueForsLogFile):
     def peek_next(self) -> Optional[RawSensorReading]:
         """
-        Return the next sensor reading but do not advance
+        Return the next sensor reading but do not advance. Convert to sensor reading
         """
         if self._peek:
             return self._peek
 
-        if self.fhandle is not None:
-            next_line = self.fhandle.readline()
-            if next_line:
-                date, time, value = next_line.split(",")
-                time = datetime.strptime(f"{date} {time}", DATE_FORMAT).astimezone()
-                self._peek = (time, float(value))
-                return self._peek
-        return None
+        result = super().peek_next()
+        if result:
+            self._peek = result[0], float(result[1])
+        return self._peek
 
 
-class BlueForsTempMonitor(Uploader):
-    def __init__(self):
-        super().__init__()
+class BlueForsTempMonitor(BlueForsSensorMonitor):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         # Load sensors
         self._sensors = config.UPLOAD.BLUEFORS_CONFIG.SENSORS
@@ -94,31 +51,10 @@ class BlueForsTempMonitor(Uploader):
 
         # Find the latest folder and open each file
         self.cwd = self.latest_folder()
-        self._sensor_files: dict[str, BlueForsLogFile] = {}
+        self._sensor_files: dict[str, BlueForsTempLogFile] = {}
         for sensor in self._sensors:
             fname = FILE_PATTERN.format(n=self._sensors[sensor], date=self.cwd.name)
-            self._sensor_files[sensor] = BlueForsLogFile(self.cwd / fname)
-
-    def latest_folder(self):
-        """
-        Find the latest folder in the BF logs directory
-        """
-        # As a shortcut, check if the folder exists for today
-        today = datetime.now().strftime("%y-%m-%d")
-        today_dir = LOG_DIR / today
-        if today_dir.exists():
-            return today_dir
-
-        # Get a list of directories in the log path that match the date format
-        newest = max(
-            (
-                (m.groups(), d)
-                for d in LOG_DIR.iterdir()
-                if d.is_dir() and (m := FOLDER_PATTERN.match(d.name))
-            )
-        )
-        # Return the newest
-        return newest[1]
+            self._sensor_files[sensor] = BlueForsTempLogFile(self.cwd / fname)
 
     def poll(self):
         """
@@ -190,7 +126,7 @@ class BlueForsTempMonitor(Uploader):
             self.cwd = latest_folder
             for sensor in self._sensors:
                 fname = FILE_PATTERN.format(n=self._sensors[sensor], date=self.cwd.name)
-                self._sensor_files[sensor] = BlueForsLogFile(self.cwd / fname)
+                self._sensor_files[sensor] = BlueForsTempLogFile(self.cwd / fname)
             return True
 
         # End of all files, and nothing new
