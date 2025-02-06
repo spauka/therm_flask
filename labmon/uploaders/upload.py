@@ -33,7 +33,7 @@ class Uploader:
         # Are we a supplementary sensor?
         if self.supp is not None:
             supp = quote_plus(self.supp)
-            self._url = urljoin(self._url, f"data/{supp}")
+            self._url = urljoin(f"{self._url}/", f"supp/{supp}")
 
         # Store the time of the latest upload
         self.latest = self.get_latest()
