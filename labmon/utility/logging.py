@@ -2,6 +2,9 @@ import logging
 
 from colorama import Fore, Style, init
 
+root_logger = logging.root
+ch = logging.StreamHandler()
+
 # Init terminal colors
 init(autoreset=True)
 
@@ -23,9 +26,6 @@ class ColoredFormatter(logging.Formatter):
 
 
 def set_logging(level=logging.INFO):
-    root_logger = logging.root
-
-    ch = logging.StreamHandler()
     ch.setLevel(level)
 
     formatter = ColoredFormatter("%(asctime)s - %(levelname)s:%(name)s - %(message)s")
