@@ -9,6 +9,8 @@ from .config import CONFIG_FILE, config
 from .uploaders.bluefors_upload import BlueForsMonitor
 from .utility.logging import set_logging
 
+logger = logging.getLogger(__name__)
+
 UPLOADERS = {
     "BlueFors": BlueForsMonitor,
     # "Leiden": LeidenMonitor,
@@ -50,12 +52,16 @@ if __name__ == "__main__":
         uploaders.append(UPLOADERS[uploader](client=client))
 
     # And start a poll
-    while True:
-        to_poll = deque(range(len(uploaders)))
-        while to_poll:
-            next_poll = to_poll.popleft()
-            if uploaders[next_poll].poll():
-                to_poll.append(next_poll)
+    try:
+        while True:
+            to_poll = deque(range(len(uploaders)))
+            while to_poll:
+                next_poll = to_poll.popleft()
+                if uploaders[next_poll].poll():
+                    to_poll.append(next_poll)
 
-        # Wait 1 second then see if there is more data
-        time.sleep(1)
+            # Wait 1 second then see if there is more data
+            time.sleep(1)
+    except KeyboardInterrupt:
+        logger.warning("Exiting")
+        client.close()
