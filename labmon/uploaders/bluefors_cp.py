@@ -1,13 +1,12 @@
 import logging
 from collections import deque
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional
 
 from ..config import config
 from ..utility.hilbert import hilbert_amplitude
 from .bluefors_common import BlueForsMapLogFile, BlueForsSensorMonitor
 
-MAX_AGE = timedelta(seconds=config.UPLOAD.BLUEFORS_CONFIG.MAX_AGE)
 FILE_PATTERN = "Status_{date}.log"
 CPA_FIELD_MAP = {
     "Low": "cpalpa",
@@ -37,6 +36,19 @@ class BlueForsCompressorMonitor(BlueForsSensorMonitor):
 
         # Save the compressor number
         self.compressor_num = compressor_num
+
+        # Derive the field names
+
+        if compressor_num is not None and compressor_num > 1:
+            self._cpa_field_map = {}
+            self._cpa_bounce_map = {}
+            for site_field, log_field in CPA_FIELD_MAP.items():
+                self._cpa_field_map[site_field] = f"{log_field}_{compressor_num}"
+            for site_field, log_field in CPA_BOUNCE_MAP.items():
+                self._cpa_bounce_map[site_field] = f"{log_field}_{compressor_num}"
+        else:
+            self._cpa_field_map = CPA_FIELD_MAP
+            self._cpa_bounce_map = CPA_BOUNCE_MAP
 
         # Create a list of previous pressures for calculating the bounce
         self.high_bounce = deque(
@@ -81,12 +93,12 @@ class BlueForsCompressorMonitor(BlueForsSensorMonitor):
             # Map values into a dictionary
             values = {}
             values["time"] = time
-            for name, map_name in CPA_FIELD_MAP.items():
+            for name, map_name in self._cpa_field_map.items():
                 values[name] = next_val[map_name]
 
             # Add an estimate of bounce
             bounce = self.bounce(
-                *[next_val[map_name] for map_name in CPA_BOUNCE_MAP.values()]
+                *[next_val[map_name] for map_name in self._cpa_bounce_map.values()]
             )
             if bounce:
                 values["Bounce"] = bounce
@@ -107,9 +119,7 @@ class BlueForsCompressorMonitor(BlueForsSensorMonitor):
             logger.info("Advancing log folder to: %s", str(latest_folder))
             self.cwd = latest_folder()
             self._fname = FILE_PATTERN.format(date=self.cwd.name)
-            self._status_log: BlueForsMapLogFile = BlueForsMapLogFile(
-                self.cwd / self._fname
-            )
+            self._status_log = BlueForsMapLogFile(self.cwd / self._fname)
             return True
 
         # End of all files, and nothing new
