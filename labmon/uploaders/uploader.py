@@ -38,7 +38,7 @@ class Uploader:
         # Store the time of the latest upload
         self.latest = self.get_latest()
 
-    @retry(exception=httpx.TimeoutException)
+    @retry(exception=(httpx.TimeoutException, httpx.HTTPStatusError))
     def get_latest(self):
         """
         Return the timestamp of the latest uploaded dataset
@@ -51,7 +51,7 @@ class Uploader:
         )
         return latest
 
-    @retry(exception=httpx.TimeoutException)
+    @retry(exception=(httpx.TimeoutException, httpx.HTTPStatusError))
     def upload(self, values: dict[str, float | datetime]):
         """
         Upload the latest dataset to the monitoring server.
