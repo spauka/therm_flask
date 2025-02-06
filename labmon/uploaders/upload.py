@@ -58,7 +58,7 @@ class Uploader:
         If "time" is not included, set the time to the current time.
         """
         if "time" not in values:
-            self.latest = datetime.now()
+            self.latest = datetime.now().astimezone()
         elif isinstance(values["time"], datetime):
             self.latest = values["time"]
         else:
