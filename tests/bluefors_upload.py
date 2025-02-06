@@ -8,7 +8,7 @@ from labmon.utility.logging import logging, set_logging
 if __name__ == "__main__":
     set_logging(logging.DEBUG)
     fs = BlueForsTempMonitor()
-    cp = BlueForsCompressorMonitor()
+    cp = BlueForsCompressorMonitor(supp="Compressor")
 
     # For debugging purposes, set the latest time to some value in our dataset
     fs.latest = datetime(
