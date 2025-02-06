@@ -8,12 +8,8 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-flask = "^3.1.0"
-sqlalchemy = "^2.0.36"
-psycopg = "^3.2.3"
 dataclass-wizard = "^0.33.0"
-flask-sqlalchemy = "^3.1.1"
-httpx = "^0.28.1"
+httpx = {extras = ["http2"], version = "^0.28.1"}
 colorama = "^0.4.6"
 
 [tool.poetry.group.uwsgi]
@@ -28,6 +24,13 @@ optional = true
 [tool.poetry.group.dev.dependencies]
 pylint = "^3.3.3"
 black = "^24.10.0"
+
+
+[tool.poetry.group.server.dependencies]
+flask = "^3.1.0"
+flask-sqlalchemy = "^3.1.1"
+psycopg = "^3.2.4"
+sqlalchemy = "^2.0.37"
 
 [build-system]
 requires = ["poetry-core"]
