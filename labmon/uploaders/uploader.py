@@ -61,9 +61,17 @@ class Uploader:
             self.latest = datetime.now().astimezone()
         elif isinstance(values["time"], datetime):
             self.latest = values["time"]
+        elif isinstance(values["time"], str):
+            # Check that the format is valid
+            try:
+                _ = datetime.fromisoformat(values["time"])
+            except ValueError as e:
+                raise ValueError(
+                    f"Invalid format for time. Expecting datetime, got {values['time']}."
+                ) from e
         else:
             raise ValueError(
-                f"Invalid format for time. Expecting datetime, got {values['time']:r}."
+                f"Invalid format for time. Expecting datetime, got {values['time']!r}."
             )
         values["time"] = self.latest.isoformat()
 
