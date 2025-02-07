@@ -4,8 +4,5 @@ from wsgiref.handlers import CGIHandler
 
 from . import create_app
 
-try:
-    app = create_app()
-    CGIHandler().run(app)
-except Exception as e:
-    print(e)
+app = create_app()
+CGIHandler().run(app)

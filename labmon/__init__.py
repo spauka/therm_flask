@@ -3,9 +3,6 @@ import os
 from logging import getLevelName
 from pathlib import Path
 
-from flask import Flask, render_template
-
-from . import db
 from .config import CONF_LOC, CONFIG_FILE, config
 from .utility.logging import set_logging
 
@@ -15,7 +12,7 @@ if config.LOGGING:
     set_logging(level)
 
 
-def create_app() -> Flask:
+def create_app() -> "Flask":
     """
     Create flask app if enabled, load the config and setup routes.
     Otherwise throw an error.
@@ -28,6 +25,13 @@ def create_app() -> Flask:
                 f"Please enable the server in {CONFIG_FILE} and try again."
             )
         )
+
+    # Load server modules
+    # pylint: disable=import-outside-toplevel
+    from flask import Flask, render_template
+
+    # pylint: disable=import-outside-toplevel
+    from . import db, fridge_data
 
     # Create and configure the app
     app = Flask(__name__)
@@ -42,9 +46,6 @@ def create_app() -> Flask:
     @app.route("/")
     def blank():
         return render_template("blank.html", title=app.name)
-
-    # Load fridge data
-    from . import fridge_data  # pylint: disable=import-outside-toplevel
 
     app.register_blueprint(fridge_data.fridge_bp)
 
