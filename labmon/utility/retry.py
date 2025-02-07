@@ -17,28 +17,30 @@ def retry(starting_retry_wait=5.0, multiplier=1.5, exception=Exception):
         ):
             try:
                 return f(*args, **kwargs)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 if isinstance(e, exception):
                     wait_time = retry_wait + random.uniform(1, retry_wait)
                     next_retry_wait = retry_wait * multiplier
-                    logger.warning(
+                    logger.error(
                         (
                             "Retrying function %s due to exception %s. "
-                            "Attempt %d. Waiting %.2f to try again."
+                            "Attempt %d. Waiting %.2f to try again.",
                         ),
                         f.__name__,
                         e.__class__.__name__,
                         retry_count,
                         wait_time,
+                        exc_info=e,
                     )
                     sleep(wait_time)
-                    return f_with_retry(
-                        *args,
-                        retry_wait=next_retry_wait,
-                        retry_count=retry_count + 1,
-                        **kwargs,
-                    )
-                raise e
+                else:
+                    raise e
+                return f_with_retry(
+                    *args,
+                    retry_wait=next_retry_wait,
+                    retry_count=retry_count + 1,
+                    **kwargs,
+                )
 
         return f_with_retry
 
