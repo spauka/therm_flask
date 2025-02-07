@@ -43,7 +43,7 @@ class BlueForsUploadConfig:
             "Four_K": 2,
             "Magnet": 3,
             "Still": 5,
-            "MXC": 6,
+            "MC": 6,
         }
     )
     UPLOAD_COMPRESSORS: bool = True
