@@ -196,11 +196,11 @@ class FridgeView(MethodView):
 
         if "sensors" in request.args:
             return self._sensors_view(data_source)
-        elif "current" in request.args:
+        if "current" in request.args:
             return self._current_view(data_source)
-        elif "summary" in request.args:
+        if "summary" in request.args:
             return self._summary_view(data_source)
-        elif "count" in request.args:
+        if "count" in request.args:
             try:
                 count = int(request.args["count"])
             except ValueError:
@@ -209,16 +209,23 @@ class FridgeView(MethodView):
                     status=400,
                 )
             return self._count_view(data_source, count, avg_period=avg_period)
-        elif "start" in request.args and "stop" in request.args:
+        if "start" in request.args and "stop" in request.args:
             try:
                 try:
                     start = datetime.fromisoformat(request.args["start"])
                 except ValueError:
-                    start = datetime.fromtimestamp(float(request.args["start"]) / 1000)
+                    start_timestamp = float(request.args["start"])
+                    # Detect javascript timestamps
+                    if start_timestamp > 10_000_000_000:
+                        start_timestamp /= 1000
+                    start = datetime.fromtimestamp(start_timestamp)
                 try:
                     stop = datetime.fromisoformat(request.args["stop"])
                 except ValueError:
-                    stop = datetime.fromtimestamp(float(request.args["stop"]) / 1000)
+                    stop_timestamp = float(request.args["stop"])
+                    if stop_timestamp > 10_000_000_000:
+                        stop_timestamp /= 1000
+                    stop = datetime.fromtimestamp(stop_timestamp)
             except ValueError:
                 return Response("Invalid start or stop date.", status=400)
 
@@ -237,16 +244,16 @@ class FridgeView(MethodView):
                 )
 
             return self._date_view(data_source, start, stop, avg_period=avg_period)
-        elif "start" in request.args or "stop" in request.args:
+        if "start" in request.args or "stop" in request.args:
             return Response(
                 "Both start and stop must be provided when requesting a date range",
                 status=400,
             )
-        elif avg_period is not None:
+        if avg_period is not None:
             # Can also return all data if we're asking for averaged data
             return self._date_view(data_source, avg_period=avg_period)
-        else:
-            return Response("Unknown request", status=421)
+
+        return Response("Unknown request", status=421)
 
     def post(self, fridge_name, supp) -> Response:
         data_source = self._get_data_source(fridge_name, supp)
@@ -271,7 +278,12 @@ class FridgeView(MethodView):
                     f"Sensor {field} not found in {data_source.name}", status=400
                 )
             else:
-                data[field] = float(value)
+                try:
+                    data[field] = float(value)
+                except ValueError:
+                    return Response(
+                        f"Invalid value for field {field}: {value!r}", status=400
+                    )
 
         # Add to db
         try:

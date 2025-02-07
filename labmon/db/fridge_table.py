@@ -11,13 +11,15 @@ from .db import SQLAlchemy, db
 class SensorReading:
     """
     Table of sensor readings
-    Note that the table has an index on time descending, so where possible queries are done on that index
-    and then sorted in a subquery if they should be ordered ascending. This is far more efficient than doing
-    an ascending query as it removes the need to do a full scan over the table/index to obtain a count.
+    Note that the table has an index on time descending, so where possible queries
+    are done on that index and then sorted in a subquery if they should be ordered
+    ascending. This is far more efficient than doing an ascending query as it removes
+    the need to do a full scan over the table/index to obtain a count.
     """
 
     # All fridges have a Time column
     __abstract__ = True
+    __table__ = None
     time: Column
 
     def __init__(self):
@@ -30,7 +32,7 @@ class SensorReading:
 
     @classmethod
     def size(cls):
-        query = select(func.count()).select_from(cls)
+        query = select(func.count()).select_from(cls)  # pylint: disable=not-callable
         return db.session.scalar(query)
 
     @classmethod
