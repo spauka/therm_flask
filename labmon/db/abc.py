@@ -1,16 +1,11 @@
+from time import sleep
 from typing import List, Type, TypeVar
-from sqlalchemy import (
-    Column,
-    TIMESTAMP,
-    Integer,
-    Float,
-    Unicode,
-    UnicodeText,
-    inspect,
-)
-from sqlalchemy.orm import Mapped, mapped_column, declared_attr
 
-from .db import db, Base
+from sqlalchemy import TIMESTAMP, Column, Float, Integer, Unicode, UnicodeText, inspect
+from sqlalchemy.exc import InvalidRequestError
+from sqlalchemy.orm import Mapped, declared_attr, mapped_column
+
+from .db import Base, db
 from .fridge_table import SensorReading
 
 SensorReadingT = TypeVar("SensorReadingT", bound=SensorReading)
@@ -27,7 +22,7 @@ class FridgeModel(Base):
     comment: Mapped[str] = mapped_column(UnicodeText)
 
     @declared_attr
-    def sensors(cls) -> List["SensorModel"]:
+    def sensors(cls) -> List["SensorModel"]:  # pylint: disable=no-self-argument
         raise NotImplementedError("Not implemented in ABC")
 
     def fridge_table(self, check_exists=True) -> Type[SensorReadingT]:
@@ -63,7 +58,20 @@ class FridgeModel(Base):
         for sensor in self.sensors:
             new_fridge_table["__annotations__"][sensor.column_name] = Column
             new_fridge_table[sensor.column_name] = mapped_column(Float, nullable=True)
-        fridge_class = type(self.table_name, (Base, SensorReading), new_fridge_table)
+        try:
+            fridge_class = type(
+                self.table_name, (Base, SensorReading), new_fridge_table
+            )
+        except InvalidRequestError as e:
+            # The table was created by another thread while we were working. Let's return
+            # the existing table instead
+            for _ in range(5):
+                sleep(0.01)
+                if self.table_name in _fridge_classes:
+                    return _fridge_classes[self.table_name]
+            raise RuntimeError(
+                f"Couldn't create fridge class for {self.table_name}"
+            ) from e
 
         _fridge_classes[self.table_name] = fridge_class
         return fridge_class
