@@ -35,12 +35,12 @@ def retry(starting_retry_wait=5.0, multiplier=1.5, exception=Exception):
                     sleep(wait_time)
                 else:
                     raise e
-                return f_with_retry(
-                    *args,
-                    retry_wait=next_retry_wait,
-                    retry_count=retry_count + 1,
-                    **kwargs,
-                )
+            return f_with_retry(
+                *args,
+                retry_wait=next_retry_wait,
+                retry_count=retry_count + 1,
+                **kwargs,
+            )
 
         return f_with_retry
 
