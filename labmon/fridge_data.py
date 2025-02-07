@@ -42,12 +42,17 @@ class FridgeView(MethodView):
         """
         data = []
         for sensor in data_source.sensors:
+            if not sensor.visible:
+                continue
             data.append(
                 {
                     "name": sensor.display_name,
                     "column_name": sensor.column_name,
+                    "view_order": sensor.view_order,
                 }
             )
+
+        data.sort(key=lambda x: x["view_order"])
 
         r = Response(json.dumps(data))
         r.mimetype = "application/json"
