@@ -1,7 +1,8 @@
-from typing import Iterable
-from datetime import datetime
 from dataclasses import fields
-from sqlalchemy import Column, TIMESTAMP, select, insert, func
+from datetime import datetime
+from typing import Iterable
+
+from sqlalchemy import TIMESTAMP, Column, func, insert, select
 from sqlalchemy.orm import aliased
 
 from .db import SQLAlchemy, db
@@ -42,7 +43,7 @@ class SensorReading:
             time = values["time"]
             del values["time"]
         else:
-            time = datetime.now()
+            time = datetime.now().astimezone()
 
         try:
             query = insert(cls).values(time=time, **values)

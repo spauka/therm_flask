@@ -84,7 +84,7 @@ class FridgeView(MethodView):
         a data source. By default, we return the last 2 hours of data.
         """
         sensors = data_source.sensors
-        stop = datetime.now()
+        stop = datetime.now().astimezone()
         start = stop - timedelta(hours=2)
         latest_data = data_source.fridge_table().get_between(start, stop)
 
