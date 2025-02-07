@@ -20,6 +20,7 @@ class Uploader:
     def __init__(self, supp=None, client: httpx.Client = None):
         self.fridge = config.UPLOAD.FRIDGE
         self.supp = supp
+        self.supp_str = f"/{supp}" if supp else ""
 
         fridge_url_safe = quote_plus(self.fridge)
         self._url = urljoin(f"{config.UPLOAD.BASE_URL}/", f"{fridge_url_safe}")
@@ -77,18 +78,29 @@ class Uploader:
 
         if config.UPLOAD.MOCK:
             logger.info(
-                "Mock upload data for fridge %s at time %s. Data was: %r",
+                "Mock upload data for fridge %s%s at time %s. Data was: %r",
                 self.fridge,
+                self.supp_str,
                 values["time"],
                 values,
             )
             return "OK"
 
         # Upload to server
-        res = self.client.post(self._url, data=values).raise_for_status()
+        res = self.client.post(self._url, data=values)
+        if not 200 <= res.status_code < 300:
+            logger.error(
+                "Request for fridge %s%s failed with status %d. Response was: %s",
+                self.fridge,
+                self.supp_str,
+                res.status_code,
+                res.text,
+            )
+            res.raise_for_status()
         logger.info(
-            "Uploaded data for fridge %s at time %s. Status: %d.",
+            "Uploaded data for fridge %s%s at time %s. Status: %d.",
             self.fridge,
+            self.supp_str,
             values["time"],
             res.status_code,
         )
