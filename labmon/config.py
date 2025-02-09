@@ -54,6 +54,21 @@ class BlueForsUploadConfig:
     UPLOAD_MAXIGAUGE: bool = True
 
 
+@dataclass(frozon=True)
+class LeidenUploadConfig:
+    LOG_DIR: str = "C:\\avs-47\\"
+    TC_FILE_PATTERN: str = r"LogAVS_Reilly-DR__([0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2})\.dat"
+    SENSORS: dict[str, int] = field(
+        default_factory=lambda: {
+            "Four_K_RuO": 10,
+            "Still_RuO": 11,
+            "Fifty_mK_RuO": 12,
+            "MC_CMN": 13,
+            "MC_PT": 14,
+        }
+    )
+
+
 @dataclass(frozen=True)
 class UploadConfig:
     ENABLED: bool = False
