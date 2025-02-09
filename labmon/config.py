@@ -54,7 +54,7 @@ class BlueForsUploadConfig:
     UPLOAD_MAXIGAUGE: bool = True
 
 
-@dataclass(frozon=True)
+@dataclass(frozen=True)
 class LeidenUploadConfig:
     LOG_DIR: str = "C:\\avs-47\\"
     TC_FILE_PATTERN: str = r"LogAVS_Reilly-DR__([0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2})\.dat"
