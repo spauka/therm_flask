@@ -20,6 +20,8 @@ class FridgeModel(Base):
     table_name: Mapped[str] = mapped_column(Unicode(255), unique=True)
     label: Mapped[str] = mapped_column(Unicode(255))
     comment: Mapped[str] = mapped_column(UnicodeText)
+    enabled: Mapped[bool] = mapped_column(Integer)
+    view_order: Mapped[int] = mapped_column(Integer)
 
     @declared_attr
     def sensors(cls) -> List["SensorModel"]:  # pylint: disable=no-self-argument
