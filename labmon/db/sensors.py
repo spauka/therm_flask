@@ -19,7 +19,7 @@ class Sensor(SensorModel):
         "id", Identity("sensors_id_seq"), primary_key=True
     )
     fridge_id: Mapped[int] = mapped_column(ForeignKey("fridges.id"))
-    fridge: Mapped["Fridge"] = relationship(back_populates="sensors", repr=False)
+    fridge: Mapped["Fridge"] = relationship(back_populates="sensors", repr=False, innerjoin=True)
     column_name: Mapped[str] = mapped_column(Unicode(1024))
     display_name: Mapped[str] = mapped_column(Unicode(1024))
     view_order: Mapped[int] = mapped_column()
@@ -51,7 +51,7 @@ class SensorSupplementary(SensorModel):
         "id", Identity("sensors_supplementary_id_seq"), primary_key=True
     )
     fridge_supp_id: Mapped[int] = mapped_column(ForeignKey("fridges_supplementary.id"))
-    fridge_supp: Mapped["FridgeSupplementary"] = relationship(repr=False)
+    fridge_supp: Mapped["FridgeSupplementary"] = relationship(repr=False, innerjoin=True)
     display_name: Mapped[str] = mapped_column(Unicode(1024))
     column_name: Mapped[str] = mapped_column(Unicode(1024))
     view_order: Mapped[int] = mapped_column()

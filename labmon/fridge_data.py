@@ -5,6 +5,7 @@ from math import isinf, isnan
 from typing import Iterable, Optional, TypeVar
 
 from flask import Blueprint, Response, g, request
+from flask.json import jsonify
 from flask.views import MethodView
 
 from .db import Fridge, FridgeSupplementary
@@ -52,12 +53,9 @@ class FridgeView(MethodView):
                 }
             )
 
-        data.sort(key=lambda x: x["view_order"])
-
-        r = Response(json.dumps(data))
-        r.mimetype = "application/json"
+        r = jsonify(data)
         r.headers["Access-Control-Allow-Origin"] = "*"
-        r.headers["Cache-Control"] = "public, max-age=60"
+        r.headers["Cache-Control"] = "public, max-age=300"
         return r
 
     def _current_view(self, data_source: FridgeModel) -> Response:
@@ -72,8 +70,7 @@ class FridgeView(MethodView):
                 data[k] = None
 
         # Construct response
-        r = Response(json.dumps(data))
-        r.mimetype = "application/json"
+        r = jsonify(data)
         r.headers["Access-Control-Allow-Origin"] = "*"
         r.headers["Cache-Control"] = "public, max-age=5"
         return r
@@ -109,8 +106,7 @@ class FridgeView(MethodView):
                 summary_data.append(min_val)
 
         # Construct response
-        r = Response(json.dumps(summary_data))
-        r.mimetype = "application/json"
+        r = jsonify(data)
         r.headers["Access-Control-Allow-Origin"] = "*"
         r.headers["Cache-Control"] = "public, max-age=5"
         return r
@@ -149,8 +145,7 @@ class FridgeView(MethodView):
         data = self._format_data(fridge_table, latest_n_data)
 
         # Construct response
-        r = Response(json.dumps(data))
-        r.mimetype = "application/json"
+        r = jsonify(data)
         r.headers["Access-Control-Allow-Origin"] = "*"
         r.headers["Cache-Control"] = "public, max-age=30"
         return r
@@ -170,8 +165,7 @@ class FridgeView(MethodView):
         data = self._format_data(fridge_table, fridge_data)
 
         # Construct response
-        r = Response(json.dumps(data))
-        r.mimetype = "application/json"
+        r = jsonify(data)
         r.headers["Access-Control-Allow-Origin"] = "*"
         r.headers["Cache-Control"] = "public, max-age=300"
         return r

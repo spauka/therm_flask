@@ -1,12 +1,6 @@
 import string
 from typing import List, Iterable, TYPE_CHECKING
-from sqlalchemy import (
-    Unicode,
-    UnicodeText,
-    Identity,
-    ForeignKey,
-    select,
-)
+from sqlalchemy import Unicode, UnicodeText, Identity, ForeignKey, select
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.exc import NoResultFound
 
@@ -18,27 +12,19 @@ if TYPE_CHECKING:
 
 
 class Fridge(FridgeModel):
-    fridge_id: Mapped[int] = mapped_column(
-        "id", Identity("fridge_id_seq"), primary_key=True
-    )
+    fridge_id: Mapped[int] = mapped_column("id", Identity("fridge_id_seq"), primary_key=True)
     name: Mapped[str] = mapped_column(Unicode(255), unique=True)
     label: Mapped[str] = mapped_column(Unicode(255))
-    table_name: Mapped[str] = mapped_column(
-        "fridge_table_name", Unicode(255), unique=True
-    )
+    table_name: Mapped[str] = mapped_column("fridge_table_name", Unicode(255), unique=True)
     comment: Mapped[str] = mapped_column(UnicodeText)
-    sensors: Mapped[List["Sensor"]] = relationship(back_populates="fridge")
-    supplementary: Mapped[List["FridgeSupplementary"]] = relationship(
-        back_populates="fridge"
+    sensors: Mapped[List["Sensor"]] = relationship(
+        back_populates="fridge", order_by="Sensor.view_order"
     )
+    supplementary: Mapped[List["FridgeSupplementary"]] = relationship(back_populates="fridge")
     __tablename__ = "fridges"
 
     def __init__(
-        self,
-        name: str,
-        table_name: str = None,
-        sensors: Iterable["Sensor"] = (),
-        comment="",
+        self, name: str, table_name: str = None, sensors: Iterable["Sensor"] = (), comment=""
     ):
         self.name = name
         # Derive a table name if not given
@@ -55,8 +41,7 @@ class Fridge(FridgeModel):
         Sanitize a name to a format acceptable for table names
         """
         return "".join(
-            c.lower() if c in string.ascii_letters + string.digits else "_"
-            for c in name
+            c.lower() if c in string.ascii_letters + string.digits else "_" for c in name
         )
 
     @classmethod
@@ -89,7 +74,7 @@ class FridgeSupplementary(FridgeModel):
     fridge: Mapped["Fridge"] = relationship(repr=False)
     comment: Mapped[str] = mapped_column(UnicodeText())
     sensors: Mapped[List["SensorSupplementary"]] = relationship(
-        back_populates="fridge_supp"
+        back_populates="fridge_supp", order_by="SensorSupplementary.view_order"
     )
     __tablename__ = "fridges_supplementary"
 
@@ -109,9 +94,7 @@ class FridgeSupplementary(FridgeModel):
         self.comment = comment
 
     @classmethod
-    def get_fridge_supp_by_name(
-        cls, fridge: Fridge, name: str
-    ) -> "FridgeSupplementary":
+    def get_fridge_supp_by_name(cls, fridge: Fridge, name: str) -> "FridgeSupplementary":
         """
         Return a supplementary fridge object from the given name
         """
