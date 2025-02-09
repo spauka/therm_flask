@@ -53,7 +53,9 @@ class BlueForsTempMonitor(BlueForsSensorMonitor):
         self._sensors = config.UPLOAD.BLUEFORS_CONFIG.SENSORS
         self._values = {}
         for sensor in self._sensors:
-            self._values[sensor] = SensorReading(None, datetime.min.astimezone(), True)
+            self._values[sensor] = SensorReading(
+                None, datetime.fromtimestamp(0).astimezone(), True
+            )
 
         # Find the latest folder and open each file
         self.cwd = self.latest_folder()
