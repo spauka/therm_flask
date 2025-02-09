@@ -1,6 +1,6 @@
 import dataclasses
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, TypeAlias
 
 from ..config import config
@@ -54,7 +54,7 @@ class BlueForsTempMonitor(BlueForsSensorMonitor):
         self._values = {}
         for sensor in self._sensors:
             self._values[sensor] = SensorReading(
-                None, datetime.fromtimestamp(0).astimezone(), True
+                None, datetime.fromtimestamp(0).replace(tzinfo=timezone.utc), True
             )
 
         # Find the latest folder and open each file
