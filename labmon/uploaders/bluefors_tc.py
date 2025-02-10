@@ -137,11 +137,11 @@ class BlueForsTempMonitor(BlueForsSensorMonitor):
         # End of all files, and nothing new
         return False
 
-    def upload(self, _values=None):
+    def upload(self, values=None):
         """
         Upload data and mark all sensor values as uploaded
         """
-        # And upload all values, taking the time from the OLDEST sensor reading
+        # And upload all values, taking the time from the OLDEST not-uploaded sensor reading
         upload_values = {
             sensor: value.value
             for sensor, value in self._values.items()
@@ -150,9 +150,14 @@ class BlueForsTempMonitor(BlueForsSensorMonitor):
         upload_values["time"] = min(
             value.last_read for value in self._values.values() if value.uploaded is False
         )
-        super().upload(upload_values)
+        logger.debug(
+            "Stale values are: %r", [value for value in self._values.values() if value.is_stale()]
+        )
+        res = super().upload(upload_values)
 
         # Update status of all sensors to uploaded
         for sensor, value in self._values.items():
             if not value.uploaded:
                 self._values[sensor] = dataclasses.replace(value, **{"uploaded": True})
+
+        return res

@@ -36,6 +36,7 @@ class ServerConfig:
 @dataclass(frozen=True)
 class BlueForsUploadConfig:
     LOG_DIR: str = "C:\\BlueFors_Logs"
+    LOG_WARNING_INTERVAL: int = 1_800 # Warn missing files every 30 minutes
     MAX_AGE: float = 180.0  # Maximum age of data in seconds
     SENSORS: dict[str, int] = field(
         default_factory=lambda: {

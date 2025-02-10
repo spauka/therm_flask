@@ -51,7 +51,7 @@ class Uploader:
         return latest
 
     @retry(exception=(httpx.TimeoutException, httpx.HTTPStatusError))
-    def upload(self, values: dict[str, float | datetime | str]):
+    def upload(self, values: dict[str, float | datetime | str]) -> str:
         """
         Upload the latest dataset to the monitoring server.
         If "time" is not included, set the time to the current time.

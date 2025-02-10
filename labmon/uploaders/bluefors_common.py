@@ -1,6 +1,6 @@
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from io import TextIOWrapper
 from pathlib import Path
 from typing import Optional, TypeAlias, Any
@@ -11,6 +11,7 @@ from .uploader import Uploader
 LOG_DIR = Path(config.UPLOAD.BLUEFORS_CONFIG.LOG_DIR)
 FOLDER_PATTERN = re.compile(r"([0-9]{2})-([0-9]{2})-([0-9]{2})")
 DATE_FORMAT = "%d-%m-%y %H:%M:%S"
+LOG_WARNING_INTERVAL = timedelta(seconds=config.UPLOAD.BLUEFORS_CONFIG.LOG_WARNING_INTERVAL)
 
 logger = logging.getLogger(__name__)
 
@@ -24,17 +25,21 @@ class BlueForsLogFile:
         self.filename = filename
         self._fhandle = None
         self._peek = None
+        self._last_warned = datetime.fromtimestamp(0).replace(tzinfo=timezone.utc)
 
     @property
     def fhandle(self) -> Optional[TextIOWrapper]:
         if self._fhandle is None:
             try:
                 self._fhandle = open(self.filename, "r", encoding="utf-8")
+                self._last_warned = datetime.fromtimestamp(0).replace(tzinfo=timezone.utc)
             except FileNotFoundError:
-                logger.warning(
-                    "Sensor file %s not found. May not exist yet. Will try again later.",
-                    self.filename,
-                )
+                if (datetime.now().astimezone() - self._last_warned) > LOG_WARNING_INTERVAL:
+                    logger.warning(
+                        "Sensor file %s not found. May not exist yet. Will try again later.",
+                        self.filename,
+                    )
+                    self._last_warned = datetime.now().astimezone()
         return self._fhandle
 
     def return_next(self) -> Optional[RawLogFileReading]:
