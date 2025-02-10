@@ -5,16 +5,18 @@ from time import sleep
 logger = logging.getLogger(__name__)
 
 
-def retry(starting_retry_wait=5.0, multiplier=1.5, exception=Exception):
+def retry(
+    starting_retry_wait=5.0,
+    multiplier=1.5,
+    exception: tuple[type[Exception], ...] | type[Exception] = Exception,
+):
     """
     Decorator to add timeout with exponential backoff to function
     on exception
     """
 
     def retry_func(f):
-        def f_with_retry(
-            *args, retry_wait=starting_retry_wait, retry_count=0, **kwargs
-        ):
+        def f_with_retry(*args, retry_wait=starting_retry_wait, retry_count=0, **kwargs):
             try:
                 return f(*args, **kwargs)
             except Exception as e:  # pylint: disable=broad-exception-caught
