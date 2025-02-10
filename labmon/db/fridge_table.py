@@ -1,11 +1,12 @@
-from dataclasses import fields
+from dataclasses import Field, fields
 from datetime import datetime
-from typing import Iterable
+from typing import Iterable, Optional
 
-from sqlalchemy import TIMESTAMP, Column, func, insert, select
+from sqlalchemy import TIMESTAMP, Column, func, insert, select, Table
 from sqlalchemy.orm import aliased
+from sqlalchemy.exc import CompileError, IntegrityError
 
-from .db import SQLAlchemy, db
+from .db import db
 
 
 class SensorReading:
@@ -19,7 +20,8 @@ class SensorReading:
 
     # All fridges have a Time column
     __abstract__ = True
-    __table__ = None
+    __table__: Table
+    __dataclass_fields__: dict[str, Field]
     time: Column
 
     def __init__(self):
@@ -52,9 +54,9 @@ class SensorReading:
             db.session.execute(query)
             db.session.commit()
             return True
-        except SQLAlchemy.exc.CompileError as exc:
+        except CompileError as exc:
             raise KeyError("Invalid column name") from exc
-        except SQLAlchemy.exc.IntegrityError:
+        except IntegrityError:
             # This occurs if we try and add a duplicate timestamp
             # We can fail quietly here
             return False
@@ -75,7 +77,7 @@ class SensorReading:
 
     @classmethod
     def get_between(
-        cls, start: datetime = None, stop: datetime = None
+        cls, start: Optional[datetime] = None, stop: Optional[datetime] = None
     ) -> Iterable["SensorReading"]:
         """
         Return sensor readings taken between the start and stop times
@@ -100,7 +102,10 @@ class SensorReading:
 
     @classmethod
     def hourly_avg(
-        cls, start: datetime = None, stop: datetime = None, count: int = None
+        cls,
+        start: Optional[datetime] = None,
+        stop: Optional[datetime] = None,
+        count: Optional[int] = None,
     ) -> Iterable["SensorReading"]:
         """
         Return hourly average
@@ -112,9 +117,9 @@ class SensorReading:
     def avg_data(
         cls,
         time_period: str = "hour",
-        start: datetime = None,
-        stop: datetime = None,
-        count: int = None,
+        start: Optional[datetime] = None,
+        stop: Optional[datetime] = None,
+        count: Optional[int] = None,
     ) -> Iterable["SensorReading"]:
         """
         Averaged data over a time period given by time_period

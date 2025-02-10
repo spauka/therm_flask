@@ -1,9 +1,6 @@
-import json
-import os
 from logging import getLevelName
-from pathlib import Path
 
-from .config import CONF_LOC, CONFIG_FILE, config
+from .config import CONFIG_FILE, config
 from .utility.logging import set_logging
 
 # Check and enable logging if set
@@ -12,7 +9,7 @@ if config.LOGGING:
     set_logging(level)
 
 
-def create_app() -> "Flask":
+def create_app() -> "Flask":  # noqa: F821
     """
     Create flask app if enabled, load the config and setup routes.
     Otherwise throw an error.

@@ -1,4 +1,3 @@
-import json
 from dataclasses import asdict, fields
 from datetime import datetime, timedelta
 from math import isinf, isnan
@@ -9,7 +8,7 @@ from flask.json import jsonify
 from flask.views import MethodView
 
 from .db import Fridge, FridgeSupplementary
-from .db.abc import FridgeModel, SensorReading, SensorReadingT
+from .db.abc import FridgeModel, SensorReading
 
 fridge_bp = Blueprint("fridge_data", __name__)
 
@@ -22,7 +21,7 @@ def _first(iterable: Iterable[T]) -> T:
 
 
 class FridgeView(MethodView):
-    def _get_data_source(self, fridge_name: str, supp: str) -> Optional[FridgeModel]:
+    def _get_data_source(self, fridge_name: str, supp: Optional[str]) -> Optional[FridgeModel]:
         try:
             g.fridge = Fridge.get_fridge_by_name(fridge_name)
             if supp is not None:
@@ -110,7 +109,7 @@ class FridgeView(MethodView):
         return r
 
     def _format_data(
-        self, fridge_table: SensorReadingT, rows: Iterable[SensorReading]
+        self, fridge_table: type[SensorReading], rows: Iterable[SensorReading]
     ) -> dict[str, list]:
         # Format the data correctly
         data = {}
