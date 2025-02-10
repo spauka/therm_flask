@@ -13,20 +13,34 @@ angular.module('app.controllers', [])
         }
         // This should be a property since it's shared globally
         $scope.lastUpdated = 'Never';
+        $scope.historic = false;
+        $scope.toggleHistoric = function(value) {
+            $scope.historic = value;
+            if (value) {
+                $location.search("historic", "");
+            } else {
+                $location.search("historic", null);
+            }
+        };
     }])
     .controller('FridgeViewController', ['$scope', '$routeParams', '$interval', '$timeout', function ($scope, $routeParams, $interval, $timeout) {
         $scope.pagetitle = $routeParams.fridge.replace('_', ' ');
         $scope.params = $routeParams;
         $scope.sensors = [];
-	$scope.sensorsLoaded = false;
+        $scope.sensorsLoaded = false;
         $scope.values = {};
         $scope.charts = {};
         $scope.initialData = null;
         $scope.requests = [];
 
+        // Check route parameters - if historic is there, force historic on
+        const shouldBeHistoric = "historic" in $routeParams;
+        if (shouldBeHistoric != $scope.historic) {
+            $scope.toggleHistoric(shouldBeHistoric);
+        }
+
         // Figure out the data URL's for the fridge
         $scope.fridge = $routeParams.fridge;
-        $scope.historic = 'historic' in $routeParams;
         if ('supp' in $routeParams) {
             $scope.supp = $routeParams.supp;
             $scope.baseURL = new URL($routeParams.fridge + "/supp/" + $scope.supp, data_uri);
