@@ -133,11 +133,9 @@ angular.module('app.controllers', [])
                 data.forEach(element => {
                     $scope.values[element.column_name] = NaN;
                 });
-                // Perform an initial fetch of the values. This occurs even for historic datasets
-                fetchCurrent(true);
                 // Trigger an update of the page with the new sensor values
                 $scope.$apply();
-		$scope.sensorsLoaded = true;
+                $scope.sensorsLoaded = true;
 
                 // Check if we've already loaded our initial dataset. If we have, set an update once
                 // we've finished rendering
@@ -161,6 +159,9 @@ angular.module('app.controllers', [])
                         $scope.$parent.lastUpdated = "Never";
                     });
                 }
+                // Perform an initial fetch of the values. This occurs even for historic datasets
+                fetchCurrent(true);
+
                 console.log("Loaded",$scope.sensors.length,"sensors for Fridge",$scope.fridge,"("+$scope.supp+")");
             }).catch((error) => {
                 if (error.name === 'AbortError') {
