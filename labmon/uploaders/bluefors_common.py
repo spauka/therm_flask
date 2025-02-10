@@ -1,9 +1,9 @@
 import logging
 import re
 from datetime import datetime
-from io import FileIO
+from io import TextIOWrapper
 from pathlib import Path
-from typing import Optional, TypeAlias
+from typing import Optional, TypeAlias, Any
 
 from ..config import config
 from .uploader import Uploader
@@ -14,7 +14,7 @@ DATE_FORMAT = "%d-%m-%y %H:%M:%S"
 
 logger = logging.getLogger(__name__)
 
-RawLogFileReading: TypeAlias = tuple[datetime, str]
+RawLogFileReading: TypeAlias = tuple[datetime, str] | tuple[datetime, Any]
 MapLogFileReading: TypeAlias = tuple[datetime, dict[str, float]]
 
 
@@ -26,7 +26,7 @@ class BlueForsLogFile:
         self._peek = None
 
     @property
-    def fhandle(self) -> Optional[FileIO]:
+    def fhandle(self) -> Optional[TextIOWrapper]:
         if self._fhandle is None:
             try:
                 self._fhandle = open(self.filename, "r", encoding="utf-8")
@@ -79,7 +79,11 @@ class BlueForsMapLogFile(BlueForsLogFile):
         Return next value. Note that this will have been mapped to the right format
         by the peek function.
         """
-        return super().return_next()
+        if not self._peek:
+            self.peek_next()
+        next_val = self._peek
+        self._peek = None
+        return next_val
 
     def peek_next(self) -> Optional[MapLogFileReading]:
         """

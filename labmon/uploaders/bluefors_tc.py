@@ -30,7 +30,11 @@ class BlueForsTempLogFile(BlueForsLogFile):
         """
         Return next sensor reading.
         """
-        return super().return_next()
+        if not self._peek:
+            self.peek_next()
+        next_val = self._peek
+        self._peek = None
+        return next_val
 
     def peek_next(self) -> Optional[TempSensorReading]:
         """
@@ -85,9 +89,7 @@ class BlueForsTempMonitor(BlueForsSensorMonitor):
         # Check if there are any new values
         if next_value:
             (time, value), sensor = next_value
-            logger.debug(
-                "Read next value for sensor %s at %s: %.2f", sensor, time, value
-            )
+            logger.debug("Read next value for sensor %s at %s: %.2f", sensor, time, value)
             # Advance the file
             self._sensor_files[sensor].return_next()
 
@@ -110,13 +112,8 @@ class BlueForsTempMonitor(BlueForsSensorMonitor):
 
         # If there are any sensor values that haven't been uploaded but are going stale,
         # then upload them here
-        if any(
-            sensor.is_stale() and not sensor.uploaded
-            for sensor in self._values.values()
-        ):
-            logger.warning(
-                "Uploading data due to staleness. Is there new data flowing?"
-            )
+        if any(sensor.is_stale() and not sensor.uploaded for sensor in self._values.values()):
+            logger.warning("Uploading data due to staleness. Is there new data flowing?")
             self.upload()
             return True
 
@@ -151,9 +148,7 @@ class BlueForsTempMonitor(BlueForsSensorMonitor):
             if value.uploaded is False or value.is_stale() is False
         }
         upload_values["time"] = min(
-            value.last_read
-            for value in self._values.values()
-            if value.uploaded is False
+            value.last_read for value in self._values.values() if value.uploaded is False
         )
         super().upload(upload_values)
 
