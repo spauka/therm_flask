@@ -26,9 +26,7 @@ class FridgeView(MethodView):
         try:
             g.fridge = Fridge.get_fridge_by_name(fridge_name)
             if supp is not None:
-                g.fridge_supp = FridgeSupplementary.get_fridge_supp_by_name(
-                    g.fridge, supp
-                )
+                g.fridge_supp = FridgeSupplementary.get_fridge_supp_by_name(g.fridge, supp)
                 g.fridge_table = g.fridge_supp.fridge_table()
                 return g.fridge_supp
             g.fridge_supp = None
@@ -106,7 +104,7 @@ class FridgeView(MethodView):
                 summary_data.append(min_val)
 
         # Construct response
-        r = jsonify(data)
+        r = jsonify(summary_data)
         r.headers["Access-Control-Allow-Origin"] = "*"
         r.headers["Cache-Control"] = "public, max-age=5"
         return r
@@ -173,9 +171,7 @@ class FridgeView(MethodView):
     def get(self, fridge_name, supp) -> Response:
         data_source = self._get_data_source(fridge_name, supp)
         if data_source is None:
-            return Response(
-                f"Unable to find fridge {fridge_name}, supp: {supp}.", status=404
-            )
+            return Response(f"Unable to find fridge {fridge_name}, supp: {supp}.", status=404)
 
         avg_period = request.args.get("avg_period", None)
         if avg_period is not None:
@@ -199,7 +195,7 @@ class FridgeView(MethodView):
                 count = int(request.args["count"])
             except ValueError:
                 return Response(
-                    f"Count must be a positive integer. Got {request.args["count"]}",
+                    f"Count must be a positive integer. Got {request.args['count']}",
                     status=400,
                 )
             return self._count_view(data_source, count, avg_period=avg_period)
@@ -232,7 +228,7 @@ class FridgeView(MethodView):
                 return Response(
                     (
                         "An averaging period must be given for intervals longer than 30 days. "
-                        f"Requested interval: {str(stop-start)}"
+                        f"Requested interval: {str(stop - start)}"
                     ),
                     status=400,
                 )
@@ -251,6 +247,9 @@ class FridgeView(MethodView):
 
     def post(self, fridge_name, supp) -> Response:
         data_source = self._get_data_source(fridge_name, supp)
+        if data_source is None:
+            return Response(f"Unable to find fridge {fridge_name}, supp: {supp}.", status=404)
+
         valid_sensors = set(sensor.column_name for sensor in data_source.sensors)
 
         # Put the data in a json array
@@ -264,20 +263,14 @@ class FridgeView(MethodView):
                     try:
                         data["time"] = datetime.fromtimestamp(float(value))
                     except ValueError:
-                        return Response(
-                            f"Invalid time format: {data["time"]}", status=400
-                        )
+                        return Response(f"Invalid time format: {data['time']}", status=400)
             elif field not in valid_sensors:
-                return Response(
-                    f"Sensor {field} not found in {data_source.name}", status=400
-                )
+                return Response(f"Sensor {field} not found in {data_source.name}", status=400)
             else:
                 try:
                     data[field] = float(value)
                 except ValueError:
-                    return Response(
-                        f"Invalid value for field {field}: {value!r}", status=400
-                    )
+                    return Response(f"Invalid value for field {field}: {value!r}", status=400)
 
         # Add to db
         try:
