@@ -21,7 +21,6 @@ class SensorReading:
     # All fridges have a Time column
     __abstract__ = True
     __table__: Table
-    __dataclass_fields__: dict[str, Field]
     time: Column
 
     def __init__(self):
