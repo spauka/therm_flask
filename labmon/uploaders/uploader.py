@@ -17,7 +17,7 @@ class Uploader:
     _url: str
     latest: datetime
 
-    def __init__(self, supp=None, client: httpx.Client = None):
+    def __init__(self, supp=None, client: Optional[httpx.Client] = None):
         self.fridge = config.UPLOAD.FRIDGE
         self.supp = supp
         self.supp_str = f"/{supp}" if supp else ""
@@ -47,13 +47,11 @@ class Uploader:
         res = self.client.get(self._url, params={"current": ""})
         data = res.json()
         latest = datetime.fromisoformat(data["time"])
-        logger.info(
-            "Latest data for fridge %s was %s.", self.fridge, latest.isoformat()
-        )
+        logger.info("Latest data for fridge %s was %s.", self.fridge, latest.isoformat())
         return latest
 
     @retry(exception=(httpx.TimeoutException, httpx.HTTPStatusError))
-    def upload(self, values: dict[str, float | datetime]):
+    def upload(self, values: dict[str, float | datetime | str]):
         """
         Upload the latest dataset to the monitoring server.
         If "time" is not included, set the time to the current time.
@@ -65,7 +63,7 @@ class Uploader:
         elif isinstance(values["time"], str):
             # Check that the format is valid
             try:
-                _ = datetime.fromisoformat(values["time"])
+                self.latest = datetime.fromisoformat(values["time"]).astimezone()
             except ValueError as e:
                 raise ValueError(
                     f"Invalid format for time. Expecting datetime, got {values['time']}."
