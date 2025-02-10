@@ -57,7 +57,11 @@ class BlueForsUploadConfig:
 @dataclass(frozen=True)
 class LeidenUploadConfig:
     LOG_DIR: str = "C:\\avs-47\\"
-    TC_FILE_PATTERN: str = r"LogAVS_Reilly-DR__([0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2})\.dat"
+    TC_FILE_PATTERN: str = (
+        r"LogAVS_Reilly-DR__([0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2})\.dat"
+    )
+    # Check for a new log file after this many seconds with no new data
+    NEW_LOG_CHECK_INTERVAL: int = 300
     SENSORS: dict[str, int] = field(
         default_factory=lambda: {
             "Four_K_RuO": 10,
@@ -75,10 +79,9 @@ class UploadConfig:
     MOCK: bool = False  # Simulate upload only, don't actually upload
     BASE_URL: str = "https://qsyd.sydney.edu.au/data"
     FRIDGE: str = "?"  # Fill in with fridge name
-    ENABLED_UPLOADERS: list[str] = field(
-        default_factory=lambda: ["BlueFors"]
-    )  # Can also be Leiden
+    ENABLED_UPLOADERS: list[str] = field(default_factory=lambda: ["BlueFors"])  # Can also be Leiden
     BLUEFORS_CONFIG: BlueForsUploadConfig = BlueForsUploadConfig()
+    LEIDEN_CONFIG: LeidenUploadConfig = LeidenUploadConfig()
 
 
 @dataclass(frozen=True)
@@ -93,17 +96,12 @@ class Config(JSONFileWizard, JSONWizard):
 
 
 if not CONFIG_FILE.exists():
-    logger.warning(
-        "Config file doesn't exist. Creating new file at %s.", str(CONFIG_FILE)
-    )
+    logger.warning("Config file doesn't exist. Creating new file at %s.", str(CONFIG_FILE))
     config: Config = Config()
     config.to_json_file(CONFIG_FILE, indent=2)
 
     # Print message and exit
-    message = (
-        f"Created config file at {CONFIG_FILE}.\n"
-        f"Please fill in details and start again."
-    )
+    message = f"Created config file at {CONFIG_FILE}.\nPlease fill in details and start again."
     print(message)
     logger.error(message)
     sys.exit(0)
