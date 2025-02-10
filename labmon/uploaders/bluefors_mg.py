@@ -74,7 +74,7 @@ class BlueForsMaxiGaugeMonitor(BlueForsSensorMonitor):
 
             # We've found a new folder
             logger.info("Advancing log folder to: %s", str(latest_folder))
-            self.cwd = latest_folder()
+            self.cwd = latest_folder
             self._fname = FILE_PATTERN.format(date=self.cwd.name)
             self._status_log = BlueForsLogFile(self.cwd / self._fname)
             return True
