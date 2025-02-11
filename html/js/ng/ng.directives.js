@@ -73,12 +73,22 @@ smartApp
             $timeout(function() {
                 var chart = createChart(chartData);
                 chart.showLoading('Loading Data...');
+
+                // Check if the data for the graph is already loaded
+                if (scope.initialData !== null) {
+                    populateGraph(thermid, chart, scope.initialData, historic);
+                    delete scope.initialData[thermid];
+                    scope.loadedCharts.push(thermid);
+                    // Clear the initial data array if we've loaded all charts
+                    if (scope.loadedCharts.length == scope.sensors.length)
+                        delete scope.initialData["time"];
+                }
             }, 0);
 
             element.on('$destroy', function () {
                 if (thermid in scope.charts && scope.charts[thermid] !== null) {
                     scope.charts[thermid].destroy();
-                    scope.charts[thermid] = null;
+                    delete scope.charts[thermid];
                 }
             });
         }

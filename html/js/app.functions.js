@@ -67,6 +67,22 @@ function fetchWithAbort(request, controllers) {
     return get;
 }
 
+function populateGraph(col_name, chart, data, historic=false) {
+    const count = data["time"].length;
+    const sens_arr = data[col_name];
+    // Prepare the data in the right format for the sensor
+    const data_arr = Array.from({ length: count }, (_, i) => [data["time"][i], sens_arr[i]]);
+    const linkedUpdateState = chart.linkedUpdate;
+    chart.linkedUpdate = true;
+    chart.series[0].setData(data_arr);
+    if (historic) {
+        chart.originalData = data_arr;
+        chart.navigator.series[0].setData(data_arr);
+    }
+    chart.hideLoading();
+    chart.linkedUpdate = linkedUpdateState;
+}
+
 function populateGraphs(sensors, charts, data, historic=false) {
     // Get the number of elements
     const count = data["time"].length;

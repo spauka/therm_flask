@@ -30,6 +30,7 @@ angular.module('app.controllers', [])
         $scope.sensorsLoaded = false;
         $scope.values = {};
         $scope.charts = {};
+        $scope.loadedCharts = [];
         $scope.initialData = null;
         $scope.requests = [];
 
@@ -94,6 +95,9 @@ angular.module('app.controllers', [])
                             }
                         }
                     }
+
+                    // Force update of the table
+                    $scope.$apply();
                 }).catch((error) => {
                     if (error.name === 'AbortError') {
                         console.log('Request aborted.');
@@ -103,17 +107,41 @@ angular.module('app.controllers', [])
                 });
         };
 
-        // Load the initial data
+        // Start a request to load the initial data
         var request = new Request($scope.dataURL, { destination: "json", cache: "no-store" });
         fetchWithAbort(request, $scope.requests)
             .then((response) => response.json())
             .then((data) => {
-                // Check that sensors has returned successfully, if so we are ready to populate graphs
-                // with data, otherwise let sensors return before we call populateGraphs
+                // Convert the time field into Date objects
+                data["time"].forEach((timestamp) => new Date(timestamp).getTime());
+
+                // Check that sensors has loaded. If it has, then try to load the data into the
+                // charts, otherwise save the data.
                 if ($scope.sensorsLoaded) {
-                    populateGraphs($scope.sensors, $scope.charts, data, $scope.historic);
-                    $scope.initialData = null; // Delete initial data load, not needed any more
+                    $scope.loadedCharts = Object.keys($scope.charts);
+                    const num_charts = $scope.loadedCharts.length;
+                    $scope.loadedCharts.forEach((col_name) => {
+                        setTimeout(() => {
+                            populateGraph(col_name, $scope.charts[col_name], data, $scope.historic);
+                            delete data[col_name];
+                        });
+                    });
+                    if (num_charts != $scope.sensors.length) {
+                        // Some charts are still loading
+                        console.log(
+                            "Saving data for future chart loads since",
+                            num_charts,
+                            "of",
+                            $scope.sensors.length,
+                            "charts loaded."
+                        );
+                        $scope.initialData = data;
+                    } else {
+                        // Delete initial data load, not needed any more
+                        $scope.initialData = null;
+                    }
                 } else {
+                    // All charts are still loading
                     $scope.initialData = data;
                 }
             }).catch((error) => {
@@ -136,15 +164,6 @@ angular.module('app.controllers', [])
                 // Trigger an update of the page with the new sensor values
                 $scope.$apply();
                 $scope.sensorsLoaded = true;
-
-                // Check if we've already loaded our initial dataset. If we have, set an update once
-                // we've finished rendering
-                if ($scope.initialData !== null) {
-                    $timeout(function () {
-                        populateGraphs($scope.sensors, $scope.charts, $scope.initialData, $scope.historic);
-                        $scope.initialData = null;
-                    }, 1);
-                }
 
                 // Create a periodic update if we are not looking at historic data. This is not worth setting
                 // up until the sensors are loaded
