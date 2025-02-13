@@ -67,10 +67,15 @@ class BlueForsLogFile:
         if self.fhandle is not None:
             next_line = self.fhandle.readline()
             if next_line:
-                date, time, value = next_line.split(",", maxsplit=2)
-                time = datetime.strptime(f"{date} {time}", DATE_FORMAT).astimezone()
-                self._peek = (time, value)
-                return self._peek
+                try:
+                    date, time, value = next_line.split(",", maxsplit=2)
+                    time = datetime.strptime(f"{date} {time}", DATE_FORMAT).astimezone()
+                    self._peek = (time, value)
+                    return self._peek
+                except ValueError:
+                    # Incorrectly formatted line
+                    logger.error("Unable to parse line in file %s: %s\nIgnoring line.", self.filename, next_line.strip())
+                    self._peek = None
         return None
 
 
