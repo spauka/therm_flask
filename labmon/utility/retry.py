@@ -6,8 +6,9 @@ logger = logging.getLogger(__name__)
 
 
 def retry(
-    starting_retry_wait=5.0,
+    starting_retry_wait=1.0,
     multiplier=1.5,
+    max_wait=300.0,
     exception: tuple[type[Exception], ...] | type[Exception] = Exception,
 ):
     """
@@ -16,13 +17,15 @@ def retry(
     """
 
     def retry_func(f):
-        def f_with_retry(*args, retry_wait=starting_retry_wait, retry_count=0, **kwargs):
+        def f_with_retry(
+            *args, retry_wait=starting_retry_wait, retry_count=0, max_wait=max_wait, **kwargs
+        ):
             try:
                 return f(*args, **kwargs)
             except Exception as e:  # pylint: disable=broad-exception-caught
                 if isinstance(e, exception):
-                    wait_time = retry_wait + random.uniform(1, retry_wait)
-                    next_retry_wait = retry_wait * multiplier
+                    wait_time = (retry_wait / 2) + random.uniform(1, retry_wait)
+                    next_retry_wait = min(retry_wait * multiplier, max_wait)
                     logger.error(
                         (
                             "Retrying function %s due to exception %s. "
