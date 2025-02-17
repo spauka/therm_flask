@@ -25,3 +25,5 @@ ExecReload=/bin/kill -HUP $MAINPID
 KillSignal=SIGQUIT
 Type=simple
 
+[Install]
+WantedBy=multi-user.target
