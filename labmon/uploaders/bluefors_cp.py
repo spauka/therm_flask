@@ -87,12 +87,17 @@ class BlueForsCompressorMonitor(BlueForsSensorMonitor):
             # Map values into a dictionary
             values = {}
             values["time"] = time
+            missing_fields = []
             for name, map_name in self._cpa_field_map.items():
                 try:
                     values[name] = next_val[map_name]
                 except KeyError:
                     # If the field isn't found we just won't upload it
-                    pass
+                    missing_fields.append(name)
+            if missing_fields:
+                logger.warning(
+                    "Failed to read sensors %r from compressor %s.", missing_fields, self.supp
+                )
 
             # Add an estimate of bounce
             try:
@@ -103,7 +108,7 @@ class BlueForsCompressorMonitor(BlueForsSensorMonitor):
                     values["Bounce"] = bounce
             except KeyError:
                 # Similarly if we weren't able to extract a value for the bounce, ignore it
-                pass
+                logger.warning("Failed to calculate bounce for compressor %s.", self.supp)
 
             self.upload(values)
             return True

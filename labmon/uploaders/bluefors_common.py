@@ -116,7 +116,9 @@ class BlueForsMapLogFile(BlueForsLogFile):
                     mapped_values[name] = float(value)
                 except ValueError:
                     # If the value is an invalid float, don't map it
-                    pass
+                    logger.warning(
+                        "Failed to parse sensor %s to a number. Value was %s.", name, value
+                    )
 
             self._peek = time, mapped_values
         return self._peek
