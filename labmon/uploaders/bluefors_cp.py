@@ -51,19 +51,13 @@ class BlueForsCompressorMonitor(BlueForsSensorMonitor):
             self._cpa_bounce_map = CPA_BOUNCE_MAP
 
         # Create a list of previous pressures for calculating the bounce
-        self.high_bounce = deque(
-            maxlen=config.UPLOAD.BLUEFORS_CONFIG.COMPRESSOR_BOUNCE_N
-        )
-        self.low_bounce = deque(
-            maxlen=config.UPLOAD.BLUEFORS_CONFIG.COMPRESSOR_BOUNCE_N
-        )
+        self.high_bounce = deque(maxlen=config.UPLOAD.BLUEFORS_CONFIG.COMPRESSOR_BOUNCE_N)
+        self.low_bounce = deque(maxlen=config.UPLOAD.BLUEFORS_CONFIG.COMPRESSOR_BOUNCE_N)
 
         # Find the latest folder and open the status file
         self.cwd = self.latest_folder()
         self._fname = FILE_PATTERN.format(date=self.cwd.name)
-        self._status_log: BlueForsMapLogFile = BlueForsMapLogFile(
-            self.cwd / self._fname
-        )
+        self._status_log: BlueForsMapLogFile = BlueForsMapLogFile(self.cwd / self._fname)
 
     def bounce(self, lp, hp) -> Optional[float]:
         self.low_bounce.append(lp)
@@ -107,7 +101,7 @@ class BlueForsCompressorMonitor(BlueForsSensorMonitor):
                 )
                 if bounce:
                     values["Bounce"] = bounce
-            except KeyError
+            except KeyError:
                 # Similarly if we weren't able to extract a value for the bounce, ignore it
                 pass
 
