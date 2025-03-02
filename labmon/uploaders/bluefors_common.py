@@ -74,7 +74,11 @@ class BlueForsLogFile:
                     return self._peek
                 except ValueError:
                     # Incorrectly formatted line
-                    logger.error("Unable to parse line in file %s: %s\nIgnoring line.", self.filename, next_line.strip())
+                    logger.error(
+                        "Unable to parse line in file %s: %s\nIgnoring line.",
+                        self.filename,
+                        next_line.strip(),
+                    )
                     self._peek = None
         return None
 
@@ -108,7 +112,11 @@ class BlueForsMapLogFile(BlueForsLogFile):
             # Convert values to a mapping
             mapped_values = {}
             for name, value in zip(*[iter(values)] * 2):
-                mapped_values[name] = float(value)
+                try:
+                    mapped_values[name] = float(value)
+                except ValueError:
+                    # If the value is an invalid float, don't map it
+                    pass
 
             self._peek = time, mapped_values
         return self._peek

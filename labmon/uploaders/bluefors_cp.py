@@ -94,14 +94,22 @@ class BlueForsCompressorMonitor(BlueForsSensorMonitor):
             values = {}
             values["time"] = time
             for name, map_name in self._cpa_field_map.items():
-                values[name] = next_val[map_name]
+                try:
+                    values[name] = next_val[map_name]
+                except KeyError:
+                    # If the field isn't found we just won't upload it
+                    pass
 
             # Add an estimate of bounce
-            bounce = self.bounce(
-                *[next_val[map_name] for map_name in self._cpa_bounce_map.values()]
-            )
-            if bounce:
-                values["Bounce"] = bounce
+            try:
+                bounce = self.bounce(
+                    *[next_val[map_name] for map_name in self._cpa_bounce_map.values()]
+                )
+                if bounce:
+                    values["Bounce"] = bounce
+            except KeyError
+                # Similarly if we weren't able to extract a value for the bounce, ignore it
+                pass
 
             self.upload(values)
             return True
