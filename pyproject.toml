@@ -32,6 +32,12 @@ flask-sqlalchemy = "^3.1.1"
 psycopg = "^3.2.4"
 sqlalchemy = "^2.0.37"
 
+[tool.poetry.group.visa]
+optional = true
+
+[tool.poetry.group.visa.dependencies]
+pyvisa = "^1.14.1"
+
 [tool.ruff]
 line-length = 100
 indent-width = 4

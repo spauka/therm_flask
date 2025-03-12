@@ -36,7 +36,7 @@ class ServerConfig:
 @dataclass(frozen=True)
 class BlueForsUploadConfig:
     LOG_DIR: str = "C:\\BlueFors_Logs"
-    LOG_WARNING_INTERVAL: int = 1_800 # Warn missing files every 30 minutes
+    LOG_WARNING_INTERVAL: int = 1_800  # Warn missing files every 30 minutes
     MAX_AGE: float = 180.0  # Maximum age of data in seconds
     SENSORS: dict[str, int] = field(
         default_factory=lambda: {
@@ -75,6 +75,20 @@ class LeidenUploadConfig:
 
 
 @dataclass(frozen=True)
+class Lakeshore336Config:
+    ADDRESS: str = "TCPIP0::10.1.1.10::7777::SOCKET"
+    UPLOAD_INTERVAL: float = 20.0
+    SENSORS: dict[str, str] = field(
+        default_factory=lambda: {
+            "A": "Four_K_Pt",
+            "B": "Fifty_K_Pt",
+            "C": "Four_K_RuO",
+            "D": "Sample",
+        }
+    )
+
+
+@dataclass(frozen=True)
 class UploadConfig:
     ENABLED: bool = False
     MOCK: bool = False  # Simulate upload only, don't actually upload
@@ -83,6 +97,7 @@ class UploadConfig:
     ENABLED_UPLOADERS: list[str] = field(default_factory=lambda: ["BlueFors"])  # Can also be Leiden
     BLUEFORS_CONFIG: BlueForsUploadConfig = BlueForsUploadConfig()
     LEIDEN_CONFIG: LeidenUploadConfig = LeidenUploadConfig()
+    LAKESHORE_CONFIG: Lakeshore336Config = Lakeshore336Config()
 
 
 @dataclass(frozen=True)
