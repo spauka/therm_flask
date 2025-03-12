@@ -11,7 +11,7 @@ from .uploader import Uploader
 logger = logging.getLogger(__name__)
 
 
-class Lakeshore336Uploader(Uploader):
+class Lakeshore336Monitor(Uploader):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
