@@ -53,6 +53,8 @@ class Lakeshore336Monitor(Uploader):
                     try:
                         sensor_value = self._instr_conn.query(f"KRDG? {channel}").strip(";")
                         data[sensor] = float(sensor_value)
+                        if config.UPLOAD.LAKESHORE_CONFIG.UPLOAD_MILLIKELVIN:
+                            data[sensor] *= 1000
                     except ValueError:
                         logger.warning(
                             "Failed to parse value for sensor %s: %s", sensor, sensor_value

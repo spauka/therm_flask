@@ -78,6 +78,7 @@ class LeidenUploadConfig:
 class Lakeshore336Config:
     ADDRESS: str = "TCPIP0::10.1.1.10::7777::SOCKET"
     UPLOAD_INTERVAL: float = 20.0
+    UPLOAD_MILLIKELVIN: bool = False
     SENSORS: dict[str, str] = field(
         default_factory=lambda: {
             "A": "Four_K_Pt",
