@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 import pyvisa as visa
+from pyvisa.resources import MessageBasedResource
 
 from ..utility.retry import retry
 from ..config import config
@@ -15,16 +16,23 @@ class Lakeshore336Monitor(Uploader):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._instr_conn: Optional[visa.resources.Resource] = None
+        self._instr_conn: Optional[visa.resources.MessageBasedResource] = None
         self.upload_interval = timedelta(seconds=config.UPLOAD.LAKESHORE_CONFIG.UPLOAD_INTERVAL)
 
-    @retry(multiplier=1.2, max_wait=15, exception=visa.errors.VisaIOError)
-    def open_connection(self) -> visa.resources.Resource:
+    @retry(multiplier=1.2, max_wait=15, exception=(RuntimeError, visa.errors.VisaIOError))
+    def open_connection(self) -> visa.resources.MessageBasedResource:
         """
         Try opening a connection to the lakeshore
         """
         rm = visa.ResourceManager()
         t336 = rm.open_resource(config.UPLOAD.LAKESHORE_CONFIG.ADDRESS)
+        if not isinstance(t336, visa.resources.MessageBasedResource):
+            raise RuntimeError(
+                (
+                    "Invalid connection to Lakeshore. Can't query instrument. "
+                    f"Check the instrument address: {config.UPLOAD.LAKESHORE_CONFIG.ADDRESS}"
+                )
+            )
         t336.write_termination = "\n"
         t336.read_termination = "\r\n"
 
