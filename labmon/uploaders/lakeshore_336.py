@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 import pyvisa as visa
-from pyvisa.resources import MessageBasedResource
 
 from ..utility.retry import retry
 from ..config import config
