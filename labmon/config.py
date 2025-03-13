@@ -13,6 +13,7 @@ import os
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Optional
 
 from dataclass_wizard import JSONFileWizard, JSONWizard
 
@@ -90,6 +91,17 @@ class Lakeshore336Config:
 
 
 @dataclass(frozen=True)
+class CryomechConfig:
+    ADDRESS: str = "ASRL4"
+    # Note: Old version with the 7x3 display is v1,
+    # New version with the graphical screen is v2
+    COMPRESSOR_VERSION: str = "v1"
+    COMPRESSOR_ADDRESS: int = 16
+    BAUD_RATE: Optional[int] = 115200
+    UPLOAD_INTERVAL: float = 20.0
+
+
+@dataclass(frozen=True)
 class UploadConfig:
     ENABLED: bool = False
     MOCK: bool = False  # Simulate upload only, don't actually upload
@@ -99,6 +111,7 @@ class UploadConfig:
     BLUEFORS_CONFIG: BlueForsUploadConfig = BlueForsUploadConfig()
     LEIDEN_CONFIG: LeidenUploadConfig = LeidenUploadConfig()
     LAKESHORE_CONFIG: Lakeshore336Config = Lakeshore336Config()
+    CRYOMECH_CONFIG: CryomechConfig = CryomechConfig()
 
 
 @dataclass(frozen=True)
