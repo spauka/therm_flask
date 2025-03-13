@@ -182,7 +182,7 @@ class CryomechMonitor(Uploader):
             )
 
         # Check response
-        logger.info("Connected to Compressor. Total runtime: ", cryomech.run_time)
+        logger.info("Connected to Compressor. Total runtime: %.1f h", cryomech.run_time)
 
         return cryomech
 
