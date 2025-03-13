@@ -12,13 +12,70 @@ from .uploader import Uploader
 logger = logging.getLogger(__name__)
 
 
+CPA_FIELD_MAP = {
+    "Bounce": "bounce",
+    "Current": "motor_current",
+    "Helium": "helium_temp",
+    "Oil": "oil_temp",
+    "WaterIn": "input_water_temp",
+    "WaterOut": "output_water_temp",
+    "Delta": "average_delta_pressure",
+    "High": "average_high_pressure",
+    "Low": "average_low_pressure",
+}
+
+
 class Cryomech:
     @property
-    def run_time(self):
+    def state(self) -> bool:
         raise NotImplementedError()
 
     @property
-    def input_water_temp(self):
+    def run_time(self) -> float:
+        raise NotImplementedError()
+
+    @property
+    def motor_current(self) -> float:
+        raise NotImplementedError()
+
+    @property
+    def input_water_temp(self) -> float:
+        raise NotImplementedError()
+
+    @property
+    def output_water_temp(self) -> float:
+        raise NotImplementedError()
+
+    @property
+    def oil_temp(self) -> float:
+        raise NotImplementedError()
+
+    @property
+    def helium_temp(self) -> float:
+        raise NotImplementedError()
+
+    @property
+    def high_pressure(self) -> float:
+        raise NotImplementedError()
+
+    @property
+    def low_pressure(self) -> float:
+        raise NotImplementedError()
+
+    @property
+    def average_high_pressure(self) -> float:
+        raise NotImplementedError()
+
+    @property
+    def average_low_pressure(self) -> float:
+        raise NotImplementedError()
+
+    @property
+    def average_delta_pressure(self) -> float:
+        raise NotImplementedError()
+
+    @property
+    def bounce(self) -> float:
         raise NotImplementedError()
 
 
@@ -145,12 +202,56 @@ class CryomechV1(Cryomech):
         return res[4]
 
     @property
+    def state(self):
+        return bool(self.query(self.CPA_PARAMETERS["STATE"]))
+
+    @property
     def run_time(self):
         return self.query(self.CPA_PARAMETERS["RUNTIME"]) / 60
 
     @property
+    def motor_current(self) -> float:
+        return self.query(self.CPA_PARAMETERS["MOTOR_CURRENT"])
+
+    @property
     def input_water_temp(self):
         return 0.1 * self.query(self.CPA_PARAMETERS["INPUT_WATER_TEMP_dC"])
+
+    @property
+    def output_water_temp(self) -> float:
+        return 0.1 * self.query(self.CPA_PARAMETERS["OUTPUT_WATER_TEMP_dC"])
+
+    @property
+    def oil_temp(self) -> float:
+        return 0.1 * self.query(self.CPA_PARAMETERS["OIL_TEMP_dC"])
+
+    @property
+    def helium_temp(self) -> float:
+        return 0.1 * self.query(self.CPA_PARAMETERS["HELIUM_TEMP_dC"])
+
+    @property
+    def high_pressure(self) -> float:
+        return 0.1 * self.query(self.CPA_PARAMETERS["PRES_HIGH_dPSI"])
+
+    @property
+    def low_pressure(self) -> float:
+        return 0.1 * self.query(self.CPA_PARAMETERS["PRES_LOW_dPSI"])
+
+    @property
+    def average_high_pressure(self) -> float:
+        return 0.1 * self.query(self.CPA_PARAMETERS["AVERAGE_PRES_HIGH_dPSI"])
+
+    @property
+    def average_low_pressure(self) -> float:
+        return 0.1 * self.query(self.CPA_PARAMETERS["AVERAGE_PRES_LOW_dPSI"])
+
+    @property
+    def average_delta_pressure(self) -> float:
+        return 0.1 * self.query(self.CPA_PARAMETERS["AVERAGE_PRES_DELTA_dPSI"])
+
+    @property
+    def bounce(self) -> float:
+        return 0.1 * self.query(self.CPA_PARAMETERS["AVERAGE_BOUNCE_dPSI"])
 
 
 class CryomechMonitor(Uploader):
