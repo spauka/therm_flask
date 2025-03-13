@@ -146,7 +146,7 @@ class CryomechV1(Cryomech):
 
     @property
     def run_time(self):
-        return self.query(self.CPA_PARAMETERS["RUNTIME"])
+        return self.query(self.CPA_PARAMETERS["RUNTIME"]) / 60
 
     @property
     def input_water_temp(self):
@@ -199,6 +199,7 @@ class CryomechMonitor(Uploader):
         try:
             if (datetime.now().astimezone() - self.latest) > self.upload_interval:
                 logger.warning("Water temp: %.1f", self._instr_conn.input_water_temp)
+                self.latest = datetime.now().astimezone()
                 # We're ready to upload the next dataset
                 return True
         except (RuntimeError, ValueError, visa.errors.VisaIOError) as e:
