@@ -8,6 +8,7 @@ import httpx
 from .config import CONFIG_FILE, config
 from .uploaders.bluefors_upload import BlueForsMonitor
 from .uploaders.lakeshore_336 import Lakeshore336Monitor
+from .uploaders.cryomech import CryomechMonitor
 from .utility.logging import set_logging
 
 logger = logging.getLogger(__name__)
@@ -15,6 +16,7 @@ logger = logging.getLogger(__name__)
 UPLOADERS = {
     "BlueFors": BlueForsMonitor,
     "Lakeshore336": Lakeshore336Monitor,
+    "Cryomech": CryomechMonitor,
     # "Leiden": LeidenMonitor,
 }
 
