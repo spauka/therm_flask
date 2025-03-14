@@ -103,7 +103,7 @@ class CryomechV1(Cryomech):
     CMD_READ = 0x63
     CMD_WRITE = 0x61
     COMMAND_STRUCT = struct.Struct(">BBB3sB")
-    RESULT_STRUCT = struct.Struct(">BBB3sIB")
+    RESULT_STRUCT = struct.Struct(">BBB3siB")
 
     def __init__(self, handle: visa.resources.MessageBasedResource, address: int):
         self.handle = handle
