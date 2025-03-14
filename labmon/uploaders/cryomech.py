@@ -1,10 +1,12 @@
 import logging
+from collections import deque
 from datetime import datetime, timedelta
 from typing import Optional
 import struct
 
 import pyvisa as visa
 
+from ..utility.hilbert import hilbert_amplitude
 from ..utility.retry import retry
 from ..config import config
 from .uploader import Uploader
@@ -261,6 +263,13 @@ class CryomechMonitor(Uploader):
         self._instr_conn: Optional[Cryomech] = None
         self.upload_interval = timedelta(seconds=config.UPLOAD.LAKESHORE_CONFIG.UPLOAD_INTERVAL)
 
+        if config.UPLOAD.CRYOMECH_CONFIG.USE_CALCULATED_BOUNCE:
+            self.high_bounce = deque(maxlen=config.UPLOAD.CRYOMECH_CONFIG.COMPRESSOR_BOUNCE_N)
+            self.low_bounce = deque(maxlen=config.UPLOAD.CRYOMECH_CONFIG.COMPRESSOR_BOUNCE_N)
+        else:
+            self.high_bounce = None
+            self.low_bounce = None
+
     @retry(multiplier=1.2, max_wait=15, exception=visa.errors.VisaIOError)
     def open_connection(self) -> Cryomech:
         """
@@ -297,11 +306,28 @@ class CryomechMonitor(Uploader):
         if self._instr_conn is None:
             self._instr_conn = self.open_connection()
 
+            if self.low_bounce is not None and self.high_bounce is not None:
+                self.low_bounce.clear()
+                self.high_bounce.clear()
+
         try:
             if (datetime.now().astimezone() - self.latest) > self.upload_interval:
-                logger.warning("Water temp: %.1f", self._instr_conn.input_water_temp)
-                self.latest = datetime.now().astimezone()
-                # We're ready to upload the next dataset
+                data = {}
+                # Pull all parameters from the compressor
+                for field, param_name in CPA_FIELD_MAP:
+                    data[field] = getattr(self._instr_conn, param_name)
+
+                # Check if we want to manually calculate bounce
+                if self.low_bounce is not None and self.high_bounce is not None:
+                    self.low_bounce.append(self._instr_conn.low_pressure)
+                    self.high_bounce.append(self._instr_conn.high_pressure)
+
+                    low_bounce = hilbert_amplitude(self.low_bounce)
+                    high_bounce = hilbert_amplitude(self.high_bounce)
+                    data["Bounce"] = (low_bounce + high_bounce) / 2
+
+                # And upload the data
+                self.upload(data)
                 return True
         except (RuntimeError, ValueError, visa.errors.VisaIOError) as e:
             logger.error("Communication with cryomech failed. Will try to reconnect...", exc_info=e)

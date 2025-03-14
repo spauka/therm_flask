@@ -99,6 +99,11 @@ class CryomechConfig:
     COMPRESSOR_ADDRESS: int = 16
     BAUD_RATE: Optional[int] = 115200
     UPLOAD_INTERVAL: float = 20.0
+    # Read the value of bounce from the compressor if false
+    # otherwise attempt to calculate ourselves. If true, use COMPRESSOR_BOUNCE_N
+    # points to calculate bounce
+    USE_CALCULATED_BOUNCE: bool = False
+    COMPRESSOR_BOUNCE_N: int = 15
 
 
 @dataclass(frozen=True)
