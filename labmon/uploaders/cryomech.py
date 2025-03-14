@@ -314,7 +314,7 @@ class CryomechMonitor(Uploader):
             if (datetime.now().astimezone() - self.latest) > self.upload_interval:
                 data = {}
                 # Pull all parameters from the compressor
-                for field, param_name in CPA_FIELD_MAP:
+                for field, param_name in CPA_FIELD_MAP.items():
                     data[field] = getattr(self._instr_conn, param_name)
 
                 # Check if we want to manually calculate bounce
