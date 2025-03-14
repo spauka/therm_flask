@@ -258,10 +258,13 @@ class CryomechV1(Cryomech):
 
 class CryomechMonitor(Uploader):
     def __init__(self, *args, **kwargs):
+        if config.UPLOAD.CRYOMECH_CONFIG.SUPP is not None:
+            # If this is a supplementary uploader, add the table name
+            kwargs["supp"] = config.UPLOAD.CRYOMECH_CONFIG.SUPP
         super().__init__(*args, **kwargs)
 
         self._instr_conn: Optional[Cryomech] = None
-        self.upload_interval = timedelta(seconds=config.UPLOAD.LAKESHORE_CONFIG.UPLOAD_INTERVAL)
+        self.upload_interval = timedelta(seconds=config.UPLOAD.CRYOMECH_CONFIG.UPLOAD_INTERVAL)
 
         if config.UPLOAD.CRYOMECH_CONFIG.USE_CALCULATED_BOUNCE:
             self.high_bounce = deque(maxlen=config.UPLOAD.CRYOMECH_CONFIG.COMPRESSOR_BOUNCE_N)

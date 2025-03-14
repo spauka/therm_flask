@@ -93,6 +93,9 @@ class Lakeshore336Config:
 @dataclass(frozen=True)
 class CryomechConfig:
     ADDRESS: str = "ASRL4"
+    # If this compressor is attached to a fridge, give the supplementary
+    # table name
+    SUPP: Optional[str] = None
     # Note: Old version with the 7x3 display is v1,
     # New version with the graphical screen is v2
     COMPRESSOR_VERSION: str = "v1"
