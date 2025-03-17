@@ -69,6 +69,14 @@ class PfeifferMaxiGaugeMonitor(Uploader):
                     f"Check the instrument address: {config.UPLOAD.MAXIGAUGE_CONFIG.ADDRESS}"
                 )
             )
+
+        # Set baud rate if given
+        if (
+            isinstance(maxigauge, visa.resources.SerialInstrument)
+            and config.UPLOAD.MAXIGAUGE_CONFIG.BAUD_RATE is not None
+        ):
+            maxigauge.baud_rate = config.UPLOAD.MAXIGAUGE_CONFIG.BAUD_RATE
+
         maxigauge.write_termination = "\r"
         maxigauge.read_termination = "\r\n"
 
