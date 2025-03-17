@@ -100,9 +100,9 @@ class MaxigaugeConfig:
     UPLOAD_INTERVAL: float = 20.0
     SENSORS: dict[str, str] = field(
         default_factory=lambda: {
-            "3": "IVC",
-            "4": "OVC",
-            "5": "Still",
+            "3": "OVC",
+            "4": "IVC",
+            "5": "STILL",
         }
     )
 
