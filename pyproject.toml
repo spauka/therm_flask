@@ -11,6 +11,7 @@ python = "^3.9"
 dataclass-wizard = "^0.33.0"
 httpx = {extras = ["http2"], version = "^0.28.1"}
 colorama = "^0.4.6"
+pyvisa = "^1.14.1"
 
 [tool.poetry.group.uwsgi]
 optional = true
@@ -31,12 +32,6 @@ flask = "^3.1.0"
 flask-sqlalchemy = "^3.1.1"
 psycopg = "^3.2.4"
 sqlalchemy = "^2.0.37"
-
-[tool.poetry.group.visa]
-optional = true
-
-[tool.poetry.group.visa.dependencies]
-pyvisa = "^1.14.1"
 
 [tool.ruff]
 line-length = 100
