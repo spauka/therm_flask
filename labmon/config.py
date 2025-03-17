@@ -93,6 +93,9 @@ class Lakeshore336Config:
 @dataclass(frozen=True)
 class MaxigaugeConfig:
     ADDRESS: str = "ASRL4"
+    # If this maxigauge is attached to a fridge, give the supplementary
+    # table name
+    SUPP: Optional[str] = None
     BAUD_RATE: Optional[int] = 9600
     UPLOAD_INTERVAL: float = 20.0
     SENSORS: dict[str, str] = field(

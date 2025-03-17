@@ -28,6 +28,9 @@ class SensorStatus(IntEnum):
 
 class PfeifferMaxiGaugeMonitor(Uploader):
     def __init__(self, *args, **kwargs):
+        if config.UPLOAD.MAXIGAUGE_CONFIG.SUPP is not None:
+            # If this is a supplementary uploader, add the table name
+            kwargs["supp"] = config.UPLOAD.MAXIGAUGE_CONFIG.SUPP
         super().__init__(*args, **kwargs)
 
         self._instr_conn: Optional[visa.resources.MessageBasedResource] = None
