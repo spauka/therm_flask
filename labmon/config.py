@@ -102,7 +102,7 @@ class MaxigaugeConfig:
         default_factory=lambda: {
             "3": "OVC",
             "4": "IVC",
-            "5": "STILL",
+            "5": "Still ",
         }
     )
 

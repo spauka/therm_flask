@@ -104,7 +104,7 @@ class PfeifferMaxiGaugeMonitor(Uploader):
                     sensor_value = ""
                     try:
                         sensor_value = self.query(f"PR{channel}")
-                        status_str, value = sensor_value.split()
+                        status_str, value = sensor_value.split(",")
                         status = SensorStatus(int(status_str))
                         if status is SensorStatus.OK:
                             data[sensor] = float(value)
