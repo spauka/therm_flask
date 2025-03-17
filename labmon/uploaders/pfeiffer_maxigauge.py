@@ -26,7 +26,7 @@ class SensorStatus(IntEnum):
     SENS_UNIDENT = 6
 
 
-class PfiefferMaxiGaugeMonitor(Uploader):
+class PfeifferMaxiGaugeMonitor(Uploader):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
