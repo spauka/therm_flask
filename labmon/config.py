@@ -91,6 +91,20 @@ class Lakeshore336Config:
 
 
 @dataclass(frozen=True)
+class MaxigaugeConfig:
+    ADDRESS: str = "ASRL4"
+    BAUD_RATE: Optional[int] = 9600
+    UPLOAD_INTERVAL: float = 20.0
+    SENSORS: dict[str, str] = field(
+        default_factory=lambda: {
+            "3": "IVC",
+            "4": "OVC",
+            "5": "Still",
+        }
+    )
+
+
+@dataclass(frozen=True)
 class CryomechConfig:
     ADDRESS: str = "ASRL4"
     # If this compressor is attached to a fridge, give the supplementary
@@ -120,6 +134,7 @@ class UploadConfig:
     LEIDEN_CONFIG: LeidenUploadConfig = LeidenUploadConfig()
     LAKESHORE_CONFIG: Lakeshore336Config = Lakeshore336Config()
     CRYOMECH_CONFIG: CryomechConfig = CryomechConfig()
+    MAXIGAUGE_CONFIG: MaxigaugeConfig = MaxigaugeConfig()
 
 
 @dataclass(frozen=True)
