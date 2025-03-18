@@ -26,12 +26,17 @@ optional = true
 pylint = "^3.3.3"
 black = "^24.10.0"
 
-
 [tool.poetry.group.server.dependencies]
 flask = "^3.1.0"
 flask-sqlalchemy = "^3.1.1"
 psycopg = "^3.2.4"
 sqlalchemy = "^2.0.37"
+
+[tool.setuptools.package-data]
+pkgname = ["py.typed"]
+
+[tool.setuptools.packages.find]
+where = ["labmon"]
 
 [tool.ruff]
 line-length = 100
