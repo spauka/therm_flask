@@ -1,4 +1,5 @@
 import logging
+from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Optional
 from urllib.parse import quote_plus, urljoin
@@ -11,12 +12,30 @@ from ..utility import retry
 logger = logging.getLogger(__name__)
 
 
-class Uploader:
+class UploaderABC(ABC):
     fridge: str
     supp: Optional[str]
     _url: str
     latest: datetime
 
+    @abstractmethod
+    def __init__(self, supp=None, client: Optional[httpx.Client | httpx.AsyncClient] = None): ...
+
+    @abstractmethod
+    def get_latest(self) -> datetime: ...
+
+    @abstractmethod
+    def poll(self) -> bool: ...
+
+    @abstractmethod
+    def upload(self, values: dict[str, float | datetime | str]) -> str: ...
+
+
+class AsyncUploader(UploaderABC):
+    pass
+
+
+class Uploader(UploaderABC):
     def __init__(self, supp=None, client: Optional[httpx.Client] = None):
         self.fridge = config.UPLOAD.FRIDGE
         self.supp = supp
@@ -40,7 +59,7 @@ class Uploader:
         self.latest = self.get_latest()
 
     @retry(exception=(httpx.TimeoutException, httpx.HTTPStatusError))
-    def get_latest(self):
+    def get_latest(self) -> datetime:
         """
         Return the timestamp of the latest uploaded dataset
         """
