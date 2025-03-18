@@ -162,7 +162,10 @@ if not CONFIG_FILE.exists():
     logger.error(message)
     sys.exit(0)
 else:
-    config: Config = Config.from_json_file(CONFIG_FILE)
+    loaded_config = Config.from_json_file(CONFIG_FILE)
+    assert isinstance(loaded_config, Config)
+    config: Config = loaded_config
+
 logger.info("Loaded config file %s", str(CONFIG_FILE))
 logger.debug("Config parameters: %r", config)
 
