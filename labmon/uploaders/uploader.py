@@ -113,7 +113,7 @@ class BaseUploader:
         logger.debug("Response was: %s", res.text)
 
 
-class AsyncUploader(BaseUploader):
+class Uploader(BaseUploader):
     def __init__(
         self, supp=None, client: Optional[httpx.AsyncClient] = None, factory: bool = False
     ):
@@ -125,10 +125,17 @@ class AsyncUploader(BaseUploader):
 
         super().__init__(supp=supp, factory=factory)
 
+    @property
+    def poll_interval(self):
+        """
+        Return the polling interval. This should be overwritten by child classes.
+        """
+        return 1
+
     @classmethod
     async def create_uploader(
         cls, *args, supp=None, client: Optional[httpx.AsyncClient] = None, **kwargs
-    ):
+    ) -> "Uploader":
         new_inst = cls(*args, supp=supp, client=client, factory=True, **kwargs)
         new_inst.latest = await new_inst.get_latest()
         return new_inst
@@ -166,14 +173,14 @@ class AsyncUploader(BaseUploader):
         self.latest = latest
         return res.text
 
-    def poll(self):
+    async def poll(self) -> bool:
         """
-        Check for new values
+        Check for new values. Return true if new values were uploaded.
         """
         raise NotImplementedError("Uploaders must implement this method to check logs")
 
 
-class Uploader(BaseUploader):
+class OldUploader(BaseUploader):
     def __init__(self, supp=None, client: Optional[httpx.Client] = None, factory: bool = False):
         # Create httpx client
         if client is None:
@@ -184,7 +191,9 @@ class Uploader(BaseUploader):
         super().__init__(supp=supp, factory=factory)
 
     @classmethod
-    def create_uploader(cls, *args, supp=None, client: Optional[httpx.Client] = None, **kwargs):
+    def create_uploader(
+        cls, *args, supp=None, client: Optional[httpx.Client] = None, **kwargs
+    ) -> "OldUploader":
         new_inst = cls(*args, supp=supp, client=client, factory=True, **kwargs)
         new_inst.latest = new_inst.get_latest()
         return new_inst
@@ -222,8 +231,8 @@ class Uploader(BaseUploader):
         self.latest = latest
         return res.text
 
-    def poll(self):
+    def poll(self) -> bool:
         """
-        Check for new values
+        Check for new values. Return true if new values were uploaded.
         """
         raise NotImplementedError("Uploaders must implement this method to check logs")
