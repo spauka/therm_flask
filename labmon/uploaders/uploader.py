@@ -17,7 +17,18 @@ class BaseUploader:
     _url: str
     latest: datetime
 
-    def __init__(self, supp: Optional[str] = None):
+    def __init__(self, supp: Optional[str] = None, factory: bool = False):
+        """
+        Initialize an uploader and calculate the URLs.
+
+        In general, this should be created using the create_uploader factory function, if it
+        is called directly, raise a RuntimeError.
+        """
+        if factory is False:
+            raise RuntimeError(
+                "Uploaders should be created using the create_uploader factory rather than directly."
+            )
+
         self.fridge = config.UPLOAD.FRIDGE
         self.supp = supp
         self.supp_str = f"/{supp}" if supp else ""
@@ -103,20 +114,22 @@ class BaseUploader:
 
 
 class AsyncUploader(BaseUploader):
-    def __init__(self, supp=None, client: Optional[httpx.AsyncClient] = None):
+    def __init__(
+        self, supp=None, client: Optional[httpx.AsyncClient] = None, factory: bool = False
+    ):
         # Create httpx client
         if client is None:
             self.client = httpx.AsyncClient(http2=True)
         else:
             self.client = client
 
-        super().__init__(supp)
+        super().__init__(supp=supp, factory=factory)
 
     @classmethod
     async def create_uploader(
         cls, *args, supp=None, client: Optional[httpx.AsyncClient] = None, **kwargs
     ):
-        new_inst = cls(*args, supp=supp, client=client, **kwargs)
+        new_inst = cls(*args, supp=supp, client=client, factory=True, **kwargs)
         new_inst.latest = await new_inst.get_latest()
         return new_inst
 
@@ -125,6 +138,8 @@ class AsyncUploader(BaseUploader):
         """
         Return the timestamp of the latest uploaded dataset
         """
+        if config.UPLOAD.MOCK:
+            return datetime.now().astimezone()
         res = await self.client.get(self._url, params={"current": ""})
         data = res.json()
         latest = datetime.fromisoformat(data["time"])
@@ -159,18 +174,18 @@ class AsyncUploader(BaseUploader):
 
 
 class Uploader(BaseUploader):
-    def __init__(self, supp=None, client: Optional[httpx.Client] = None):
+    def __init__(self, supp=None, client: Optional[httpx.Client] = None, factory: bool = False):
         # Create httpx client
         if client is None:
             self.client = httpx.Client(http2=True)
         else:
             self.client = client
 
-        super().__init__(supp)
+        super().__init__(supp=supp, factory=factory)
 
     @classmethod
     def create_uploader(cls, *args, supp=None, client: Optional[httpx.Client] = None, **kwargs):
-        new_inst = cls(*args, supp=supp, client=client, **kwargs)
+        new_inst = cls(*args, supp=supp, client=client, factory=True, **kwargs)
         new_inst.latest = new_inst.get_latest()
         return new_inst
 
@@ -179,6 +194,8 @@ class Uploader(BaseUploader):
         """
         Return the timestamp of the latest uploaded dataset
         """
+        if config.UPLOAD.MOCK:
+            return datetime.now().astimezone()
         res = self.client.get(self._url, params={"current": ""})
         data = res.json()
         latest = datetime.fromisoformat(data["time"])
