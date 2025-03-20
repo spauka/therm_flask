@@ -3,8 +3,6 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import Optional, TypeAlias
 
-from sqlalchemy import DateTime
-
 from ..config import config
 from .bluefors_common import BlueForsLogFile, BlueForsSensorMonitor
 

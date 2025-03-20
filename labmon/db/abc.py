@@ -1,6 +1,5 @@
-from collections.abc import Callable
 from time import sleep
-from typing import Any, Generic, TypeVar, reveal_type, ParamSpec
+from typing import Any
 
 from sqlalchemy import TIMESTAMP, Column, Float, Integer, Unicode, UnicodeText, inspect
 from sqlalchemy.exc import InvalidRequestError
@@ -11,14 +10,6 @@ from .fridge_table import SensorReading
 
 # Cache of created fridge classes
 _fridge_classes: dict[str, type[SensorReading]] = {}
-
-
-T = TypeVar("T", bound="SensorModel")
-P = ParamSpec("P")
-
-
-def property_like[T, **P](f: Callable[P, T]) -> T:
-    return f  # type: ignore
 
 
 class FridgeModel(Base):

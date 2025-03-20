@@ -53,7 +53,7 @@ class BlueForsMonitor(Uploader):
             uploaded |= await monitor.poll()
         return uploaded
 
-    async def upload(self, values):
+    async def upload(self, raw_values):
         """
         Override base upload method, since this is just a collection of
         other uploaders. We should never call this method on this class.

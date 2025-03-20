@@ -299,7 +299,7 @@ class CryomechMonitor(Uploader):
 
         return cryomech
 
-    def poll(self):
+    async def poll(self):
         """
         Upload if the appropriate interval has passed
 

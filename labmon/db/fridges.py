@@ -8,7 +8,6 @@ from .db import db
 from .abc import FridgeModel
 
 if TYPE_CHECKING:
-    from .abc import SensorModel
     from .sensors import Sensor, SensorSupplementary
 
 

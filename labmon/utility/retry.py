@@ -35,7 +35,7 @@ def retry(
                         # type, pass the exception forward.
                         if max_retry > 0 and retry_count == max_retry:
                             raise e
-                        elif not isinstance(e, exception):
+                        if not isinstance(e, exception):
                             raise e
 
                         # Otherwise, wait for wait-time and retry the function
@@ -69,7 +69,7 @@ def retry(
                     # type, pass the exception forward.
                     if max_retry > 0 and retry_count == max_retry:
                         raise e
-                    elif not isinstance(e, exception):
+                    if not isinstance(e, exception):
                         raise e
 
                     # Otherwise, wait for wait-time and retry the function
