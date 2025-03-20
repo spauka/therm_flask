@@ -164,7 +164,7 @@ if not CONFIG_FILE.exists():
 else:
     loaded_config = Config.from_json_file(CONFIG_FILE)
     assert isinstance(loaded_config, Config)
-    config: Config = loaded_config
+    config = loaded_config
 
 logger.info("Loaded config file %s", str(CONFIG_FILE))
 logger.debug("Config parameters: %r", config)
