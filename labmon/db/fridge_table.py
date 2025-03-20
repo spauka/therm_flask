@@ -1,6 +1,6 @@
 from dataclasses import fields
 from datetime import datetime
-from typing import Iterable, Optional, TYPE_CHECKING
+from typing import Iterable, Optional, dataclass_transform, TypeVar
 
 from sqlalchemy import TIMESTAMP, Column, func, insert, select, Table
 from sqlalchemy.orm import aliased
@@ -8,11 +8,19 @@ from sqlalchemy.exc import CompileError, IntegrityError
 
 from .db import db
 
-if TYPE_CHECKING:
-    from _typeshed import DataclassInstance
+_T = TypeVar("_T")
 
 
-class SensorReading(DataclassInstance):
+@dataclass_transform()
+def mark_dataclass(cls: type[_T]) -> type[_T]:
+    """
+    Used to mark that SensorReading will become a dataclass when initialized
+    """
+    return cls
+
+
+@mark_dataclass
+class SensorReading:
     """
     Table of sensor readings
     Note that the table has an index on time descending, so where possible queries

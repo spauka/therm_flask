@@ -1,13 +1,14 @@
 import string
 from typing import Iterable, Optional, TYPE_CHECKING
-from sqlalchemy import Unicode, UnicodeText, Identity, ForeignKey, select, declared_attr
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Unicode, UnicodeText, Identity, ForeignKey, select
+from sqlalchemy.orm import Mapped, mapped_column, relationship, declared_attr
 from sqlalchemy.exc import NoResultFound
 
 from .db import db
 from .abc import FridgeModel
 
 if TYPE_CHECKING:
+    from .abc import SensorModel
     from .sensors import Sensor, SensorSupplementary
 
 
@@ -22,7 +23,7 @@ class Fridge(FridgeModel):
 
     @declared_attr
     @classmethod
-    def sensors(cls) -> Mapped[list["Sensor"]]:  # pylint: disable=no-self-argument
+    def sensors(cls) -> Mapped[list["SensorModel"]]:  # pylint: disable=no-self-argument
         return relationship(back_populates="fridge", order_by="Sensor.view_order")
 
     def __init__(
@@ -81,7 +82,7 @@ class FridgeSupplementary(FridgeModel):
 
     @declared_attr
     @classmethod
-    def sensors(cls) -> Mapped[list["SensorSupplementary"]]:  # pylint: disable=no-self-argument
+    def sensors(cls) -> Mapped[list["SensorModel"]]:  # pylint: disable=no-self-argument
         return relationship(back_populates="fridge_supp", order_by="SensorSupplementary.view_order")
 
     def __init__(
