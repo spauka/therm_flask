@@ -1,5 +1,5 @@
 from time import sleep
-from typing import List
+from typing import Any
 
 from sqlalchemy import TIMESTAMP, Column, Float, Integer, Unicode, UnicodeText, inspect
 from sqlalchemy.exc import InvalidRequestError
@@ -22,7 +22,8 @@ class FridgeModel(Base):
     view_order: Mapped[int] = mapped_column(Integer)
 
     @declared_attr
-    def sensors(cls) -> Mapped[List["SensorModel"]]:  # pylint: disable=no-self-argument
+    @classmethod
+    def sensors(cls) -> Mapped[list["SensorModel"]]:  # pylint: disable=no-self-argument
         raise NotImplementedError("Not implemented in ABC")
 
     def fridge_table(self, check_exists=True) -> type[SensorReading]:
@@ -50,7 +51,7 @@ class FridgeModel(Base):
         # Otherwise we create an instance of the fridge table
         # We have to fill in the annotations such that SQLAlchemy knows
         # to map the columns to the dataclass
-        new_fridge_table = {
+        new_fridge_table: dict[str, Any] = {
             "__tablename__": self.table_name,
             "__annotations__": {"time": Column},
             "time": mapped_column(TIMESTAMP(timezone=True), primary_key=True),
