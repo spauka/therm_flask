@@ -3,6 +3,8 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import Optional, TypeAlias
 
+from sqlalchemy import DateTime
+
 from ..config import config
 from .bluefors_common import BlueForsLogFile, BlueForsSensorMonitor
 
@@ -21,8 +23,13 @@ class SensorReading:
     last_read: datetime
     uploaded: bool
 
-    def is_stale(self):
-        return (datetime.now().astimezone() - self.last_read) > MAX_AGE
+    def is_stale(self, time: Optional[datetime] = None):
+        if time is None:
+            time = datetime.now().astimezone()
+        elif time.tzinfo is None:
+            time = time.astimezone()
+
+        return (time - self.last_read) > MAX_AGE
 
 
 class BlueForsTempLogFile(BlueForsLogFile):
@@ -68,7 +75,37 @@ class BlueForsTempMonitor(BlueForsSensorMonitor):
             fname = FILE_PATTERN.format(n=self._sensors[sensor], date=self.cwd.name)
             self._sensor_files[sensor] = BlueForsTempLogFile(self.cwd / fname)
 
-    def poll(self):
+    def _prepare_values(self) -> dict[str, datetime | float]:
+        """
+        Prepare upload data
+        """
+        # Get the newest sensor reading, we will check for staleness against this reading
+        newest_reading = max(
+            value.last_read for value in self._values.values() if value.uploaded is False
+        )
+        oldest_reading = min(
+            value.last_read for value in self._values.values() if value.uploaded is False
+        )
+
+        # Upload all non-stale values, taking the time from the OLDEST not-uploaded sensor reading
+        upload_values: dict[str, datetime | float] = {
+            sensor: value.value
+            for sensor, value in self._values.items()
+            if value.value is not None and value.is_stale(newest_reading) is False
+        }
+        upload_values["time"] = oldest_reading
+        logger.debug(
+            "Stale values are: %r", [value for value in self._values.values() if value.is_stale()]
+        )
+
+        # Update status of all sensors to uploaded
+        for sensor, value in self._values.items():
+            if not value.uploaded:
+                self._values[sensor] = dataclasses.replace(value, uploaded=True)
+
+        return upload_values
+
+    async def poll(self):
         """
         Check log files for new data.
 
@@ -78,9 +115,9 @@ class BlueForsTempMonitor(BlueForsSensorMonitor):
         try:
             next_value: Optional[tuple[TempSensorReading, str]] = min(
                 (
-                    (value, sensor)
+                    (reading, sensor)
                     for sensor in self._sensors
-                    if (value := self._sensor_files[sensor].peek_next())
+                    if (reading := self._sensor_files[sensor].peek_next())
                 )
             )
         except ValueError:
@@ -101,7 +138,7 @@ class BlueForsTempMonitor(BlueForsSensorMonitor):
             # Check if the sensor already has a new value in it. If so, then upload
             # those values
             if not self._values[sensor].uploaded:
-                self.upload()
+                await self.upload(self._prepare_values())
 
             # Store the new reading. If it's reading is older than the latest in the database,
             # we set uploaded true
@@ -114,7 +151,7 @@ class BlueForsTempMonitor(BlueForsSensorMonitor):
         # then upload them here
         if any(sensor.is_stale() and not sensor.uploaded for sensor in self._values.values()):
             logger.warning("Uploading data due to staleness. Is there new data flowing?")
-            self.upload()
+            await self.upload(self._prepare_values())
             return True
 
         # If we're at the end of all files, double check that we shouldn't move to a new folder
@@ -136,28 +173,3 @@ class BlueForsTempMonitor(BlueForsSensorMonitor):
 
         # End of all files, and nothing new
         return False
-
-    def upload(self, values=None):
-        """
-        Upload data and mark all sensor values as uploaded
-        """
-        # And upload all values, taking the time from the OLDEST not-uploaded sensor reading
-        upload_values = {
-            sensor: value.value
-            for sensor, value in self._values.items()
-            if value.uploaded is False or value.is_stale() is False
-        }
-        upload_values["time"] = min(
-            value.last_read for value in self._values.values() if value.uploaded is False
-        )
-        logger.debug(
-            "Stale values are: %r", [value for value in self._values.values() if value.is_stale()]
-        )
-        res = super().upload(upload_values)
-
-        # Update status of all sensors to uploaded
-        for sensor, value in self._values.items():
-            if not value.uploaded:
-                self._values[sensor] = dataclasses.replace(value, **{"uploaded": True})
-
-        return res

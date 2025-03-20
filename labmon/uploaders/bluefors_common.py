@@ -68,8 +68,8 @@ class BlueForsLogFile:
             next_line = self.fhandle.readline()
             if next_line:
                 try:
-                    date, time, value = next_line.split(",", maxsplit=2)
-                    time = datetime.strptime(f"{date} {time}", DATE_FORMAT).astimezone()
+                    date_str, time_str, value = next_line.split(",", maxsplit=2)
+                    time = datetime.strptime(f"{date_str} {time_str}", DATE_FORMAT).astimezone()
                     self._peek = (time, value)
                     return self._peek
                 except ValueError:
@@ -111,13 +111,13 @@ class BlueForsMapLogFile(BlueForsLogFile):
             time, values = value[0], value[1].split(",")
             # Convert values to a mapping
             mapped_values = {}
-            for name, value in zip(*[iter(values)] * 2):
+            for name, value_str in zip(*[iter(values)] * 2):
                 try:
-                    mapped_values[name] = float(value)
+                    mapped_values[name] = float(value_str)
                 except ValueError:
                     # If the value is an invalid float, don't map it
                     logger.warning(
-                        "Failed to parse sensor %s to a number. Value was %s.", name, value
+                        "Failed to parse sensor %s to a number. Value was %s.", name, value_str
                     )
 
             self._peek = time, mapped_values
@@ -149,7 +149,7 @@ class BlueForsSensorMonitor(Uploader):
         # Return the newest
         return newest[1]
 
-    def poll(self):
+    async def poll(self):
         """
         Check log files for new data.
 

@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Optional
+from typing import MutableMapping, Optional, cast
 from urllib.parse import quote_plus, urljoin
 
 import httpx
@@ -41,7 +41,7 @@ class BaseUploader:
             supp = quote_plus(self.supp)
             self._url = urljoin(f"{self._url}/", f"supp/{supp}")
 
-    def _mock_upload(self, values: dict[str, float | datetime | str]):
+    def _mock_upload(self, values: MutableMapping[str, float | datetime | str]):
         """
         Mock upload - log but don't actually send data
         """
@@ -55,8 +55,8 @@ class BaseUploader:
         return "OK"
 
     def _validate_upload_values(
-        self, values: dict[str, float | datetime | str]
-    ) -> tuple[datetime, dict[str, float | datetime | str]]:
+        self, values: MutableMapping[str, float | datetime]
+    ) -> tuple[datetime, MutableMapping[str, float | datetime | str]]:
         """
         If "time" is not included, set the time to the current time, and ensure
         that a timezone is always attached to the upload info.
@@ -84,12 +84,13 @@ class BaseUploader:
             raise ValueError(
                 f"Invalid format for time. Expecting datetime, got {values['time']!r}."
             )
-        values["time"] = latest.isoformat()
+        values_cast = cast(dict[str, float | datetime | str], values)
+        values_cast["time"] = latest.isoformat()
 
-        return latest, values
+        return latest, values_cast
 
     def _validate_upload_successful(
-        self, res: httpx.Response, values: dict[str, float | datetime | str]
+        self, res: httpx.Response, values: MutableMapping[str, float | datetime | str]
     ):
         """
         Validate that the upload was successful
@@ -136,7 +137,7 @@ class Uploader(BaseUploader):
     async def create_uploader(
         cls, *args, supp=None, client: Optional[httpx.AsyncClient] = None, **kwargs
     ) -> "Uploader":
-        new_inst = cls(*args, supp=supp, client=client, factory=True, **kwargs)
+        new_inst = cls(*args, supp=supp, client=client, factory=True, **kwargs)  # type: ignore
         new_inst.latest = await new_inst.get_latest()
         return new_inst
 
@@ -154,12 +155,12 @@ class Uploader(BaseUploader):
         return latest
 
     @retry(exception=(httpx.TimeoutException, httpx.HTTPStatusError))
-    async def upload(self, values: dict[str, float | datetime | str]) -> str:
+    async def upload(self, raw_values: MutableMapping[str, float | datetime]) -> str:
         """
         Upload the latest dataset to the monitoring server.
         If "time" is not included, set the time to the current time.
         """
-        latest, values = self._validate_upload_values(values)
+        latest, values = self._validate_upload_values(raw_values)
 
         if config.UPLOAD.MOCK:
             self.latest = latest
@@ -174,64 +175,6 @@ class Uploader(BaseUploader):
         return res.text
 
     async def poll(self) -> bool:
-        """
-        Check for new values. Return true if new values were uploaded.
-        """
-        raise NotImplementedError("Uploaders must implement this method to check logs")
-
-
-class OldUploader(BaseUploader):
-    def __init__(self, supp=None, client: Optional[httpx.Client] = None, factory: bool = False):
-        # Create httpx client
-        if client is None:
-            self.client = httpx.Client(http2=True)
-        else:
-            self.client = client
-
-        super().__init__(supp=supp, factory=factory)
-
-    @classmethod
-    def create_uploader(
-        cls, *args, supp=None, client: Optional[httpx.Client] = None, **kwargs
-    ) -> "OldUploader":
-        new_inst = cls(*args, supp=supp, client=client, factory=True, **kwargs)
-        new_inst.latest = new_inst.get_latest()
-        return new_inst
-
-    @retry(exception=(httpx.TimeoutException, httpx.HTTPStatusError))
-    def get_latest(self) -> datetime:
-        """
-        Return the timestamp of the latest uploaded dataset
-        """
-        if config.UPLOAD.MOCK:
-            return datetime.now().astimezone()
-        res = self.client.get(self._url, params={"current": ""})
-        data = res.json()
-        latest = datetime.fromisoformat(data["time"])
-        logger.info("Latest data for fridge %s was %s.", self.fridge, latest.isoformat())
-        return latest
-
-    @retry(exception=(httpx.TimeoutException, httpx.HTTPStatusError))
-    def upload(self, values: dict[str, float | datetime | str]) -> str:
-        """
-        Upload the latest dataset to the monitoring server.
-        If "time" is not included, set the time to the current time.
-        """
-        latest, values = self._validate_upload_values(values)
-
-        if config.UPLOAD.MOCK:
-            self.latest = latest
-            return self._mock_upload(values)
-
-        # Upload to server
-        res = self.client.post(self._url, data=values)
-        self._validate_upload_successful(res, values)
-
-        # Mark successful upload
-        self.latest = latest
-        return res.text
-
-    def poll(self) -> bool:
         """
         Check for new values. Return true if new values were uploaded.
         """

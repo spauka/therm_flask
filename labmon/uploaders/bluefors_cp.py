@@ -73,23 +73,23 @@ class BlueForsCompressorMonitor(BlueForsSensorMonitor):
             return (low_bounce + high_bounce) / 2
         return None
 
-    def poll(self):
+    async def poll(self):
         """
         Check log files for new data.
 
         Returns true if a new value is read or data is uploaded, otherwise false.
         """
         # Check if there is a new sensor reading
-        next_val = self._status_log.return_next()
-        if next_val:
-            time, next_val = next_val
+        next_reading = self._status_log.return_next()
+        if next_reading:
+            time, next_val = next_reading
 
             # Check if the dataset is old, if it is, don't upload
             if time < self.latest:
                 return True
 
             # Map values into a dictionary
-            values = {}
+            values: dict[str, datetime | float] = {}
             values["time"] = time
             missing_fields = []
             for name, map_name in self._cpa_field_map.items():
@@ -114,7 +114,7 @@ class BlueForsCompressorMonitor(BlueForsSensorMonitor):
                 # Similarly if we weren't able to extract a value for the bounce, ignore it
                 logger.warning("Failed to calculate bounce for compressor %s.", self.supp)
 
-            self.upload(values)
+            await self.upload(values)
             return True
 
         # If we're at the end of all files, double check that we shouldn't move to a new folder

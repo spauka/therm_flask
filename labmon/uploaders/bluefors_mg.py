@@ -29,16 +29,16 @@ class BlueForsMaxiGaugeMonitor(BlueForsSensorMonitor):
         self._fname = FILE_PATTERN.format(date=self.cwd.name)
         self._status_log: BlueForsLogFile = BlueForsLogFile(self.cwd / self._fname)
 
-    def poll(self):
+    async def poll(self):
         """
         Check log files for new data.
 
         Returns true if a new value is read or data is uploaded, otherwise false.
         """
         # Check if there is a new sensor reading
-        next_val = self._status_log.return_next()
-        if next_val:
-            time, next_val = next_val
+        next_reading = self._status_log.return_next()
+        if next_reading:
+            time, next_val = next_reading
 
             # Check if the dataset is old, if it is, don't upload
             if time < self.latest:
@@ -49,9 +49,7 @@ class BlueForsMaxiGaugeMonitor(BlueForsSensorMonitor):
             # so we iterate in sixes
             values = {}
             values["time"] = time
-            for ch, _disp, enabled, value, err, _unk in zip(
-                *[iter(next_val.split(","))] * 6
-            ):
+            for ch, _disp, enabled, value, err, _unk in zip(*[iter(next_val.split(","))] * 6):
                 enabled = int(enabled)
                 value = float(value)
                 err = int(err)
@@ -60,7 +58,7 @@ class BlueForsMaxiGaugeMonitor(BlueForsSensorMonitor):
                     values[GAUGE_MAP[ch]] = value
 
             # Upload values
-            self.upload(values)
+            await self.upload(values)
             return True
 
         # If we're at the end of all files, double check that we shouldn't move to a new folder

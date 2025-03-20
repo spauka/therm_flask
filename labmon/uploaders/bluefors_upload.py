@@ -44,16 +44,16 @@ class BlueForsMonitor(Uploader):
         if config.UPLOAD.BLUEFORS_CONFIG.UPLOAD_MAXIGAUGE:
             self.monitor.append(BlueForsMaxiGaugeMonitor(*args, **kwargs))
 
-    def poll(self):
+    async def poll(self):
         """
         Check each of the monitors to see if they have any data
         """
         uploaded = False
         for monitor in self.monitor:
-            uploaded |= monitor.poll()
+            uploaded |= await monitor.poll()
         return uploaded
 
-    def upload(self, values):
+    async def upload(self, values):
         """
         Override base upload method, since this is just a collection of
         other uploaders. We should never call this method on this class.
