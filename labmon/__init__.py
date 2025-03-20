@@ -14,7 +14,7 @@ if config.LOGGING:
     set_logging(level)
 
 
-def create_app() -> Flask:
+def create_app() -> "Flask":
     """
     Create flask app if enabled, load the config and setup routes.
     Otherwise throw an error.
