@@ -80,8 +80,8 @@ async def main():
 
     # Create polls
     poll_tasks: list[asyncio.Task] = []
-    for uploader in uploaders:
-        poll_tasks.append(create_task(schedule_poll(uploader)))
+    for uploader_inst in uploaders:
+        poll_tasks.append(create_task(schedule_poll(uploader_inst)))
 
     # Create infinite loop
     while True:

@@ -61,7 +61,7 @@ class LeidenLogFile:
         if self.fhandle is not None:
             next_line = self.fhandle.readline()
             if next_line:
-                values = {}
+                values: dict[str, float | datetime] = {}
                 date, raw_values = next_line.split("\t")
                 values["time"] = datetime.strptime(date, DATE_FORMAT).astimezone()
                 for sensor, column in config.UPLOAD.LEIDEN_CONFIG.SENSORS.items():

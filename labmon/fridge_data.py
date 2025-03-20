@@ -120,11 +120,11 @@ class FridgeView(MethodView):
                 columns.append(field.name)
         for row in rows:
             data["time"].append(row.time.isoformat())
-            for field in columns:
-                field_data = getattr(row, field)
+            for field_name in columns:
+                field_data = getattr(row, field_name)
                 if field_data is not None and (isnan(field_data) or isinf(field_data)):
                     field_data = None
-                data[field].append(field_data)
+                data[field_name].append(field_data)
 
         return data
 
@@ -252,10 +252,10 @@ class FridgeView(MethodView):
         valid_sensors = set(sensor.column_name for sensor in data_source.sensors)
 
         # Put the data in a json array
-        data = {}
-        for field, value in request.form.items():
+        data: dict[str, float | datetime] = {}
+        for field_name, value in request.form.items():
             # Convert all variants of time to lowercase time, and convert into timestamp
-            if field.lower() == "time":
+            if field_name.lower() == "time":
                 try:
                     data["time"] = datetime.fromisoformat(value)
                 except ValueError:
@@ -263,13 +263,13 @@ class FridgeView(MethodView):
                         data["time"] = datetime.fromtimestamp(float(value))
                     except ValueError:
                         return Response(f"Invalid time format: {data['time']}", status=400)
-            elif field not in valid_sensors:
-                return Response(f"Sensor {field} not found in {data_source.name}", status=400)
+            elif field_name not in valid_sensors:
+                return Response(f"Sensor {field_name} not found in {data_source.name}", status=400)
             else:
                 try:
-                    data[field] = float(value)
+                    data[field_name] = float(value)
                 except ValueError:
-                    return Response(f"Invalid value for field {field}: {value!r}", status=400)
+                    return Response(f"Invalid value for field {field_name}: {value!r}", status=400)
 
         # Add to db
         try:

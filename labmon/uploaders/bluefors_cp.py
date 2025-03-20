@@ -51,8 +51,12 @@ class BlueForsCompressorMonitor(BlueForsSensorMonitor):
             self._cpa_bounce_map = CPA_BOUNCE_MAP
 
         # Create a list of previous pressures for calculating the bounce
-        self.high_bounce = deque(maxlen=config.UPLOAD.BLUEFORS_CONFIG.COMPRESSOR_BOUNCE_N)
-        self.low_bounce = deque(maxlen=config.UPLOAD.BLUEFORS_CONFIG.COMPRESSOR_BOUNCE_N)
+        self.high_bounce: deque[float] = deque(
+            maxlen=config.UPLOAD.BLUEFORS_CONFIG.COMPRESSOR_BOUNCE_N
+        )
+        self.low_bounce: deque[float] = deque(
+            maxlen=config.UPLOAD.BLUEFORS_CONFIG.COMPRESSOR_BOUNCE_N
+        )
 
         # Find the latest folder and open the status file
         self.cwd = self.latest_folder()

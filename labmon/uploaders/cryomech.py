@@ -267,8 +267,8 @@ class CryomechMonitor(Uploader):
         self.upload_interval = timedelta(seconds=config.UPLOAD.CRYOMECH_CONFIG.UPLOAD_INTERVAL)
 
         if config.UPLOAD.CRYOMECH_CONFIG.USE_CALCULATED_BOUNCE:
-            self.high_bounce = deque(maxlen=config.UPLOAD.CRYOMECH_CONFIG.COMPRESSOR_BOUNCE_N)
-            self.low_bounce = deque(maxlen=config.UPLOAD.CRYOMECH_CONFIG.COMPRESSOR_BOUNCE_N)
+            self.high_bounce: Optional[deque[float]] = deque(maxlen=config.UPLOAD.CRYOMECH_CONFIG.COMPRESSOR_BOUNCE_N)
+            self.low_bounce: Optional[deque[float]] = deque(maxlen=config.UPLOAD.CRYOMECH_CONFIG.COMPRESSOR_BOUNCE_N)
         else:
             self.high_bounce = None
             self.low_bounce = None

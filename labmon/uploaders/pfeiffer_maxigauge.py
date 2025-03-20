@@ -48,8 +48,8 @@ class PfeifferMaxiGaugeMonitor(Uploader):
 
         # Send query and check for acknowledgement
         handle.write(query)
-        resp = handle.read_bytes(3, break_on_termchar=True)
-        if resp[0] == NAK:
+        ack = handle.read_bytes(3, break_on_termchar=True)
+        if ack[0] == NAK:
             raise RuntimeError(f"Query error. Invalid query: {query}.")
         handle.write_raw(bytes((ENQ,)))
         resp = handle.read()
