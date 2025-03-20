@@ -18,13 +18,11 @@ class Fridge(FridgeModel):
     label: Mapped[str] = mapped_column(Unicode(255))
     table_name: Mapped[str] = mapped_column("fridge_table_name", Unicode(255), unique=True)
     comment: Mapped[str] = mapped_column(UnicodeText)
+    sensors: Mapped[list["Sensor"]] = relationship(  # type: ignore
+        back_populates="fridge", order_by="Sensor.view_order"
+    )
     supplementary: Mapped[list["FridgeSupplementary"]] = relationship(back_populates="fridge")
     __tablename__ = "fridges"
-
-    @declared_attr
-    @classmethod
-    def sensors(cls) -> Mapped[list["SensorModel"]]:  # pylint: disable=no-self-argument
-        return relationship(back_populates="fridge", order_by="Sensor.view_order")
 
     def __init__(
         self,
@@ -77,13 +75,11 @@ class FridgeSupplementary(FridgeModel):
     table_name: Mapped[str] = mapped_column("supp_table_name", Unicode(1024))
     fridge_id: Mapped[int] = mapped_column(ForeignKey("fridges.id"))
     fridge: Mapped["Fridge"] = relationship(repr=False)
+    sensors: Mapped[list["SensorSupplementary"]] = relationship(  # type: ignore
+        back_populates="fridge_supp", order_by="SensorSupplementary.view_order"
+    )
     comment: Mapped[str] = mapped_column(UnicodeText())
     __tablename__ = "fridges_supplementary"
-
-    @declared_attr
-    @classmethod
-    def sensors(cls) -> Mapped[list["SensorModel"]]:  # pylint: disable=no-self-argument
-        return relationship(back_populates="fridge_supp", order_by="SensorSupplementary.view_order")
 
     def __init__(
         self,

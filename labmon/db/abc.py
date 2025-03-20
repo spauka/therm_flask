@@ -1,5 +1,6 @@
+from collections.abc import Callable
 from time import sleep
-from typing import Any
+from typing import Any, Generic, TypeVar, reveal_type, ParamSpec
 
 from sqlalchemy import TIMESTAMP, Column, Float, Integer, Unicode, UnicodeText, inspect
 from sqlalchemy.exc import InvalidRequestError
@@ -10,6 +11,14 @@ from .fridge_table import SensorReading
 
 # Cache of created fridge classes
 _fridge_classes: dict[str, type[SensorReading]] = {}
+
+
+T = TypeVar("T", bound="SensorModel")
+P = ParamSpec("P")
+
+
+def property_like[T, **P](f: Callable[P, T]) -> T:
+    return f  # type: ignore
 
 
 class FridgeModel(Base):
@@ -24,7 +33,7 @@ class FridgeModel(Base):
     @declared_attr
     @classmethod
     def sensors(cls) -> Mapped[list["SensorModel"]]:  # pylint: disable=no-self-argument
-        raise NotImplementedError("Not implemented in ABC")
+        raise NotImplementedError(f"Not implemented in ABC for class {cls.__name__}")
 
     def fridge_table(self, check_exists=True) -> type[SensorReading]:
         """
