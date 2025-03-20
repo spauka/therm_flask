@@ -8,7 +8,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-dataclass-wizard = "^0.33.0"
+dataclass-wizard = "^0.35.0"
 httpx = {extras = ["http2"], version = "^0.28.1"}
 colorama = "^0.4.6"
 pyvisa = "^1.14.1"
