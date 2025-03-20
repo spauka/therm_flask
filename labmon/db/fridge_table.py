@@ -1,4 +1,4 @@
-from dataclasses import Field, fields
+from dataclasses import fields
 from datetime import datetime
 from typing import Iterable, Optional
 

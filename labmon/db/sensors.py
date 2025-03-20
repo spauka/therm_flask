@@ -15,9 +15,7 @@ class Sensor(SensorModel):
     List of sensors attached to the fridge given by fridge_id
     """
 
-    sensor_id: Mapped[int] = mapped_column(
-        "id", Identity("sensors_id_seq"), primary_key=True
-    )
+    sensor_id: Mapped[int] = mapped_column("id", Identity(), primary_key=True)
     fridge_id: Mapped[int] = mapped_column(ForeignKey("fridges.id"))
     fridge: Mapped["Fridge"] = relationship(back_populates="sensors", repr=False, innerjoin=True)
     column_name: Mapped[str] = mapped_column(Unicode(1024))
@@ -31,13 +29,11 @@ class Sensor(SensorModel):
         self.display_name = display_name
         self.column_name = column_name
         self.view_order = view_order
-        self.visible = visible
+        self.visible = bool(visible)
 
     @classmethod
     def get_sensor(cls, column_name, fridge) -> "Sensor":
-        query = select(cls).where(
-            cls.fridge == fridge and cls.column_name == column_name
-        )
+        query = select(cls).where(cls.fridge == fridge and cls.column_name == column_name)
         sensor = db.session.execute(query).scalar_one()
         return sensor
 
@@ -47,9 +43,7 @@ class SensorSupplementary(SensorModel):
     List of sensors attached to the supplementary sensor set
     """
 
-    sensor_id: Mapped[int] = mapped_column(
-        "id", Identity("sensors_supplementary_id_seq"), primary_key=True
-    )
+    sensor_id: Mapped[int] = mapped_column("id", Identity(), primary_key=True)
     fridge_supp_id: Mapped[int] = mapped_column(ForeignKey("fridges_supplementary.id"))
     fridge_supp: Mapped["FridgeSupplementary"] = relationship(repr=False, innerjoin=True)
     display_name: Mapped[str] = mapped_column(Unicode(1024))
@@ -63,12 +57,10 @@ class SensorSupplementary(SensorModel):
         self.display_name = display_name
         self.column_name = column_name
         self.view_order = view_order
-        self.visible = visible
+        self.visible = bool(visible)
 
     @classmethod
     def get_sensor(cls, column_name, fridge) -> "SensorSupplementary":
-        query = select(cls).where(
-            cls.fridge_supp == fridge and cls.column_name == column_name
-        )
+        query = select(cls).where(cls.fridge_supp == fridge and cls.column_name == column_name)
         sensor = db.session.execute(query).scalar_one()
         return sensor

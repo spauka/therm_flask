@@ -1,5 +1,5 @@
 import string
-from typing import List, Iterable, TYPE_CHECKING
+from typing import List, Iterable, Optional, TYPE_CHECKING
 from sqlalchemy import Unicode, UnicodeText, Identity, ForeignKey, select
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.exc import NoResultFound
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class Fridge(FridgeModel):
-    fridge_id: Mapped[int] = mapped_column("id", Identity("fridge_id_seq"), primary_key=True)
+    fridge_id: Mapped[int] = mapped_column("id", Identity(), primary_key=True)
     name: Mapped[str] = mapped_column(Unicode(255), unique=True)
     label: Mapped[str] = mapped_column(Unicode(255))
     table_name: Mapped[str] = mapped_column("fridge_table_name", Unicode(255), unique=True)
@@ -24,7 +24,11 @@ class Fridge(FridgeModel):
     __tablename__ = "fridges"
 
     def __init__(
-        self, name: str, table_name: str = None, sensors: Iterable["Sensor"] = (), comment=""
+        self,
+        name: str,
+        table_name: Optional[str] = None,
+        sensors: Iterable["Sensor"] = (),
+        comment="",
     ):
         self.name = name
         # Derive a table name if not given
@@ -64,9 +68,7 @@ class Fridge(FridgeModel):
 
 
 class FridgeSupplementary(FridgeModel):
-    supp_id: Mapped[int] = mapped_column(
-        "id", Identity("fridges_supplementary_id_seq"), primary_key=True
-    )
+    supp_id: Mapped[int] = mapped_column("id", Identity(), primary_key=True)
     name: Mapped[str] = mapped_column(Unicode(1024))
     label: Mapped[str] = mapped_column(Unicode(1024))
     table_name: Mapped[str] = mapped_column("supp_table_name", Unicode(1024))
@@ -84,7 +86,7 @@ class FridgeSupplementary(FridgeModel):
         table_name: str,
         label: str,
         sensors: Iterable["SensorSupplementary"] = (),
-        comment=None,
+        comment: str = "",
     ):
         self.supp_name = name
         self.table_name = table_name
