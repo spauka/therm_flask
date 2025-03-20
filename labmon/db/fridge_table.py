@@ -1,6 +1,6 @@
 from dataclasses import fields
 from datetime import datetime
-from typing import Iterable, Optional
+from typing import Iterable, Optional, TYPE_CHECKING
 
 from sqlalchemy import TIMESTAMP, Column, func, insert, select, Table
 from sqlalchemy.orm import aliased
@@ -8,8 +8,11 @@ from sqlalchemy.exc import CompileError, IntegrityError
 
 from .db import db
 
+if TYPE_CHECKING:
+    from _typeshed import DataclassInstance
 
-class SensorReading:
+
+class SensorReading(DataclassInstance):
     """
     Table of sensor readings
     Note that the table has an index on time descending, so where possible queries

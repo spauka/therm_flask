@@ -22,7 +22,7 @@ class FridgeModel(Base):
     view_order: Mapped[int] = mapped_column(Integer)
 
     @declared_attr
-    def sensors(cls) -> List["SensorModel"]:  # pylint: disable=no-self-argument
+    def sensors(cls) -> Mapped[List["SensorModel"]]:  # pylint: disable=no-self-argument
         raise NotImplementedError("Not implemented in ABC")
 
     def fridge_table(self, check_exists=True) -> type[SensorReading]:

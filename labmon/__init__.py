@@ -1,7 +1,12 @@
 from logging import getLevelName
+from typing import TYPE_CHECKING
 
 from .config import CONFIG_FILE, config
 from .utility.logging import set_logging
+
+
+if TYPE_CHECKING:
+    from flask import Flask
 
 # Check and enable logging if set
 if config.LOGGING:
@@ -9,7 +14,7 @@ if config.LOGGING:
     set_logging(level)
 
 
-def create_app() -> "Flask":  # noqa: F821
+def create_app() -> Flask:
     """
     Create flask app if enabled, load the config and setup routes.
     Otherwise throw an error.

@@ -84,7 +84,7 @@ class FridgeView(MethodView):
 
         # For most situations, the coldest thermometer is usually the right one to return
         # Let's preprocess out the minimum value from the sensor.
-        summary_data = []
+        summary_data: list[Optional[float]] = []
         for data in latest_data:
             min_val = float("inf")
             for sensor in sensors:
@@ -112,7 +112,7 @@ class FridgeView(MethodView):
         self, fridge_table: type[SensorReading], rows: Iterable[SensorReading]
     ) -> dict[str, list]:
         # Format the data correctly
-        data = {}
+        data: dict[str, list[Optional[float]]] = {}
         columns = []
         for field in fields(fridge_table):
             data[field.name] = []
