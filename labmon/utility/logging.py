@@ -3,6 +3,7 @@ import logging
 from colorama import Fore, Style, init
 
 root_logger = logging.root
+labmon_logger = logging.getLogger("labmon")
 ch = logging.StreamHandler()
 
 # Init terminal colors
@@ -25,15 +26,15 @@ class ColoredFormatter(logging.Formatter):
         return f"{log_color}{log_message}{Style.RESET_ALL}"
 
 
-def set_logging(level=logging.INFO, source="labmon"):
+def init_logging(level=logging.INFO):
     ch.setLevel(logging.DEBUG)
 
     formatter = ColoredFormatter("%(asctime)s - %(levelname)s:%(name)s - %(message)s")
     ch.setFormatter(formatter)
 
-    if source is None or source == ".":
-        logger = root_logger
-    else:
-        logger = logging.getLogger(source)
-    logger.setLevel(level)
-    logger.addHandler(ch)
+    root_logger.setLevel(level)
+    root_logger.addHandler(ch)
+
+
+def set_logging(level=logging.INFO):
+    labmon_logger.setLevel(level)

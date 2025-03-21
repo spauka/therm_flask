@@ -2,7 +2,7 @@ from logging import getLevelName
 from typing import TYPE_CHECKING
 
 from .config import CONFIG_FILE, config
-from .utility.logging import set_logging
+from .utility.logging import init_logging
 
 
 if TYPE_CHECKING:
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 # Check and enable logging if set
 if config.LOGGING:
     level = getLevelName(config.LOG_LEVEL)
-    set_logging(level)
+    init_logging(level)
 
 
 def create_app() -> "Flask":
