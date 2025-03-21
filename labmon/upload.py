@@ -12,6 +12,7 @@ from .uploaders.bluefors_upload import BlueForsMonitor
 from .uploaders.lakeshore_336 import Lakeshore336Monitor
 from .uploaders.cryomech import CryomechMonitor
 from .uploaders.pfeiffer_maxigauge import PfeifferMaxiGaugeMonitor
+from .utility.retry import retry
 from .utility.logging import set_logging
 
 logger = logging.getLogger(__name__)
@@ -26,6 +27,7 @@ UPLOADERS: dict[str, type[Uploader]] = {
 VALID_UPLOADERS = list(UPLOADERS.keys())
 
 
+@retry()
 async def schedule_poll(uploader: Uploader):
     """
     Schedule a poll to run every <interval> seconds. In order to ensure that
