@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import MutableMapping, Optional, cast
+from typing import MutableMapping, Optional, cast, TypeVar
 from urllib.parse import quote_plus, urljoin
 
 import httpx
@@ -9,6 +9,9 @@ from .. import config
 from ..utility import retry
 
 logger = logging.getLogger(__name__)
+
+
+T = TypeVar("T", bound="Uploader")
 
 
 class BaseUploader:
@@ -135,8 +138,12 @@ class Uploader(BaseUploader):
 
     @classmethod
     async def create_uploader(
-        cls, *args, supp=None, client: Optional[httpx.AsyncClient] = None, **kwargs
-    ) -> "Uploader":
+        cls: type[T],
+        *args,
+        supp: Optional[str] = None,
+        client: Optional[httpx.AsyncClient] = None,
+        **kwargs,
+    ) -> T:
         new_inst = cls(*args, supp=supp, client=client, factory=True, **kwargs)  # type: ignore
         new_inst.latest = await new_inst.get_latest()
         return new_inst

@@ -125,9 +125,6 @@ class BlueForsMapLogFile(BlueForsLogFile):
 
 
 class BlueForsSensorMonitor(Uploader):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     def latest_folder(self):
         """
         Find the latest folder in the BF logs directory

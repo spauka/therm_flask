@@ -26,23 +26,31 @@ class BlueForsMonitor(Uploader):
             logger.error("Log directory %s is not a directory.", str(log_dir))
             raise RuntimeError(f"Log directory {log_dir} must be a directory")
 
+    @classmethod
+    async def create_uploader(
+        cls, *args, supp=None, client = None, **kwargs
+    ):
+        new_inst = await super().create_uploader()
+
         # Enable temperature monitoring
-        self.monitor.append(BlueForsTempMonitor(*args, **kwargs))
+        new_inst.monitor.append(await BlueForsTempMonitor.create_uploader(*args, **kwargs))
 
         # Check if compressor monitoring is enabled and how many there are
         if config.UPLOAD.BLUEFORS_CONFIG.UPLOAD_COMPRESSORS:
             num_comp = config.UPLOAD.BLUEFORS_CONFIG.NUM_COMPRESSORS
             if num_comp > 1:
                 for i in range(1, num_comp + 1):
-                    self.monitor.append(
-                        BlueForsCompressorMonitor(*args, compressor_num=i, **kwargs)
+                    new_inst.monitor.append(
+                        await BlueForsCompressorMonitor.create_uploader(*args, compressor_num=i, **kwargs)
                     )
             else:
-                self.monitor.append(BlueForsCompressorMonitor(*args, **kwargs))
+                new_inst.monitor.append(await BlueForsCompressorMonitor.create_uploader(*args, **kwargs))
 
         # Check if maxigauge monitoring is enabled
         if config.UPLOAD.BLUEFORS_CONFIG.UPLOAD_MAXIGAUGE:
-            self.monitor.append(BlueForsMaxiGaugeMonitor(*args, **kwargs))
+            new_inst.monitor.append(await BlueForsMaxiGaugeMonitor.create_uploader(*args, **kwargs))
+
+        return new_inst
 
     async def poll(self):
         """

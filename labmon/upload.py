@@ -33,13 +33,16 @@ async def schedule_poll(uploader: Uploader):
     iteration until the first is complete, and calculate the correct interval.
     """
     interval = timedelta(seconds=uploader.poll_interval)
-    next_time = datetime.now() + interval
+    next_time: datetime = datetime.now()
 
     try:
         while True:
             result = True
             while result:
                 next_time = datetime.now() + interval
+                logger.debug(
+                    "Polling %s at time %s", uploader.__class__.__name__, datetime.now().isoformat()
+                )
                 result = await uploader.poll()
                 # Allow other uploaders to run if necessary
                 await asyncio.sleep(0)
