@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 class BlueForsMaxiGaugeMonitor(BlueForsSensorMonitor):
     def __init__(self, *args, **kwargs):
         # Derive the name of the supplementary sensor if not explicitly overriden
-        if "supp" not in kwargs:
+        if "supp" not in kwargs or kwargs["supp"] is None:
             kwargs["supp"] = "MaxiGauge"
 
         super().__init__(*args, **kwargs)

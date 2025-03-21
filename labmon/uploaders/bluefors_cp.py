@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 class BlueForsCompressorMonitor(BlueForsSensorMonitor):
     def __init__(self, *args, compressor_num: Optional[int] = None, **kwargs):
         # Derive the name of the supplementary sensor if not explicitly overriden
-        if "supp" not in kwargs:
+        if "supp" not in kwargs or kwargs["supp"] is None:
             if compressor_num is None:
                 kwargs["supp"] = "Compressor"
             else:
