@@ -1,3 +1,4 @@
+from asyncio import Task, create_task, gather
 from logging import getLogger
 from pathlib import Path
 
@@ -30,9 +31,11 @@ class BlueForsMonitor(Uploader):
     async def create_uploader(cls, *args, supp=None, client=None, **kwargs):
         new_inst = await super().create_uploader(*args, supp=supp, client=client, **kwargs)
 
+        monitors: list[Task] = []
+
         # Enable temperature monitoring
-        new_inst.monitor.append(
-            await BlueForsTempMonitor.create_uploader(*args, client=client, **kwargs)
+        monitors.append(
+            create_task(BlueForsTempMonitor.create_uploader(*args, client=client, **kwargs))
         )
 
         # Check if compressor monitoring is enabled and how many there are
@@ -40,21 +43,30 @@ class BlueForsMonitor(Uploader):
             num_comp = config.UPLOAD.BLUEFORS_CONFIG.NUM_COMPRESSORS
             if num_comp > 1:
                 for i in range(1, num_comp + 1):
-                    new_inst.monitor.append(
-                        await BlueForsCompressorMonitor.create_uploader(
-                            *args, compressor_num=i, client=client, **kwargs
+                    monitors.append(
+                        create_task(
+                            BlueForsCompressorMonitor.create_uploader(
+                                *args, compressor_num=i, client=client, **kwargs
+                            )
                         )
                     )
             else:
-                new_inst.monitor.append(
-                    await BlueForsCompressorMonitor.create_uploader(*args, client=client, **kwargs)
+                monitors.append(
+                    create_task(
+                        BlueForsCompressorMonitor.create_uploader(*args, client=client, **kwargs)
+                    )
                 )
 
         # Check if maxigauge monitoring is enabled
         if config.UPLOAD.BLUEFORS_CONFIG.UPLOAD_MAXIGAUGE:
-            new_inst.monitor.append(
-                await BlueForsMaxiGaugeMonitor.create_uploader(*args, client=client, **kwargs)
+            monitors.append(
+                create_task(
+                    BlueForsMaxiGaugeMonitor.create_uploader(*args, client=client, **kwargs)
+                )
             )
+
+        # Add all the new monitors to the parent
+        new_inst.monitor.extend(await gather(*monitors))
 
         return new_inst
 
@@ -62,10 +74,8 @@ class BlueForsMonitor(Uploader):
         """
         Check each of the monitors to see if they have any data
         """
-        uploaded = False
-        for monitor in self.monitor:
-            uploaded |= await monitor.poll()
-        return uploaded
+        results: list[Task] = [create_task(monitor.poll()) for monitor in self.monitor]
+        return any(await gather(*results))
 
     async def upload(self, raw_values):
         """
