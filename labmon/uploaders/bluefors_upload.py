@@ -27,13 +27,13 @@ class BlueForsMonitor(Uploader):
             raise RuntimeError(f"Log directory {log_dir} must be a directory")
 
     @classmethod
-    async def create_uploader(
-        cls, *args, supp=None, client = None, **kwargs
-    ):
-        new_inst = await super().create_uploader()
+    async def create_uploader(cls, *args, supp=None, client=None, **kwargs):
+        new_inst = await super().create_uploader(*args, supp=supp, client=client, **kwargs)
 
         # Enable temperature monitoring
-        new_inst.monitor.append(await BlueForsTempMonitor.create_uploader(*args, **kwargs))
+        new_inst.monitor.append(
+            await BlueForsTempMonitor.create_uploader(*args, client=client, **kwargs)
+        )
 
         # Check if compressor monitoring is enabled and how many there are
         if config.UPLOAD.BLUEFORS_CONFIG.UPLOAD_COMPRESSORS:
@@ -41,14 +41,20 @@ class BlueForsMonitor(Uploader):
             if num_comp > 1:
                 for i in range(1, num_comp + 1):
                     new_inst.monitor.append(
-                        await BlueForsCompressorMonitor.create_uploader(*args, compressor_num=i, **kwargs)
+                        await BlueForsCompressorMonitor.create_uploader(
+                            *args, compressor_num=i, client=client, **kwargs
+                        )
                     )
             else:
-                new_inst.monitor.append(await BlueForsCompressorMonitor.create_uploader(*args, **kwargs))
+                new_inst.monitor.append(
+                    await BlueForsCompressorMonitor.create_uploader(*args, client=client, **kwargs)
+                )
 
         # Check if maxigauge monitoring is enabled
         if config.UPLOAD.BLUEFORS_CONFIG.UPLOAD_MAXIGAUGE:
-            new_inst.monitor.append(await BlueForsMaxiGaugeMonitor.create_uploader(*args, **kwargs))
+            new_inst.monitor.append(
+                await BlueForsMaxiGaugeMonitor.create_uploader(*args, client=client, **kwargs)
+            )
 
         return new_inst
 
