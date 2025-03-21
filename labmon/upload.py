@@ -99,6 +99,8 @@ if __name__ == "__main__":
     args = cmd_args.parse_args()
 
     if args.verbose:
+        # Set log level INFO on all, and log level debug on labmon
+        set_logging(logging.INFO, ".")
         set_logging(logging.DEBUG)
 
     # Check that uploading is enabled
