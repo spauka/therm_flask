@@ -94,6 +94,10 @@ async def main():
 
 
 if __name__ == "__main__":
+    # If we are here - override the name of the default logger
+    logger = logging.getLogger("labmon.upload")
+
+    # Parse command line arguments
     cmd_args = argparse.ArgumentParser("LabMon Monitoring Upload Script")
     cmd_args.add_argument("-v", "--verbose", action="store_true")
     args = cmd_args.parse_args()

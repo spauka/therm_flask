@@ -26,11 +26,14 @@ class ColoredFormatter(logging.Formatter):
 
 
 def set_logging(level=logging.INFO, source="labmon"):
-    ch.setLevel(level)
+    ch.setLevel(logging.DEBUG)
 
     formatter = ColoredFormatter("%(asctime)s - %(levelname)s:%(name)s - %(message)s")
     ch.setFormatter(formatter)
 
-    logger = logging.getLogger(source)
-    logger.setLevel(logging.DEBUG)
+    if source is None or source == ".":
+        logger = root_logger
+    else:
+        logger = logging.getLogger(source)
+    logger.setLevel(level)
     logger.addHandler(ch)
