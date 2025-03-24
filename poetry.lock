@@ -714,6 +714,20 @@ spelling = ["pyenchant (>=3.2,<4.0)"]
 testutils = ["gitpython (>3)"]
 
 [[package]]
+name = "pyserial"
+version = "3.5"
+description = "Python Serial Port Extension"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pyserial-3.5-py2.py3-none-any.whl", hash = "sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0"},
+    {file = "pyserial-3.5.tar.gz", hash = "sha256:3c77e014170dfffbd816e6ffc205e9842efb10be9f58ec16d3e8675b4925cddb"},
+]
+
+[package.extras]
+cp2110 = ["hidapi"]
+
+[[package]]
 name = "pyvisa"
 version = "1.14.1"
 description = "Python VISA bindings for GPIB, RS232, TCPIP and USB instruments"
@@ -956,4 +970,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "4972cedbd42df76b6310aeafd58c4f903ec51fd47ff08363c26bd353a90a6770"
+content-hash = "581bfa7f955281aea81b6c2c4e588f8a069b75be9a79abf2c21ded52ca149a60"
