@@ -267,8 +267,12 @@ class CryomechMonitor(Uploader):
         self.upload_interval = timedelta(seconds=config.UPLOAD.CRYOMECH_CONFIG.UPLOAD_INTERVAL)
 
         if config.UPLOAD.CRYOMECH_CONFIG.USE_CALCULATED_BOUNCE:
-            self.high_bounce: Optional[deque[float]] = deque(maxlen=config.UPLOAD.CRYOMECH_CONFIG.COMPRESSOR_BOUNCE_N)
-            self.low_bounce: Optional[deque[float]] = deque(maxlen=config.UPLOAD.CRYOMECH_CONFIG.COMPRESSOR_BOUNCE_N)
+            self.high_bounce: Optional[deque[float]] = deque(
+                maxlen=config.UPLOAD.CRYOMECH_CONFIG.COMPRESSOR_BOUNCE_N
+            )
+            self.low_bounce: Optional[deque[float]] = deque(
+                maxlen=config.UPLOAD.CRYOMECH_CONFIG.COMPRESSOR_BOUNCE_N
+            )
         else:
             self.high_bounce = None
             self.low_bounce = None
@@ -330,7 +334,7 @@ class CryomechMonitor(Uploader):
                     data["Bounce"] = (low_bounce + high_bounce) / 2
 
                 # And upload the data
-                self.upload(data)
+                await self.upload(data)
                 return True
         except (RuntimeError, ValueError, visa.errors.VisaIOError) as e:
             logger.error("Communication with cryomech failed. Will try to reconnect...", exc_info=e)

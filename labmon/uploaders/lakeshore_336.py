@@ -41,7 +41,7 @@ class Lakeshore336Monitor(Uploader):
 
         return t336
 
-    def poll(self):
+    async def poll(self):
         """
         Upload if the appropriate interval has passed
 
@@ -66,7 +66,7 @@ class Lakeshore336Monitor(Uploader):
                         logger.warning(
                             "Failed to parse value for sensor %s: %s", sensor, sensor_value
                         )
-                self.upload(data)
+                await self.upload(data)
                 return True
         except visa.errors.VisaIOError as e:
             logger.error(

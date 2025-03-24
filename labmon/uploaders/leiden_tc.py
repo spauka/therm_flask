@@ -112,7 +112,7 @@ class LeidenTempMonitor(Uploader):
 
         return None
 
-    def poll(self):
+    async def poll(self):
         """
         Check log files for new data.
 
@@ -125,7 +125,7 @@ class LeidenTempMonitor(Uploader):
             if next_value:
                 # Upload and return true
                 logger.debug("Next sensor reading for fridge %s: %r", self.fridge, next_value)
-                self.upload(next_value)
+                await self.upload(next_value)
                 return True
 
         # If we're at the end of the file, double check every NEW_LOG_CHECK_INTERVAL that there isn't
