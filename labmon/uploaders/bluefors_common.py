@@ -5,13 +5,11 @@ from io import TextIOWrapper
 from pathlib import Path
 from typing import Optional, TypeAlias, Any
 
-from ..config import config
+from ..config import BlueForsUploadConfig
 from .uploader import Uploader
 
-LOG_DIR = Path(config.UPLOAD.BLUEFORS_CONFIG.LOG_DIR)
 FOLDER_PATTERN = re.compile(r"([0-9]{2})-([0-9]{2})-([0-9]{2})")
 DATE_FORMAT = "%d-%m-%y %H:%M:%S"
-LOG_WARNING_INTERVAL = timedelta(seconds=config.UPLOAD.BLUEFORS_CONFIG.LOG_WARNING_INTERVAL)
 
 logger = logging.getLogger(__name__)
 
@@ -20,11 +18,12 @@ MapLogFileReading: TypeAlias = tuple[datetime, dict[str, float]]
 
 
 class BlueForsLogFile:
-    def __init__(self, filename):
+    def __init__(self, filename, log_warning_interval: float = 1800.0):
         logger.debug("Opening sensor file %s", filename)
-        self.filename = filename
-        self._fhandle = None
-        self._peek = None
+        self.filename: str = filename
+        self.log_warning_interval = timedelta(seconds=log_warning_interval)
+        self._fhandle: Optional[TextIOWrapper] = None
+        self._peek: Optional[RawLogFileReading] = None
         self._last_warned = datetime.fromtimestamp(0).replace(tzinfo=timezone.utc)
 
     @property
@@ -34,7 +33,7 @@ class BlueForsLogFile:
                 self._fhandle = open(self.filename, "r", encoding="utf-8")
                 self._last_warned = datetime.fromtimestamp(0).replace(tzinfo=timezone.utc)
             except FileNotFoundError:
-                if (datetime.now().astimezone() - self._last_warned) > LOG_WARNING_INTERVAL:
+                if (datetime.now().astimezone() - self._last_warned) > self.log_warning_interval:
                     logger.warning(
                         "Sensor file %s not found. May not exist yet. Will try again later.",
                         self.filename,
@@ -88,6 +87,10 @@ class BlueForsMapLogFile(BlueForsLogFile):
     Extension of BlueForsLogFile for files which return a map of variables.
     """
 
+    def __init__(self, filename, log_warning_interval: float = 1800.0):
+        super().__init__(filename, log_warning_interval)
+        self._peek: Optional[MapLogFileReading] = None
+
     def return_next(self) -> Optional[MapLogFileReading]:
         """
         Return next value. Note that this will have been mapped to the right format
@@ -120,18 +123,35 @@ class BlueForsMapLogFile(BlueForsLogFile):
                         "Failed to parse sensor %s to a number. Value was %s.", name, value_str
                     )
 
-            self._peek = time, mapped_values
+            self._peek = time, mapped_values  # type: ignore
         return self._peek
 
 
-class BlueForsSensorMonitor(Uploader):
+class BlueForsSensorMonitor(Uploader[BlueForsUploadConfig]):
+    def __init__(
+        self,
+        config: BlueForsUploadConfig,
+        supp=None,
+        client=None,
+        factory=False,
+        **kwargs,
+    ):
+        super().__init__(config, client=client, supp=supp, factory=factory, **kwargs)
+
+        # Store log dir
+        self.log_dir = Path(self.config.LOG_DIR)
+        if not self.log_dir.exists():
+            raise RuntimeError(f"Bluefors log directory {self.log_dir} not found.")
+        if not self.log_dir.is_dir():
+            raise RuntimeError(f"Bluefors log directory {self.log_dir} must be a directory.")
+
     def latest_folder(self):
         """
         Find the latest folder in the BF logs directory
         """
         # As a shortcut, check if the folder exists for today
         today = datetime.now().strftime("%y-%m-%d")
-        today_dir = LOG_DIR / today
+        today_dir = self.log_dir / today
         if today_dir.exists():
             return today_dir
 
@@ -139,7 +159,7 @@ class BlueForsSensorMonitor(Uploader):
         newest = max(
             (
                 (m.groups(), d)
-                for d in LOG_DIR.iterdir()
+                for d in self.log_dir.iterdir()
                 if d.is_dir() and (m := FOLDER_PATTERN.match(d.name))
             )
         )

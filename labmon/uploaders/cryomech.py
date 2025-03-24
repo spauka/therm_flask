@@ -8,7 +8,7 @@ import pyvisa as visa
 
 from ..utility.hilbert import hilbert_amplitude
 from ..utility.retry import retry
-from ..config import config
+from ..config import CryomechConfig
 from .uploader import Uploader
 
 logger = logging.getLogger(__name__)
@@ -105,7 +105,12 @@ class CryomechV1(Cryomech):
     COMMAND_STRUCT = struct.Struct(">BBB3sB")
     RESULT_STRUCT = struct.Struct(">BBB3siB")
 
-    def __init__(self, handle: visa.resources.MessageBasedResource, address: int):
+    def __init__(
+        self,
+        handle: visa.resources.MessageBasedResource,
+        address: int,
+        baud_rate: Optional[int] = None,
+    ):
         self.handle = handle
         self.address = address
         self.seq = 0x10
@@ -113,11 +118,8 @@ class CryomechV1(Cryomech):
         # Set communication params.
         handle.write_termination = ""
         handle.read_termination = "\r"
-        if (
-            isinstance(handle, visa.resources.SerialInstrument)
-            and config.UPLOAD.CRYOMECH_CONFIG.BAUD_RATE is not None
-        ):
-            handle.baud_rate = config.UPLOAD.CRYOMECH_CONFIG.BAUD_RATE
+        if isinstance(handle, visa.resources.SerialInstrument) and baud_rate is not None:
+            handle.baud_rate = baud_rate
 
     @staticmethod
     def checksum(b):
@@ -256,23 +258,19 @@ class CryomechV1(Cryomech):
         return 0.1 * self.query(self.CPA_PARAMETERS["AVERAGE_BOUNCE_dPSI"])
 
 
-class CryomechMonitor(Uploader):
-    def __init__(self, *args, **kwargs):
-        if config.UPLOAD.CRYOMECH_CONFIG.SUPP is not None:
+class CryomechMonitor(Uploader[CryomechConfig]):
+    def __init__(self, config: CryomechConfig, **kwargs):
+        if config.SUPP is not None:
             # If this is a supplementary uploader, add the table name
-            kwargs["supp"] = config.UPLOAD.CRYOMECH_CONFIG.SUPP
-        super().__init__(*args, **kwargs)
+            kwargs["supp"] = config.SUPP
+        super().__init__(config, **kwargs)
 
         self._instr_conn: Optional[Cryomech] = None
-        self.upload_interval = timedelta(seconds=config.UPLOAD.CRYOMECH_CONFIG.UPLOAD_INTERVAL)
+        self.upload_interval = timedelta(seconds=config.UPLOAD_INTERVAL)
 
-        if config.UPLOAD.CRYOMECH_CONFIG.USE_CALCULATED_BOUNCE:
-            self.high_bounce: Optional[deque[float]] = deque(
-                maxlen=config.UPLOAD.CRYOMECH_CONFIG.COMPRESSOR_BOUNCE_N
-            )
-            self.low_bounce: Optional[deque[float]] = deque(
-                maxlen=config.UPLOAD.CRYOMECH_CONFIG.COMPRESSOR_BOUNCE_N
-            )
+        if config.USE_CALCULATED_BOUNCE:
+            self.high_bounce: Optional[deque[float]] = deque(maxlen=config.COMPRESSOR_BOUNCE_N)
+            self.low_bounce: Optional[deque[float]] = deque(maxlen=config.COMPRESSOR_BOUNCE_N)
         else:
             self.high_bounce = None
             self.low_bounce = None
@@ -283,20 +281,18 @@ class CryomechMonitor(Uploader):
         Try opening a connection to the lakeshore
         """
         rm = visa.ResourceManager()
-        handle = rm.open_resource(config.UPLOAD.CRYOMECH_CONFIG.ADDRESS)
+        handle = rm.open_resource(self.config.ADDRESS)
         if not isinstance(handle, visa.resources.MessageBasedResource):
             raise RuntimeError(
                 (
                     "Invalid connection to Cryomech. Can't query instrument. "
-                    f"Check the instrument address: {config.UPLOAD.LAKESHORE_CONFIG.ADDRESS}"
+                    f"Check the instrument address: {self.config.ADDRESS}"
                 )
             )
-        if config.UPLOAD.CRYOMECH_CONFIG.COMPRESSOR_VERSION == "v1":
-            cryomech = CryomechV1(handle, config.UPLOAD.CRYOMECH_CONFIG.COMPRESSOR_ADDRESS)
+        if self.config.COMPRESSOR_VERSION == "v1":
+            cryomech = CryomechV1(handle, self.config.COMPRESSOR_ADDRESS, self.config.BAUD_RATE)
         else:
-            raise RuntimeError(
-                f"Invalid cryomech version. Got {config.UPLOAD.CRYOMECH_CONFIG.COMPRESSOR_VERSION}"
-            )
+            raise RuntimeError(f"Invalid cryomech version. Got {self.config.COMPRESSOR_VERSION}")
 
         # Check response
         logger.info("Connected to Compressor. Total runtime: %.1f h", cryomech.run_time)

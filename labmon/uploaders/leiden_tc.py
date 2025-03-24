@@ -5,11 +5,9 @@ from io import TextIOWrapper
 from pathlib import Path
 from typing import Optional, TypeAlias
 
-from ..config import config
+from ..config import LeidenUploadConfig
 from .uploader import Uploader
 
-LOG_DIR = Path(config.UPLOAD.LEIDEN_CONFIG.LOG_DIR)
-FILE_PATTERN = re.compile(config.UPLOAD.LEIDEN_CONFIG.TC_FILE_PATTERN)
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 logger = logging.getLogger(__name__)
@@ -18,11 +16,12 @@ LeidenLogFileReading: TypeAlias = dict[str, datetime | float]
 
 
 class LeidenLogFile:
-    def __init__(self, filename):
+    def __init__(self, filename: str | Path, sensors: dict[str, int]):
         logger.debug("Opening sensor file %s", filename)
+        self.sensors = sensors
         self.filename = filename
-        self._fhandle = None
-        self._peek = None
+        self._fhandle: Optional[TextIOWrapper] = None
+        self._peek: Optional[LeidenLogFileReading] = None
 
     @property
     def fhandle(self) -> Optional[TextIOWrapper]:
@@ -64,7 +63,7 @@ class LeidenLogFile:
                 values: dict[str, float | datetime] = {}
                 date, raw_values = next_line.split("\t")
                 values["time"] = datetime.strptime(date, DATE_FORMAT).astimezone()
-                for sensor, column in config.UPLOAD.LEIDEN_CONFIG.SENSORS.items():
+                for sensor, column in self.sensors.items():
                     try:
                         values[sensor] = float(raw_values[column])
                     except ValueError:
@@ -80,12 +79,16 @@ class LeidenLogFile:
         return None
 
 
-class LeidenTempMonitor(Uploader):
+class LeidenTempMonitor(Uploader[LeidenUploadConfig]):
     logfile: Optional[LeidenLogFile]
     last_check: datetime
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, config: LeidenUploadConfig, **kwargs):
+        super().__init__(config, **kwargs)
+
+        # Store paths
+        self.log_dir = Path(config.LOG_DIR)
+        self.file_pattern = re.compile(config.TC_FILE_PATTERN)
 
         # Find the latest log file and open it
         self.logfile = None
@@ -98,8 +101,8 @@ class LeidenTempMonitor(Uploader):
         # Iterate through all files in the log directory and open the latest one
         newest_file = max(
             (datetime.strptime(DATE_FORMAT, m.groups()[0]), filename)
-            for filename in LOG_DIR.iterdir()
-            if filename.is_file() and (m := FILE_PATTERN.match(str(filename)))
+            for filename in self.log_dir.iterdir()
+            if filename.is_file() and (m := self.file_pattern.match(str(filename)))
         )
         self.last_check = datetime.now().astimezone()
 
@@ -107,7 +110,7 @@ class LeidenTempMonitor(Uploader):
             filename = newest_file[1]
             # Check if the filename is new
             if self.logfile is None or filename != self.logfile.filename:
-                self.logfile = LeidenLogFile(filename)
+                self.logfile = LeidenLogFile(filename, self.config.SENSORS)
             return filename
 
         return None
@@ -128,10 +131,10 @@ class LeidenTempMonitor(Uploader):
                 await self.upload(next_value)
                 return True
 
-        # If we're at the end of the file, double check every NEW_LOG_CHECK_INTERVAL that there isn't
-        # a new log file
+        # If we're at the end of the file, double check every NEW_LOG_CHECK_INTERVAL
+        # that there isn't a new log file
         if (datetime.now().astimezone() - self.last_check) > timedelta(
-            seconds=config.UPLOAD.LEIDEN_CONFIG.NEW_LOG_CHECK_INTERVAL
+            seconds=self.config.NEW_LOG_CHECK_INTERVAL
         ):
             if self.find_latest():
                 return True

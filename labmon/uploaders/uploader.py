@@ -1,11 +1,11 @@
 import logging
 from datetime import datetime
-from typing import MutableMapping, Optional, assert_type, cast, TypeVar, Generic
+from typing import MutableMapping, Optional, cast, TypeVar, Generic
 from urllib.parse import quote_plus, urljoin
 
 import httpx
 
-from .. import config
+from .. import config as global_config
 from ..config import UploaderConfig
 from ..utility import retry
 
@@ -16,13 +16,19 @@ T = TypeVar("T", bound="Uploader")
 C = TypeVar("C", bound=UploaderConfig)
 
 
-class BaseUploader:
+class Uploader(Generic[C]):
     fridge: str
     supp: Optional[str]
     _url: str
     latest: datetime
 
-    def __init__(self, supp: Optional[str] = None, factory: bool = False):
+    def __init__(
+        self,
+        config: C,
+        supp=None,
+        client: Optional[httpx.AsyncClient] = None,
+        factory: bool = False,
+    ):
         """
         Initialize an uploader and calculate the URLs.
 
@@ -31,20 +37,34 @@ class BaseUploader:
         """
         if factory is False:
             raise RuntimeError(
-                "Uploaders should be created using the create_uploader factory rather than directly."
+                (
+                    "Uploaders should be created using the create_uploader "
+                    "factory rather than directly."
+                )
             )
 
-        self.fridge = config.UPLOAD.FRIDGE
+        self.fridge = global_config.UPLOAD.FRIDGE
         self.supp = supp
         self.supp_str = f"/{supp}" if supp else ""
 
         fridge_url_safe = quote_plus(self.fridge)
-        self._url = urljoin(f"{config.UPLOAD.BASE_URL}/", f"{fridge_url_safe}")
+        self._url = urljoin(f"{global_config.UPLOAD.BASE_URL}/", f"{fridge_url_safe}")
 
         # Are we a supplementary sensor?
         if self.supp is not None:
             supp = quote_plus(self.supp)
             self._url = urljoin(f"{self._url}/", f"supp/{supp}")
+
+        # Create httpx client if not given
+        if client is None:
+            self.client = httpx.AsyncClient(http2=True)
+        else:
+            self.client = client
+
+        # Store config
+        self.config: C = config
+
+        super().__init__()
 
     def _mock_upload(self, values: MutableMapping[str, float | datetime | str]):
         """
@@ -118,26 +138,6 @@ class BaseUploader:
         )
         logger.debug("Response was: %s", res.text)
 
-
-class Uploader(BaseUploader, Generic[C]):
-    def __init__(
-        self,
-        config: C,
-        supp=None,
-        client: Optional[httpx.AsyncClient] = None,
-        factory: bool = False,
-    ):
-        # Create httpx client if not given
-        if client is None:
-            self.client = httpx.AsyncClient(http2=True)
-        else:
-            self.client = client
-
-        # Store config
-        self.config: C = config
-
-        super().__init__(supp=supp, factory=factory)
-
     @property
     def poll_interval(self):
         """
@@ -149,12 +149,11 @@ class Uploader(BaseUploader, Generic[C]):
     async def create_uploader(
         cls: type[T],
         config: C,
-        *args,
         supp: Optional[str] = None,
         client: Optional[httpx.AsyncClient] = None,
         **kwargs,
     ) -> T:
-        new_inst = cls(config, *args, supp=supp, client=client, factory=True, **kwargs)  # type: ignore
+        new_inst = cls(config, supp=supp, client=client, factory=True, **kwargs)  # type: ignore
         new_inst.latest = await new_inst.get_latest()
         return new_inst
 
@@ -163,7 +162,7 @@ class Uploader(BaseUploader, Generic[C]):
         """
         Return the timestamp of the latest uploaded dataset
         """
-        if config.UPLOAD.MOCK:
+        if global_config.UPLOAD.MOCK:
             return datetime.now().astimezone()
         res = await self.client.get(self._url, params={"current": ""})
         data = res.json()
@@ -179,7 +178,7 @@ class Uploader(BaseUploader, Generic[C]):
         """
         latest, values = self._validate_upload_values(raw_values)
 
-        if config.UPLOAD.MOCK:
+        if global_config.UPLOAD.MOCK:
             self.latest = latest
             return self._mock_upload(values)
 

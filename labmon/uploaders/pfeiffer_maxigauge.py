@@ -6,7 +6,7 @@ from enum import IntEnum
 import pyvisa as visa
 
 from ..utility.retry import retry
-from ..config import config
+from ..config import MaxigaugeConfig
 from .uploader import Uploader
 
 logger = logging.getLogger(__name__)
@@ -26,15 +26,15 @@ class SensorStatus(IntEnum):
     SENS_UNIDENT = 6
 
 
-class PfeifferMaxiGaugeMonitor(Uploader):
-    def __init__(self, *args, **kwargs):
-        if config.UPLOAD.MAXIGAUGE_CONFIG.SUPP is not None:
+class PfeifferMaxiGaugeMonitor(Uploader[MaxigaugeConfig]):
+    def __init__(self, config: MaxigaugeConfig, **kwargs):
+        if config.SUPP is not None:
             # If this is a supplementary uploader, add the table name
-            kwargs["supp"] = config.UPLOAD.MAXIGAUGE_CONFIG.SUPP
-        super().__init__(*args, **kwargs)
+            kwargs["supp"] = config.SUPP
+        super().__init__(config, **kwargs)
 
         self._instr_conn: Optional[visa.resources.MessageBasedResource] = None
-        self.upload_interval = timedelta(seconds=config.UPLOAD.MAXIGAUGE_CONFIG.UPLOAD_INTERVAL)
+        self.upload_interval = timedelta(seconds=config.UPLOAD_INTERVAL)
 
     def query(self, query: str, handle: Optional[visa.resources.MessageBasedResource] = None):
         """
@@ -42,7 +42,7 @@ class PfeifferMaxiGaugeMonitor(Uploader):
         """
         if handle is None and self._instr_conn is None:
             raise RuntimeError("Unable to query instrument: Not connected.")
-        elif handle is None:
+        if handle is None:
             assert self._instr_conn is not None
             handle = self._instr_conn
 
@@ -61,21 +61,21 @@ class PfeifferMaxiGaugeMonitor(Uploader):
         Try opening a connection to the MaxiGauge
         """
         rm = visa.ResourceManager()
-        maxigauge = rm.open_resource(config.UPLOAD.MAXIGAUGE_CONFIG.ADDRESS)
+        maxigauge = rm.open_resource(self.config.ADDRESS)
         if not isinstance(maxigauge, visa.resources.MessageBasedResource):
             raise RuntimeError(
                 (
                     "Invalid connection to Maxigauge. Can't query instrument. "
-                    f"Check the instrument address: {config.UPLOAD.MAXIGAUGE_CONFIG.ADDRESS}"
+                    f"Check the instrument address: {self.config.ADDRESS}"
                 )
             )
 
         # Set baud rate if given
         if (
             isinstance(maxigauge, visa.resources.SerialInstrument)
-            and config.UPLOAD.MAXIGAUGE_CONFIG.BAUD_RATE is not None
+            and self.config.BAUD_RATE is not None
         ):
-            maxigauge.baud_rate = config.UPLOAD.MAXIGAUGE_CONFIG.BAUD_RATE
+            maxigauge.baud_rate = self.config.BAUD_RATE
 
         maxigauge.write_termination = "\r"
         maxigauge.read_termination = "\r\n"
@@ -100,7 +100,7 @@ class PfeifferMaxiGaugeMonitor(Uploader):
             if (datetime.now().astimezone() - self.latest) > self.upload_interval:
                 # We're ready to upload the next dataset
                 data = {}
-                for channel, sensor in config.UPLOAD.MAXIGAUGE_CONFIG.SENSORS.items():
+                for channel, sensor in self.config.SENSORS.items():
                     sensor_value = ""
                     try:
                         sensor_value = self.query(f"PR{channel}")

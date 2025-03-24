@@ -5,18 +5,18 @@ from typing import Optional
 import pyvisa as visa
 
 from ..utility.retry import retry
-from ..config import config
+from ..config import Lakeshore336Config
 from .uploader import Uploader
 
 logger = logging.getLogger(__name__)
 
 
-class Lakeshore336Monitor(Uploader):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+class Lakeshore336Monitor(Uploader[Lakeshore336Config]):
+    def __init__(self, config: Lakeshore336Config, **kwargs):
+        super().__init__(config, **kwargs)
 
         self._instr_conn: Optional[visa.resources.MessageBasedResource] = None
-        self.upload_interval = timedelta(seconds=config.UPLOAD.LAKESHORE_CONFIG.UPLOAD_INTERVAL)
+        self.upload_interval = timedelta(seconds=config.UPLOAD_INTERVAL)
 
     @retry(multiplier=1.2, max_wait=15, exception=(RuntimeError, visa.errors.VisaIOError))
     def open_connection(self) -> visa.resources.MessageBasedResource:
@@ -24,12 +24,12 @@ class Lakeshore336Monitor(Uploader):
         Try opening a connection to the lakeshore
         """
         rm = visa.ResourceManager()
-        t336 = rm.open_resource(config.UPLOAD.LAKESHORE_CONFIG.ADDRESS)
+        t336 = rm.open_resource(self.config.ADDRESS)
         if not isinstance(t336, visa.resources.MessageBasedResource):
             raise RuntimeError(
                 (
                     "Invalid connection to Lakeshore. Can't query instrument. "
-                    f"Check the instrument address: {config.UPLOAD.LAKESHORE_CONFIG.ADDRESS}"
+                    f"Check the instrument address: {self.config.ADDRESS}"
                 )
             )
         t336.write_termination = "\n"
@@ -55,12 +55,12 @@ class Lakeshore336Monitor(Uploader):
             if (datetime.now().astimezone() - self.latest) > self.upload_interval:
                 # We're ready to upload the next dataset
                 data = {}
-                for channel, sensor in config.UPLOAD.LAKESHORE_CONFIG.SENSORS.items():
+                for channel, sensor in self.config.SENSORS.items():
                     sensor_value = ""
                     try:
                         sensor_value = self._instr_conn.query(f"KRDG? {channel}").strip(";")
                         data[sensor] = float(sensor_value)
-                        if config.UPLOAD.LAKESHORE_CONFIG.UPLOAD_MILLIKELVIN:
+                        if self.config.UPLOAD_MILLIKELVIN:
                             data[sensor] *= 1000
                     except ValueError:
                         logger.warning(

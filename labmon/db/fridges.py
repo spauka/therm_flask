@@ -1,7 +1,7 @@
 import string
 from typing import Iterable, Optional, TYPE_CHECKING
 from sqlalchemy import Unicode, UnicodeText, Identity, ForeignKey, select
-from sqlalchemy.orm import Mapped, mapped_column, relationship, declared_attr
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.exc import NoResultFound
 
 from .db import db

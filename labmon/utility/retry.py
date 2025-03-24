@@ -56,7 +56,8 @@ def retry(
 
             return async_f_with_retry
 
-        # Otherwise the function is synchronous, return the synchronous version of the retry function
+        # Otherwise the function is synchronous, return the synchronous version
+        # of the retry function
         @wraps(f)
         def f_with_retry(
             *args, retry_wait=starting_retry_wait, retry_count=0, max_wait=max_wait, **kwargs

@@ -17,12 +17,12 @@ logger = logging.getLogger(__name__)
 
 
 class BlueForsMaxiGaugeMonitor(BlueForsSensorMonitor):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, config, **kwargs):
         # Derive the name of the supplementary sensor if not explicitly overriden
         if "supp" not in kwargs or kwargs["supp"] is None:
             kwargs["supp"] = "MaxiGauge"
 
-        super().__init__(*args, **kwargs)
+        super().__init__(config, **kwargs)
 
         # Find the latest folder and open the status file
         self.cwd = self.latest_folder()

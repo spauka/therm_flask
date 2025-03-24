@@ -3,10 +3,9 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import Optional, TypeAlias
 
-from ..config import config
+from ..config import BlueForsUploadConfig
 from .bluefors_common import BlueForsLogFile, BlueForsSensorMonitor
 
-MAX_AGE = timedelta(seconds=config.UPLOAD.BLUEFORS_CONFIG.MAX_AGE)
 FILE_PATTERN = "CH{n} T {date}.log"
 
 logger = logging.getLogger(__name__)
@@ -21,16 +20,20 @@ class SensorReading:
     last_read: datetime
     uploaded: bool
 
-    def is_stale(self, time: Optional[datetime] = None):
+    def is_stale(self, max_age: timedelta, time: Optional[datetime] = None):
         if time is None:
             time = datetime.now().astimezone()
         elif time.tzinfo is None:
             time = time.astimezone()
 
-        return (time - self.last_read) > MAX_AGE
+        return (time - self.last_read) > max_age
 
 
 class BlueForsTempLogFile(BlueForsLogFile):
+    def __init__(self, filename, log_warning_interval: float = 1800.0):
+        super().__init__(filename, log_warning_interval)
+        self._peek: Optional[TempSensorReading] = None
+
     def return_next(self) -> Optional[TempSensorReading]:
         """
         Return next sensor reading.
@@ -50,16 +53,19 @@ class BlueForsTempLogFile(BlueForsLogFile):
 
         result = super().peek_next()
         if result:
-            self._peek = result[0], float(result[1])
+            self._peek = result[0], float(result[1])  # type: ignore
         return self._peek
 
 
 class BlueForsTempMonitor(BlueForsSensorMonitor):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, config: BlueForsUploadConfig, **kwargs):
+        super().__init__(config, **kwargs)
+
+        # Define max value age
+        self.max_age = timedelta(seconds=config.MAX_AGE)
 
         # Load sensors
-        self._sensors = config.UPLOAD.BLUEFORS_CONFIG.SENSORS
+        self._sensors = config.SENSORS
         self._values = {}
         for sensor in self._sensors:
             self._values[sensor] = SensorReading(
@@ -89,11 +95,17 @@ class BlueForsTempMonitor(BlueForsSensorMonitor):
         upload_values: dict[str, datetime | float] = {
             sensor: value.value
             for sensor, value in self._values.items()
-            if value.value is not None and value.is_stale(newest_reading) is False
+            if value.value is not None
+            and (value.uploaded is False or value.is_stale(self.max_age, newest_reading) is False)
         }
         upload_values["time"] = oldest_reading
         logger.debug(
-            "Stale values are: %r", [value for value in self._values.values() if value.is_stale()]
+            "Stale values are: %r",
+            [
+                value
+                for value in self._values.values()
+                if value.is_stale(self.max_age, newest_reading)
+            ],
         )
 
         # Update status of all sensors to uploaded
@@ -147,7 +159,10 @@ class BlueForsTempMonitor(BlueForsSensorMonitor):
 
         # If there are any sensor values that haven't been uploaded but are going stale,
         # then upload them here
-        if any(sensor.is_stale() and not sensor.uploaded for sensor in self._values.values()):
+        if any(
+            sensor.is_stale(self.max_age) and not sensor.uploaded
+            for sensor in self._values.values()
+        ):
             logger.warning("Uploading data due to staleness. Is there new data flowing?")
             await self.upload(self._prepare_values())
             return True

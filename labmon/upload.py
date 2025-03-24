@@ -3,7 +3,6 @@ import argparse
 import logging
 from datetime import datetime, timedelta
 from asyncio import create_task
-from typing import get_args
 
 import httpx
 
@@ -82,14 +81,17 @@ async def main():
 
         if uploader.TYPE in UPLOADERS:
             uploader_type = UPLOADERS[uploader.TYPE]
-            print(get_args(uploader_type))
             create_uploaders.append(
-                create_task(UPLOADERS[uploader.TYPE].create_uploader(uploader, client=client))
+                create_task(uploader_type.create_uploader(uploader, client=client))
             )
         else:
             raise KeyError(
-                f"Invalid uploader {uploader.TYPE} specified. Valid uploaders are: {', '.join(VALID_UPLOADERS)}"
+                (
+                    f"Invalid uploader {uploader.TYPE} specified. "
+                    f"Valid uploaders are: {', '.join(VALID_UPLOADERS)}"
+                )
             )
+
     uploaders: list[Uploader] = await asyncio.gather(*create_uploaders)
 
     # Create polls

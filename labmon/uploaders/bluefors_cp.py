@@ -3,7 +3,7 @@ from collections import deque
 from datetime import datetime
 from typing import Optional
 
-from ..config import config
+from ..config import BlueForsUploadConfig
 from ..utility.hilbert import hilbert_amplitude
 from .bluefors_common import BlueForsMapLogFile, BlueForsSensorMonitor
 
@@ -24,7 +24,9 @@ logger = logging.getLogger(__name__)
 
 
 class BlueForsCompressorMonitor(BlueForsSensorMonitor):
-    def __init__(self, *args, compressor_num: Optional[int] = None, **kwargs):
+    def __init__(
+        self, config: BlueForsUploadConfig, compressor_num: Optional[int] = None, **kwargs
+    ):
         # Derive the name of the supplementary sensor if not explicitly overriden
         if "supp" not in kwargs or kwargs["supp"] is None:
             if compressor_num is None:
@@ -32,7 +34,7 @@ class BlueForsCompressorMonitor(BlueForsSensorMonitor):
             else:
                 kwargs["supp"] = f"Compressor_{compressor_num}"
 
-        super().__init__(*args, **kwargs)
+        super().__init__(config, **kwargs)
 
         # Save the compressor number
         self.compressor_num = compressor_num
@@ -51,12 +53,8 @@ class BlueForsCompressorMonitor(BlueForsSensorMonitor):
             self._cpa_bounce_map = CPA_BOUNCE_MAP
 
         # Create a list of previous pressures for calculating the bounce
-        self.high_bounce: deque[float] = deque(
-            maxlen=config.UPLOAD.BLUEFORS_CONFIG.COMPRESSOR_BOUNCE_N
-        )
-        self.low_bounce: deque[float] = deque(
-            maxlen=config.UPLOAD.BLUEFORS_CONFIG.COMPRESSOR_BOUNCE_N
-        )
+        self.high_bounce: deque[float] = deque(maxlen=config.COMPRESSOR_BOUNCE_N)
+        self.low_bounce: deque[float] = deque(maxlen=config.COMPRESSOR_BOUNCE_N)
 
         # Find the latest folder and open the status file
         self.cwd = self.latest_folder()
@@ -67,7 +65,7 @@ class BlueForsCompressorMonitor(BlueForsSensorMonitor):
         self.low_bounce.append(lp)
         self.high_bounce.append(hp)
 
-        if len(self.low_bounce) == config.UPLOAD.BLUEFORS_CONFIG.COMPRESSOR_BOUNCE_N:
+        if len(self.low_bounce) == self.config.COMPRESSOR_BOUNCE_N:
             low_bounce = hilbert_amplitude(self.low_bounce)
             high_bounce = hilbert_amplitude(self.high_bounce)
             return (low_bounce + high_bounce) / 2
