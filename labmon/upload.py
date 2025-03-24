@@ -3,6 +3,7 @@ import argparse
 import logging
 from datetime import datetime, timedelta
 from asyncio import create_task
+from typing import get_args
 
 import httpx
 
@@ -75,11 +76,19 @@ async def main():
     # Create all the uploaders
     create_uploaders: list[asyncio.Task] = []
     for uploader in config.UPLOAD.ENABLED_UPLOADERS:
-        if uploader in UPLOADERS:
-            create_uploaders.append(create_task(UPLOADERS[uploader].create_uploader(client=client)))
+        if uploader.ENABLED is False:
+            logger.debug("Skipping disabled uploader: %s", uploader.TYPE)
+            continue
+
+        if uploader.TYPE in UPLOADERS:
+            uploader_type = UPLOADERS[uploader.TYPE]
+            print(get_args(uploader_type))
+            create_uploaders.append(
+                create_task(UPLOADERS[uploader.TYPE].create_uploader(uploader, client=client))
+            )
         else:
             raise KeyError(
-                f"Invalid uploader {uploader} specified. Valid uploaders are: {', '.join(VALID_UPLOADERS)}"
+                f"Invalid uploader {uploader.TYPE} specified. Valid uploaders are: {', '.join(VALID_UPLOADERS)}"
             )
     uploaders: list[Uploader] = await asyncio.gather(*create_uploaders)
 

@@ -1,17 +1,19 @@
 import logging
 from datetime import datetime
-from typing import MutableMapping, Optional, cast, TypeVar
+from typing import MutableMapping, Optional, assert_type, cast, TypeVar, Generic
 from urllib.parse import quote_plus, urljoin
 
 import httpx
 
 from .. import config
+from ..config import UploaderConfig
 from ..utility import retry
 
 logger = logging.getLogger(__name__)
 
 
 T = TypeVar("T", bound="Uploader")
+C = TypeVar("C", bound=UploaderConfig)
 
 
 class BaseUploader:
@@ -117,15 +119,22 @@ class BaseUploader:
         logger.debug("Response was: %s", res.text)
 
 
-class Uploader(BaseUploader):
+class Uploader(BaseUploader, Generic[C]):
     def __init__(
-        self, supp=None, client: Optional[httpx.AsyncClient] = None, factory: bool = False
+        self,
+        config: C,
+        supp=None,
+        client: Optional[httpx.AsyncClient] = None,
+        factory: bool = False,
     ):
-        # Create httpx client
+        # Create httpx client if not given
         if client is None:
             self.client = httpx.AsyncClient(http2=True)
         else:
             self.client = client
+
+        # Store config
+        self.config: C = config
 
         super().__init__(supp=supp, factory=factory)
 
@@ -139,12 +148,13 @@ class Uploader(BaseUploader):
     @classmethod
     async def create_uploader(
         cls: type[T],
+        config: C,
         *args,
         supp: Optional[str] = None,
         client: Optional[httpx.AsyncClient] = None,
         **kwargs,
     ) -> T:
-        new_inst = cls(*args, supp=supp, client=client, factory=True, **kwargs)  # type: ignore
+        new_inst = cls(config, *args, supp=supp, client=client, factory=True, **kwargs)  # type: ignore
         new_inst.latest = await new_inst.get_latest()
         return new_inst
 

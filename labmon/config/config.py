@@ -13,9 +13,9 @@ import os
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional, ClassVar
+from typing import Optional, TypeAlias
 
-from dataclass_wizard import JSONFileWizard, JSONWizard
+from dataclass_wizard import JSONPyWizard, JSONFileWizard, JSONWizard
 
 logger = logging.getLogger(__name__)
 
@@ -35,13 +35,12 @@ class ServerConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
 
 
-@dataclass(frozen=True)
-class UploaderConfig:
-    _CONFIG_CLASSES: ClassVar[list] = []
-
-    def __init_subclass__(cls) -> None:
-        UploaderConfig._CONFIG_CLASSES.append(cls)
-
+@dataclass()
+class UploaderConfig(JSONWizard):
+    # The type of the uploader
+    TYPE: str = "Sample"
+    # Enabled flag - by default false
+    ENABLED: bool = False
     # Supplementary sample, if applicable
     SUPP: Optional[str] = None
     # Interval to upload the sample. For log-based uploaders (like BlueFors or Leiden)
@@ -49,8 +48,24 @@ class UploaderConfig:
     UPLOAD_INTERVAL: float = 20.0
 
 
-@dataclass(frozen=True)
-class BlueForsUploadConfig(UploaderConfig):
+@dataclass()
+class SampleUploadConfig(UploaderConfig, JSONWizard):
+    class _(JSONWizard.Meta):
+        # This is the name of the uplader as defined in the upload.py file
+        tag = "Sample"
+
+    TYPE: str = "Sample"
+    # Sample uploader config, that uploads a random value for the field
+    # names listed in the FIELD_NAMES config variable
+    FIELD_NAMES: list[str] = field(default_factory=lambda: ["Field_1", "Field_2"])
+
+
+@dataclass()
+class BlueForsUploadConfig(UploaderConfig, JSONWizard):
+    class _(JSONWizard.Meta):
+        # This is the name of the uplader as defined in the upload.py file
+        tag = "BlueFors"
+
     LOG_DIR: str = "C:\\BlueFors_Logs"
     LOG_WARNING_INTERVAL: int = 1_800  # Warn missing files every 30 minutes
     MAX_AGE: float = 180.0  # Maximum age of data in seconds
@@ -71,8 +86,12 @@ class BlueForsUploadConfig(UploaderConfig):
     UPLOAD_MAXIGAUGE: bool = True
 
 
-@dataclass(frozen=True)
-class LeidenUploadConfig(UploaderConfig):
+@dataclass()
+class LeidenUploadConfig(UploaderConfig, JSONWizard):
+    class _(JSONWizard.Meta):
+        # This is the name of the uplader as defined in the upload.py file
+        tag = "Leiden"
+
     LOG_DIR: str = "C:\\avs-47\\"
     TC_FILE_PATTERN: str = (
         r"LogAVS_Reilly-DR__([0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2})\.dat"
@@ -90,8 +109,12 @@ class LeidenUploadConfig(UploaderConfig):
     )
 
 
-@dataclass(frozen=True)
-class Lakeshore336Config(UploaderConfig):
+@dataclass()
+class Lakeshore336Config(UploaderConfig, JSONWizard):
+    class _(JSONWizard.Meta):
+        # This is the name of the uplader as defined in the upload.py file
+        tag = "Lakeshore336"
+
     ADDRESS: str = "TCPIP0::10.1.1.10::7777::SOCKET"
     UPLOAD_INTERVAL: float = 20.0
     UPLOAD_MILLIKELVIN: bool = False
@@ -105,8 +128,12 @@ class Lakeshore336Config(UploaderConfig):
     )
 
 
-@dataclass(frozen=True)
-class MaxigaugeConfig(UploaderConfig):
+@dataclass()
+class MaxigaugeConfig(UploaderConfig, JSONWizard):
+    class _(JSONWizard.Meta):
+        # This is the name of the uplader as defined in the upload.py file
+        tag = "MaxiGauge"
+
     ADDRESS: str = "ASRL4"
     # If this maxigauge is attached to a fridge, give the supplementary
     # table name
@@ -122,8 +149,12 @@ class MaxigaugeConfig(UploaderConfig):
     )
 
 
-@dataclass(frozen=True)
-class CryomechConfig(UploaderConfig):
+@dataclass()
+class CryomechConfig(UploaderConfig, JSONWizard):
+    class _(JSONWizard.Meta):
+        # This is the name of the uplader as defined in the upload.py file
+        tag = "Cryomech"
+
     ADDRESS: str = "ASRL4"
     # If this compressor is attached to a fridge, give the supplementary
     # table name
@@ -141,24 +172,41 @@ class CryomechConfig(UploaderConfig):
     COMPRESSOR_BOUNCE_N: int = 15
 
 
+_VALID_UPLOAD_CONFIGS: TypeAlias = (
+    BlueForsUploadConfig
+    | LeidenUploadConfig
+    | Lakeshore336Config
+    | MaxigaugeConfig
+    | CryomechConfig
+    | SampleUploadConfig
+)
+
+
 @dataclass(frozen=True)
 class UploadConfig:
     ENABLED: bool = False
     MOCK: bool = False  # Simulate upload only, don't actually upload
     BASE_URL: str = "https://qsyd.sydney.edu.au/data"
     FRIDGE: str = "?"  # Fill in with fridge name
-    ENABLED_UPLOADERS: list[str] = field(default_factory=lambda: ["BlueFors"])  # Can also be Leiden
-    BLUEFORS_CONFIG: BlueForsUploadConfig = BlueForsUploadConfig()
-    LEIDEN_CONFIG: LeidenUploadConfig = LeidenUploadConfig()
-    LAKESHORE_CONFIG: Lakeshore336Config = Lakeshore336Config()
-    CRYOMECH_CONFIG: CryomechConfig = CryomechConfig()
-    MAXIGAUGE_CONFIG: MaxigaugeConfig = MaxigaugeConfig()
+
+    ENABLED_UPLOADERS: list[_VALID_UPLOAD_CONFIGS] = field(
+        default_factory=lambda: [
+            SampleUploadConfig(),
+            BlueForsUploadConfig(),
+            LeidenUploadConfig(),
+            Lakeshore336Config(),
+            CryomechConfig(),
+            MaxigaugeConfig(),
+        ]
+    )
 
 
-@dataclass(frozen=True)
-class Config(JSONFileWizard, JSONWizard):
+@dataclass()
+class Config(JSONPyWizard, JSONFileWizard):
     class _(JSONWizard.Meta):
-        key_transform_with_dump = "NONE"
+        v1 = True
+        v1_key_case = "AUTO"
+        tag_key = "TYPE"
 
     SERVER: ServerConfig = ServerConfig()
     UPLOAD: UploadConfig = UploadConfig()
