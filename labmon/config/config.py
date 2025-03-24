@@ -66,6 +66,8 @@ class BlueForsUploadConfig(UploaderConfig, JSONWizard):
         # This is the name of the uplader as defined in the upload.py file
         tag = "BlueFors"
 
+    # Check the sensor file every 1.0 seconds
+    UPLOAD_INTERVAL: float = 1.0
     LOG_DIR: str = "C:\\BlueFors_Logs"
     LOG_WARNING_INTERVAL: int = 1_800  # Warn missing files every 30 minutes
     MAX_AGE: float = 180.0  # Maximum age of data in seconds
@@ -92,6 +94,8 @@ class LeidenUploadConfig(UploaderConfig, JSONWizard):
         # This is the name of the uplader as defined in the upload.py file
         tag = "Leiden"
 
+    # Check the sensor file every 1.0 seconds
+    UPLOAD_INTERVAL: float = 1.0
     LOG_DIR: str = "C:\\avs-47\\"
     TC_FILE_PATTERN: str = (
         r"LogAVS_Reilly-DR__([0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2})\.dat"

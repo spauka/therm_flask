@@ -35,6 +35,11 @@ async def schedule_poll(uploader: Uploader):
     iteration until the first is complete, and calculate the correct interval.
     """
     interval = timedelta(seconds=uploader.poll_interval)
+    logger.debug(
+        "Setting up uploader %s with interval %.2f s",
+        uploader.__class__.__name__,
+        interval.total_seconds(),
+    )
     next_time: datetime = datetime.now()
 
     try:
@@ -53,14 +58,14 @@ async def schedule_poll(uploader: Uploader):
             # Check if we need to sleep before the next poll, and sleep until we're ready for
             # the next poll
             next_interval = next_time - datetime.now()
-            if next_interval.seconds < 0:
+            if next_interval.total_seconds() < 0:
                 logger.warning(
                     "Polling %s faster than it can run. The next poll is running %f seconds slow.",
                     uploader.__class__.__name__,
                     next_interval.seconds,
                 )
                 continue
-            await asyncio.sleep(next_interval.seconds)
+            await asyncio.sleep(next_interval.total_seconds())
 
     except asyncio.CancelledError:
         logger.warning("Shutting down uploader: %s", uploader.__class__.__name__)
