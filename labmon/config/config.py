@@ -13,7 +13,7 @@ import os
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
+from typing import Optional, ClassVar
 
 from dataclass_wizard import JSONFileWizard, JSONWizard
 
@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_CONF_LOC = Path("~").expanduser()
 CONF_LOC = Path(os.environ.get("THERM_CONFIG", DEFAULT_CONF_LOC))
+CONF_NAME = Path(os.environ.get("THERM_CONFIG_NAME", "labmon_config.json")).name
 CONFIG_FILE = CONF_LOC / "labmon_config.json"
 
 
@@ -35,7 +36,21 @@ class ServerConfig:
 
 
 @dataclass(frozen=True)
-class BlueForsUploadConfig:
+class UploaderConfig:
+    _CONFIG_CLASSES: ClassVar[list] = []
+
+    def __init_subclass__(cls) -> None:
+        UploaderConfig._CONFIG_CLASSES.append(cls)
+
+    # Supplementary sample, if applicable
+    SUPP: Optional[str] = None
+    # Interval to upload the sample. For log-based uploaders (like BlueFors or Leiden)
+    # this is the sample interval
+    UPLOAD_INTERVAL: float = 20.0
+
+
+@dataclass(frozen=True)
+class BlueForsUploadConfig(UploaderConfig):
     LOG_DIR: str = "C:\\BlueFors_Logs"
     LOG_WARNING_INTERVAL: int = 1_800  # Warn missing files every 30 minutes
     MAX_AGE: float = 180.0  # Maximum age of data in seconds
@@ -57,7 +72,7 @@ class BlueForsUploadConfig:
 
 
 @dataclass(frozen=True)
-class LeidenUploadConfig:
+class LeidenUploadConfig(UploaderConfig):
     LOG_DIR: str = "C:\\avs-47\\"
     TC_FILE_PATTERN: str = (
         r"LogAVS_Reilly-DR__([0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2})\.dat"
@@ -76,7 +91,7 @@ class LeidenUploadConfig:
 
 
 @dataclass(frozen=True)
-class Lakeshore336Config:
+class Lakeshore336Config(UploaderConfig):
     ADDRESS: str = "TCPIP0::10.1.1.10::7777::SOCKET"
     UPLOAD_INTERVAL: float = 20.0
     UPLOAD_MILLIKELVIN: bool = False
@@ -91,7 +106,7 @@ class Lakeshore336Config:
 
 
 @dataclass(frozen=True)
-class MaxigaugeConfig:
+class MaxigaugeConfig(UploaderConfig):
     ADDRESS: str = "ASRL4"
     # If this maxigauge is attached to a fridge, give the supplementary
     # table name
@@ -108,7 +123,7 @@ class MaxigaugeConfig:
 
 
 @dataclass(frozen=True)
-class CryomechConfig:
+class CryomechConfig(UploaderConfig):
     ADDRESS: str = "ASRL4"
     # If this compressor is attached to a fridge, give the supplementary
     # table name
@@ -173,9 +188,3 @@ logger.debug("Config parameters: %r", config)
 # Pass config accesses to the config file
 def __getattr__(name):
     return getattr(config, name)
-
-
-if __name__ == "__main__":
-    import pprint
-
-    pprint.pprint(config)
