@@ -66,7 +66,7 @@ class Uploader(Generic[C]):
 
         super().__init__()
 
-    def _mock_upload(self, values: MutableMapping[str, float | datetime | str]):
+    def _mock_upload(self, values: MutableMapping[str, float | datetime | str]) -> str:
         """
         Mock upload - log but don't actually send data
         """
@@ -116,7 +116,7 @@ class Uploader(Generic[C]):
 
     def _validate_upload_successful(
         self, res: httpx.Response, values: MutableMapping[str, float | datetime | str]
-    ):
+    ) -> bool:
         """
         Validate that the upload was successful
         """
@@ -137,13 +137,14 @@ class Uploader(Generic[C]):
             res.status_code,
         )
         logger.debug("Response was: %s", res.text)
+        return True
 
     @property
-    def poll_interval(self):
+    def poll_interval(self) -> float:
         """
-        Return the polling interval.
+        Return the polling interval. This is usually every second.
         """
-        return self.config.UPLOAD_INTERVAL
+        return 1.0
 
     @classmethod
     async def create_uploader(
