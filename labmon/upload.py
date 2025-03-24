@@ -46,6 +46,7 @@ async def schedule_poll(uploader: Uploader):
                     "Polling %s at time %s", uploader.__class__.__name__, datetime.now().isoformat()
                 )
                 result = await uploader.poll()
+                logger.debug("Poll result for %s was %r.", uploader.__class__.__name__, result)
                 # Allow other uploaders to run if necessary
                 await asyncio.sleep(0)
 

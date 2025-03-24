@@ -141,9 +141,9 @@ class Uploader(Generic[C]):
     @property
     def poll_interval(self):
         """
-        Return the polling interval. This should be overwritten by child classes.
+        Return the polling interval.
         """
-        return 1
+        return self.config.UPLOAD_INTERVAL
 
     @classmethod
     async def create_uploader(
