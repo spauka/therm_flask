@@ -113,12 +113,47 @@ class LeidenUploadConfig(UploaderConfig, JSONWizard):
     )
 
 
+@dataclass(frozen=True)
+class AVS47ChannelConfig(JSONWizard):
+    SENSOR: str = "Four_K_RuO"
+    CALIBRATION: str = "PT1000"
+    # Wait this long after reaching the final range
+    SETTLE_DELAY: float = 10.0
+    # Average points <AVERAGE_COUNT> times with <AVERAGE_DELAY> time between each point
+    AVERAGE_COUNT: int = 3
+    AVERAGE_DELAY: float = 1.0
+
+
+@dataclass()
+class AVS47Config(UploaderConfig, JSONWizard):
+    class _(JSONWizard.Meta):
+        # This is the name of the uplader as defined in the upload.py file
+        tag = "AVS47"
+
+    # PySerial port
+    SERIAL_PORT: str = "COM4"
+    # AVS address - used for chained units
+    ADDRESS: int = 1
+    UPLOAD_INTERVAL: float = 20.0
+    UPLOAD_MILLIKELVIN: bool = False
+    SENSORS: dict[int, AVS47ChannelConfig] = field(
+        default_factory=lambda: {
+            0: AVS47ChannelConfig("Four_K_RuO", "RuO_10K"),
+            1: AVS47ChannelConfig("Still_RuO", "RuO_10K"),
+            2: AVS47ChannelConfig("50mK_RuO", "RuO_1K5"),
+            3: AVS47ChannelConfig("MC_Speer", "TT_1326"),
+            5: AVS47ChannelConfig("MC_PT", "PT1000"),
+        }
+    )
+
+
 @dataclass()
 class Lakeshore336Config(UploaderConfig, JSONWizard):
     class _(JSONWizard.Meta):
         # This is the name of the uplader as defined in the upload.py file
         tag = "Lakeshore336"
 
+    # Visa Address
     ADDRESS: str = "TCPIP0::10.1.1.10::7777::SOCKET"
     UPLOAD_INTERVAL: float = 20.0
     UPLOAD_MILLIKELVIN: bool = False
@@ -138,6 +173,7 @@ class MaxigaugeConfig(UploaderConfig, JSONWizard):
         # This is the name of the uplader as defined in the upload.py file
         tag = "MaxiGauge"
 
+    # Visa Address
     ADDRESS: str = "ASRL4"
     # If this maxigauge is attached to a fridge, give the supplementary
     # table name
@@ -159,6 +195,7 @@ class CryomechConfig(UploaderConfig, JSONWizard):
         # This is the name of the uplader as defined in the upload.py file
         tag = "Cryomech"
 
+    # Visa Address
     ADDRESS: str = "ASRL4"
     # If this compressor is attached to a fridge, give the supplementary
     # table name
@@ -182,6 +219,7 @@ _VALID_UPLOAD_CONFIGS: TypeAlias = (
     | Lakeshore336Config
     | MaxigaugeConfig
     | CryomechConfig
+    | AVS47Config
     | SampleUploadConfig
 )
 
@@ -198,6 +236,7 @@ class UploadConfig:
             SampleUploadConfig(),
             BlueForsUploadConfig(),
             LeidenUploadConfig(),
+            AVS47Config(),
             Lakeshore336Config(),
             CryomechConfig(),
             MaxigaugeConfig(),
