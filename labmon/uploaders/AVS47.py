@@ -24,6 +24,7 @@ EXCITATION: dict[str, int] = {
     "1mV": 6,
     "3mV": 7,
 }
+R_EXCITATION: list[str] = list(EXCITATION.keys())
 
 INPUT_RANGE: dict[str, int] = {
     "Open": 0,
@@ -35,6 +36,10 @@ INPUT_RANGE: dict[str, int] = {
     "200K": 6,
     "2M": 7,
 }
+R_INPUT_RANGE: list[str] = list(INPUT_RANGE.keys())
+
+INPUT_SELECT: dict[str, int] = {"Zero": 0, "Measure": 1, "Calibrate": 2}
+R_INPUT_SELECT: list[str] = list(INPUT_SELECT.keys())
 
 
 class AVS47DataStruct(ctypes.LittleEndianStructure):
@@ -56,6 +61,23 @@ class AVS47DataStruct(ctypes.LittleEndianStructure):
         ("_pad3", ctypes.c_uint64, 3),  # 42-44
         ("_pad4", ctypes.c_uint64, 4),  # 45-48
     ]
+
+    def __repr__(self):
+        exc = R_EXCITATION[self.excitation]
+        inp_range = R_INPUT_RANGE[self.input_range]
+        inp_select = R_INPUT_SELECT[self.input_select]
+
+        params = (
+            f"address={self.address}, "
+            f"remote={self.remote}, "
+            f"input_range={inp_range}, "
+            f"excitation={exc}, "
+            f"channel={self.channel}, "
+            f"input_select={inp_select}, "
+            f"resistance={self.resistance:.4f}"
+        )
+
+        return f"AVS47DataStruct({params})"
 
     @property
     def readout(self):
@@ -81,7 +103,7 @@ class AVS47:
     AVS47 bit-banging driver
     """
 
-    def __init__(self, serial_port: str, address: int = 1, delay: float = 0.01):
+    def __init__(self, serial_port: str, address: int = 1, delay: float = 0.001):
         self.port = serial_port
         self.address = address
         self.delay = delay
