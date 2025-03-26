@@ -194,7 +194,6 @@ class AVS47:
             self.CP = 0
             for i in range(48):
                 self.DC = (data.value >> (47 - i)) & 0x1
-                data.value >>= 1
                 return_value |= self.DI << (47 - i)
                 await self._clock()
             self.DC = 0
