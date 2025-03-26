@@ -79,5 +79,5 @@ def polylog_res_to_temp(R: float, cal: str):
     if cal not in CALIBRATIONS:
         raise KeyError(f"Unknown calibration curve. Valid curves are: {_VALID_CALS}.")
 
-    poly = CALIBRATIONS[cal]
-    return 10 ** poly(log10(R)) / 1000
+    poly_coeff = CALIBRATIONS[cal]
+    return 10 ** poly(log10(R), poly_coeff) / 1000
