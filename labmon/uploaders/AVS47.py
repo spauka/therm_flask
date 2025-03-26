@@ -43,6 +43,42 @@ R_INPUT_SELECT: list[str] = list(INPUT_SELECT.keys())
 
 
 class AVS47DataStruct(ctypes.LittleEndianStructure):
+    def __init__(
+        self,
+        address: int = 0,
+        remote: int = 1,
+        input_range: str | int = 0,
+        excitation: str | int = 0,
+        display: int = 0,
+        channel: int = 0,
+        input_select: int | str = 0,
+    ):
+        if isinstance(input_range, str):
+            try:
+                input_range = INPUT_RANGE[input_range]
+            except KeyError:
+                raise KeyError(f"Invalid input range. Valid ranges are: {', '.join(R_INPUT_RANGE)}")
+
+        if isinstance(excitation, str):
+            try:
+                excitation = EXCITATION[excitation]
+            except KeyError:
+                raise KeyError(
+                    f"Invalid excitation. Valid excitations are: {', '.join(R_EXCITATION)}"
+                )
+
+        if isinstance(input_select, str):
+            try:
+                input_select = INPUT_SELECT[input_select]
+            except KeyError:
+                raise KeyError(
+                    f"Invalid input selection. Valid values are: {', '.join(R_INPUT_SELECT)}"
+                )
+
+        super().__init__(
+            address, remote, 0, input_range, excitation, display, channel, input_select, *([0] * 8)
+        )
+
     _fields_ = [
         ("address", ctypes.c_uint64, 6),  # 0-6
         ("remote", ctypes.c_uint64, 1),  # 7
