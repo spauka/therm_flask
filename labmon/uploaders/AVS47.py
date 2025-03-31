@@ -20,7 +20,6 @@ from .uploader import Uploader
 logger = logging.getLogger(__name__)
 
 EXCITATION: dict[str, int] = {
-    "UNK": -1,
     "0": 0,
     "3uV": 1,
     "10uV": 2,
@@ -29,11 +28,11 @@ EXCITATION: dict[str, int] = {
     "300uV": 5,
     "1mV": 6,
     "3mV": 7,
+    "UNK": -1,
 }
 R_EXCITATION: list[str] = list(EXCITATION.keys())
 
 INPUT_RANGE: dict[str, int] = {
-    "UNK": -1,
     "Open": 0,
     "2R": 1,
     "20R": 2,
@@ -42,10 +41,11 @@ INPUT_RANGE: dict[str, int] = {
     "20K": 5,
     "200K": 6,
     "2M": 7,
+    "UNK": -1,
 }
 R_INPUT_RANGE: list[str] = list(INPUT_RANGE.keys())
 
-INPUT_SELECT: dict[str, int] = {"UNK": -1, "Zero": 0, "Measure": 1, "Calibrate": 2}
+INPUT_SELECT: dict[str, int] = {"Zero": 0, "Measure": 1, "Calibrate": 2, "UNK": -1}
 R_INPUT_SELECT: list[str] = list(INPUT_SELECT.keys())
 
 
