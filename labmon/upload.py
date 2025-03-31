@@ -118,7 +118,7 @@ if __name__ == "__main__":
 
     # Parse command line arguments
     cmd_args = argparse.ArgumentParser("LabMon Monitoring Upload Script")
-    cmd_args.add_argument("-v", "--verbose", action="store", default=".")
+    cmd_args.add_argument("-v", "--verbose", default=".")
     args = cmd_args.parse_args(namespace=argparse.Namespace(verbose=None))
 
     if args.verbose is not None:
