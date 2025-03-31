@@ -120,7 +120,6 @@ if __name__ == "__main__":
     cmd_args = argparse.ArgumentParser(description="LabMon Monitoring Upload Script")
     cmd_args.add_argument("-v", "--verbose", nargs='?', const=".", default=None)
     args = cmd_args.parse_args(namespace=argparse.Namespace())
-    print(args)
 
     if args.verbose is not None:
         if args.verbose == ".":
