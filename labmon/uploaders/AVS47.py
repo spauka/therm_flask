@@ -482,7 +482,11 @@ class AVS47:
         """
         Send and receive some data
         """
-        logger.debug("AVS Sending data: %r", data.bits)
+        if data.value == NULL_DATA.value:
+            logger.debug("AVS Sending data: NULL_DATA")
+        else:
+            logger.debug("AVS Sending data: %r", data.bits)
+
         # Send the address to select the correct AVS. This must be done each time
         # as it is not stored (presumably to allow chaining?)
         await self._send_address()
