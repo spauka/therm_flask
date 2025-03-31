@@ -336,7 +336,8 @@ class AVS47:
                             "Channel %d not configured, but is enabled. Please edit the config file. Skipping....",
                             channel.channel,
                         )
-                        self.channel_states[channel.channel] = replace(channel, enabled=False)
+                        channel = replace(channel, enabled=False)
+                        self.channel_states[channel.channel] = channel
                         continue
                     channel_config = self.config[channel.channel]
 
@@ -373,11 +374,12 @@ class AVS47:
                                 self.settling_start = datetime.now()
 
                             # Update the channel config with the latest values
-                            self.channel_states[channel.channel] = replace(
+                            channel = replace(
                                 channel,
                                 input_range=new_state.bits.input_range,
                                 resistance=new_state.bits.resistance,
                             )
+                            self.channel_states[channel.channel] = channel
 
                             # Wait some time and read out a new value from the AVS
                             await asyncio.sleep(1)
@@ -406,19 +408,18 @@ class AVS47:
                             failed = True
                             break
 
-                        self.channel_states[channel.channel] = replace(
-                            channel, resistance=new_state.bits.resistance
-                        )
+                        channel = replace(channel, resistance=new_state.bits.resistance)
+                        self.channel_states[channel.channel] = channel
                         logger.debug(
                             "AVS channel %d resistance is %sΩ",
                             channel.channel,
-                            si_format(new_state.bits.resistance),
+                            si_format(new_state.bits.resistance, 3),
                         )
                         resistance += new_state.bits.resistance
 
                     # Don't store value if readout failed
                     if failed:
-                        break
+                        continue
 
                     # State is read out, convert the value
                     resistance /= channel_config.AVERAGE_COUNT
@@ -429,15 +430,15 @@ class AVS47:
                             logger.info(
                                 "AVS Channel %d Temperature is: %sK (Resistance: %sΩ)",
                                 channel.channel,
-                                si_format(temperature),
-                                si_format(resistance),
+                                si_format(temperature, 3),
+                                si_format(resistance, 3),
                             )
                             new_temperatures[channel.channel] = temperature
                         else:
                             logger.info(
                                 "AVS Channel %d Temperature out of range (Resistance: %sΩ)",
                                 channel.channel,
-                                si_format(resistance),
+                                si_format(resistance, 3),
                             )
                     else:
                         # Invalid calibration
