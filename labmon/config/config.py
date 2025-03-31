@@ -117,6 +117,8 @@ class LeidenUploadConfig(UploaderConfig, JSONWizard):
 class AVS47ChannelConfig(JSONWizard):
     SENSOR: str = "Four_K_RuO"
     CALIBRATION: str = "PT1000"
+    # Excitation for this channel
+    EXCITATION: str = "30uV"
     # Wait this long after reaching the final range
     SETTLE_DELAY: float = 20.0
     # Average points <AVERAGE_COUNT> times with <AVERAGE_DELAY> time between each point
@@ -134,7 +136,6 @@ class AVS47Config(UploaderConfig, JSONWizard):
     SERIAL_PORT: str = "COM4"
     # AVS address - used for chained units
     ADDRESS: int = 1
-    UPLOAD_INTERVAL: float = 20.0
     UPLOAD_MILLIKELVIN: bool = False
     SENSORS: dict[int, AVS47ChannelConfig] = field(
         default_factory=lambda: {
