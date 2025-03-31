@@ -387,13 +387,19 @@ class AVS47:
 
                     # If the scan failed for whatever reason, then don't read value
                     if failed:
-                        break
+                        continue
 
                     # State is settled - readout value
                     resistance = 0.0
+                    next_sample_time = datetime.now() + timedelta(
+                        seconds=channel_config.AVERAGE_DELAY
+                    )
                     for count in range(channel_config.AVERAGE_COUNT):
                         # This time we sleep at the start
-                        await asyncio.sleep(channel_config.AVERAGE_DELAY)
+                        await asyncio.sleep((next_sample_time - datetime.now()).total_seconds())
+                        next_sample_time = datetime.now() + timedelta(
+                            seconds=channel_config.AVERAGE_DELAY
+                        )
                         new_state = await self.send_and_receive()
 
                         # Double check that scan range/channel hasn't changed
