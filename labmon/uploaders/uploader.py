@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import MutableMapping, Optional, cast, TypeVar, Generic
 from urllib.parse import quote_plus, urljoin
 
@@ -179,11 +179,29 @@ class Uploader(Generic[C]):
         """
         latest, values = self._validate_upload_values(raw_values)
 
+        # If the upload is older than the latest uploaded value, skip the
+        # upload
+        if latest < self.latest:
+            logger.error(
+                "Trying to upload an old datapoint: (%s < %s). Skipping",
+                latest.isoformat(),
+                self.latest.isoformat(),
+            )
+
+        # If there is a sufficiently large gap, upload a null value
+        if (latest - self.latest).total_seconds() > global_config.UPLOAD.MAX_GAP:
+            one_second = timedelta(seconds=1)
+            _, blank = self._validate_upload_values({"time": self.latest + one_second})
+            if global_config.UPLOAD.MOCK:
+                self._mock_upload(blank)
+            else:
+                await self.client.post(self._url, data=blank)
+
+        # Upload values to server
+
         if global_config.UPLOAD.MOCK:
             self.latest = latest
             return self._mock_upload(values)
-
-        # Upload to server
         res = await self.client.post(self._url, data=values)
         self._validate_upload_successful(res, values)
 

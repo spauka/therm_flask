@@ -231,6 +231,8 @@ class UploadConfig:
     MOCK: bool = False  # Simulate upload only, don't actually upload
     BASE_URL: str = "https://qsyd.sydney.edu.au/data"
     FRIDGE: str = "?"  # Fill in with fridge name
+    # Upload a null sample if the last data point was more than this many seconds ago
+    MAX_GAP: float = 180.0
 
     ENABLED_UPLOADERS: list[_VALID_UPLOAD_CONFIGS] = field(
         default_factory=lambda: [
