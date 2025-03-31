@@ -399,7 +399,8 @@ class AVS47:
                             or new_state.bits.input_range != channel.input_range
                         ):
                             logger.warning(
-                                "Value for channel %d was unstable during read. Skippping..."
+                                "Value for channel %d was unstable during read. Skippping...",
+                                channel.channel,
                             )
                             failed = True
                             break
