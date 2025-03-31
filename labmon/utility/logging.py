@@ -36,5 +36,9 @@ def init_logging(level=logging.INFO):
     root_logger.addHandler(ch)
 
 
-def set_logging(level=logging.INFO):
-    labmon_logger.setLevel(level)
+def set_logging(level=logging.INFO, path=None):
+    if path is None:
+        labmon_logger.setLevel(level)
+    else:
+        specified_logger = logging.getLogger(path)
+        specified_logger.setLevel(level)

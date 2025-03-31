@@ -118,12 +118,15 @@ if __name__ == "__main__":
 
     # Parse command line arguments
     cmd_args = argparse.ArgumentParser("LabMon Monitoring Upload Script")
-    cmd_args.add_argument("-v", "--verbose", action="store_true")
-    args = cmd_args.parse_args()
+    cmd_args.add_argument("-v", "--verbose", action="store", default=".")
+    args = cmd_args.parse_args(namespace=argparse.Namespace(verbose=None))
 
-    if args.verbose:
-        # Set log level debug on labmon
-        set_logging(logging.DEBUG)
+    if args.verbose is not None:
+        if args.verbose == ".":
+            # Set log level debug on labmon
+            set_logging(logging.DEBUG)
+        else:
+            set_logging(logging.DEBUG, args.verbose)
 
     # Check that uploading is enabled
     if not config.UPLOAD.ENABLED:
