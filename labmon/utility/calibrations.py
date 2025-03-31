@@ -1,7 +1,12 @@
 from math import log10
+import logging
 from functools import partial
 from dataclasses import dataclass
 from typing import Optional, Sequence
+
+from .si_prefix import si_format
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -26,9 +31,21 @@ def polylog_res_to_temp(R: float, cal: SensorCalibration) -> Optional[float]:
     Convert a resistance in Ohms to K
     """
     if not (cal.valid_resistance_range[0] <= R <= cal.valid_resistance_range[1]):
+        logger.debug(
+            "Resistance out of range. %s not in (%s, %s)",
+            si_format(R),
+            si_format(cal.valid_resistance_range[0]),
+            si_format(cal.valid_resistance_range[1]),
+        )
         return None
     T = 10 ** poly(log10(R), cal.coefficients)
     if not (cal.valid_temperature_range[0] <= T <= cal.valid_temperature_range[1]):
+        logger.debug(
+            "Temperature out of range. %sK not in (%sK, %sK)",
+            si_format(T),
+            si_format(cal.valid_temperature_range[0]),
+            si_format(cal.valid_temperature_range[1]),
+        )
         return None
     return T
 
@@ -38,9 +55,21 @@ def poly_res_to_temp(R: float, cal: SensorCalibration):
     Convert a resistance in Ohms to K
     """
     if not (cal.valid_resistance_range[0] <= R <= cal.valid_resistance_range[1]):
+        logger.debug(
+            "Resistance out of range. %s not in (%s, %s)",
+            si_format(R),
+            si_format(cal.valid_resistance_range[0]),
+            si_format(cal.valid_resistance_range[1]),
+        )
         return None
     T = poly(R, cal.coefficients)
     if not (cal.valid_temperature_range[0] <= T <= cal.valid_temperature_range[1]):
+        logger.debug(
+            "Temperature out of range. %sK not in (%sK, %sK)",
+            si_format(T),
+            si_format(cal.valid_temperature_range[0]),
+            si_format(cal.valid_temperature_range[1]),
+        )
         return None
     return T
 

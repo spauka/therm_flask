@@ -412,7 +412,7 @@ class AVS47:
                         logger.debug(
                             "AVS channel %d resistance is %sΩ",
                             channel.channel,
-                            si_format(resistance),
+                            si_format(new_state.bits.resistance),
                         )
                         resistance += new_state.bits.resistance
 
