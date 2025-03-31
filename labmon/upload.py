@@ -64,7 +64,7 @@ async def schedule_poll(uploader: Uploader):
                 logger.warning(
                     "Polling %s faster than it can run. The next poll is running %f seconds slow.",
                     uploader.__class__.__name__,
-                    next_interval.seconds,
+                    next_interval.total_seconds(),
                 )
                 continue
             await asyncio.sleep(next_interval.total_seconds())
