@@ -221,12 +221,16 @@ class AVS47:
         # Set up the channel state dictionary, by default set all configured channels enabled
         self.channel_states: list[AVS47ChannelState] = []
         for i in range(8):
+            if i in config:
+                excitation = EXCITATION[config[i].EXCITATION]
+            else:
+                excitation = EXCITATION["UNK"]
             self.channel_states.append(
                 AVS47ChannelState(
                     enabled=(i in config),
                     channel=i,
                     input_range=INPUT_RANGE["UNK"],
-                    excitation=EXCITATION["UNK"],
+                    excitation=excitation,
                 )
             )
 
@@ -556,6 +560,8 @@ class AVS47Monitor(Uploader[AVS47Config]):
         if self._instr_conn.scan_complete:
             data = {}
             for channel, value in self._instr_conn.temperatures.items():
+                if self.config.UPLOAD_MILLIKELVIN:
+                    value *= 1000
                 if channel in self.config.SENSORS:
                     data[self.config.SENSORS[channel].SENSOR] = value
                 else:
