@@ -118,7 +118,7 @@ class AVS47ChannelConfig(JSONWizard):
     SENSOR: str = "Four_K_RuO"
     CALIBRATION: str = "PT1000"
     # Wait this long after reaching the final range
-    SETTLE_DELAY: float = 10.0
+    SETTLE_DELAY: float = 20.0
     # Average points <AVERAGE_COUNT> times with <AVERAGE_DELAY> time between each point
     AVERAGE_COUNT: int = 3
     AVERAGE_DELAY: float = 1.0
@@ -142,7 +142,7 @@ class AVS47Config(UploaderConfig, JSONWizard):
             1: AVS47ChannelConfig("Still_RuO", "RuO_10K"),
             2: AVS47ChannelConfig("50mK_RuO", "RuO_1K5"),
             3: AVS47ChannelConfig("MC_Speer", "TT_1326"),
-            5: AVS47ChannelConfig("MC_PT", "PT1000"),
+            4: AVS47ChannelConfig("MC_PT", "PT1000"),
         }
     )
 
