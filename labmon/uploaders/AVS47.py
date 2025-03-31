@@ -343,6 +343,7 @@ class AVS47:
                     # Check if we need to change the channel
                     failed = False
                     if self.active_channel != channel.channel:
+                        logger.debug("Changing channel to %d", channel.channel)
                         # Set channel to active
                         change, lock = channel.channel_change
                         await self.send_and_receive(change)
@@ -481,6 +482,7 @@ class AVS47:
         """
         Send and receive some data
         """
+        logger.debug("AVS Sending data: %r", data.bits)
         # Send the address to select the correct AVS. This must be done each time
         # as it is not stored (presumably to allow chaining?)
         await self._send_address()
@@ -497,7 +499,9 @@ class AVS47:
             await self._end_comm()
 
         # Return the result
-        return AVS47Data(value=return_value)
+        res = AVS47Data(value=return_value)
+        logger.debug("AVS returned data: %r", res.bits)
+        return res
 
     async def _send_address(self):
         with enable_high_res_timer():
