@@ -168,7 +168,9 @@ class Uploader(Generic[C]):
         res = await self.client.get(self._url, params={"current": ""})
         data = res.json()
         latest = datetime.fromisoformat(data["time"])
-        logger.info("Latest data for fridge %s was %s.", self.fridge, latest.isoformat())
+        logger.info(
+            "Latest data for fridge %s%s was %s.", self.fridge, self.supp_str, latest.isoformat()
+        )
         return latest
 
     @retry(exception=(httpx.TimeoutException, httpx.HTTPStatusError))
@@ -183,13 +185,22 @@ class Uploader(Generic[C]):
         # upload
         if latest < self.latest:
             logger.error(
-                "Trying to upload an old datapoint: (%s < %s). Skipping",
+                "Trying to upload an old datapoint on %s%s: (%s < %s). Skipping",
+                self.fridge,
+                self.supp_str,
                 latest.isoformat(),
                 self.latest.isoformat(),
             )
 
         # If there is a sufficiently large gap, upload a null value
-        if (latest - self.latest).total_seconds() > global_config.UPLOAD.MAX_GAP:
+        upload_gap = (latest - self.latest).total_seconds()
+        if upload_gap > global_config.UPLOAD.MAX_GAP:
+            logger.info(
+                "Uploading null value for %s%s due to upload gap of %d s",
+                self.fridge,
+                self.supp_str,
+                upload_gap,
+            )
             one_second = timedelta(seconds=1)
             _, blank = self._validate_upload_values({"time": self.latest + one_second})
             if global_config.UPLOAD.MOCK:
