@@ -8,6 +8,7 @@ import httpx
 
 from .config import CONFIG_FILE, config
 from .uploaders.uploader import Uploader
+from .uploaders.AVS47 import AVS47Monitor
 from .uploaders.bluefors_upload import BlueForsMonitor
 from .uploaders.lakeshore_336 import Lakeshore336Monitor
 from .uploaders.cryomech import CryomechMonitor
@@ -22,6 +23,7 @@ UPLOADERS: dict[str, type[Uploader]] = {
     "Lakeshore336": Lakeshore336Monitor,
     "Cryomech": CryomechMonitor,
     "MaxiGauge": PfeifferMaxiGaugeMonitor,
+    "AVS47": AVS47Monitor,
     # "Leiden": LeidenMonitor,
 }
 VALID_UPLOADERS = list(UPLOADERS.keys())
