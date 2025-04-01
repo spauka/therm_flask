@@ -317,10 +317,6 @@ class AVS47:
                 )
                 return False
 
-            # Check if the sensor range has changed, and if so, reset settling time
-            if new_state.bits.input_range != channel.input_range:
-                settling_start = datetime.now()
-
             # Update the channel config with the latest values
             channel = replace(
                 channel,
@@ -329,7 +325,13 @@ class AVS47:
             )
             self.channel_states[channel.channel] = channel
 
-            # If we have enabled quick settle, check if all points are within 1% of range
+            # Check if the sensor range has changed, and if so, reset settling time
+            if new_state.bits.input_range != channel.input_range:
+                settling_start = datetime.now()
+                continue
+
+            # If we have enabled quick settle, check if all points are within 1% of range and we
+            # haven't changed range
             if self.config[channel.channel].QUICK_SETTLE:
                 self.quick_settle.append(new_state.bits.resistance)
                 if len(self.quick_settle) == self.quick_settle_points:
