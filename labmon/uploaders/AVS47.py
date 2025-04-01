@@ -165,7 +165,7 @@ class AVS47ChannelState:
 
         # Set to default input range if not known
         if self.input_range is INPUT_RANGE["UNK"]:
-            input_range = INPUT_RANGE["2R"]
+            input_range = INPUT_RANGE["2"]
         else:
             input_range = self.input_range
 
