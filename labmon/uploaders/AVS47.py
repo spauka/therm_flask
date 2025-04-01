@@ -343,13 +343,23 @@ class AVS47:
                     val_range = maxval - minval
                     try:
                         input_range = si_parse(R_INPUT_RANGE[new_state.bits.input_range])[0]
-                        if val_range < (input_range * self.quick_settle_tolerance):
+                        tolerance = input_range * self.quick_settle_tolerance
+
+                        if val_range < tolerance:
                             logger.debug(
                                 "Breaking out of quick-settle for channel %d. Stable to within %.2f%%",
                                 channel.channel,
                                 100 * val_range / input_range,
                             )
                             return True
+                        else:
+                            logger.debug(
+                                "Quick settle range %.2f > %.2f (%.2f%% of %s range)",
+                                val_range,
+                                tolerance,
+                                100 * val_range / input_range,
+                                si_format(input_range),
+                            )
                     except ValueError:
                         logger.warning(
                             "Unable to parse input range: %s",
