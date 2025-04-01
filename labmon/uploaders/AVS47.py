@@ -35,12 +35,12 @@ R_EXCITATION: list[str] = list(EXCITATION.keys())
 
 INPUT_RANGE: dict[str, int] = {
     "Open": 0,
-    "2R": 1,
-    "20R": 2,
-    "200R": 3,
-    "2K": 4,
-    "20K": 5,
-    "200K": 6,
+    "2": 1,
+    "20": 2,
+    "200": 3,
+    "2k": 4,
+    "20k": 5,
+    "200k": 6,
     "2M": 7,
     "UNK": -1,
 }
