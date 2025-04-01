@@ -205,7 +205,7 @@ def si_parse(value: str) -> tuple[float, str]:
 
     # Try parsing as a float first
     try:
-        return float(value)
+        return float(value), ""
     except ValueError:
         pass
 
