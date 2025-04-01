@@ -338,6 +338,11 @@ class AVS47:
                     try:
                         input_range = si_parse(R_INPUT_RANGE[new_state.bits.input_range])[0]
                         if val_range < (input_range * self.quick_settle_tolerance):
+                            logger.debug(
+                                "Breaking out of quick-settle for channel %d. Stable to within %.2f%%",
+                                channel.channel,
+                                100 * val_range / input_range,
+                            )
                             return True
                     except ValueError:
                         logger.warning(
