@@ -121,7 +121,7 @@ class AVS47ChannelConfig(JSONWizard):
     EXCITATION: str = "30uV"
     # Wait this long after reaching the final range
     SETTLE_DELAY: float = 20.0
-    # Average points <AVERAGE_COUNT> times with <AVERAGE_DELAY> time between each point
+    # Average points <AVERAGE_COUNT> times with <AVERAGE_DELAY> seconds between each point
     AVERAGE_COUNT: int = 3
     AVERAGE_DELAY: float = 1.0
 

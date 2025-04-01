@@ -262,6 +262,139 @@ class AVS47:
             # We are either zero'd or not measuring
             self.active_channel = -1
 
+    async def set_channel(self, channel_num: int) -> AVS47Data:
+        """
+        Set the channel on the AVS to the given channel number
+        """
+        # Get previous channel state
+        channel = self.channel_states[channel_num]
+        logger.debug("Changing channel to %d", channel.channel)
+
+        # Set channel to active
+        change, lock = channel.channel_change
+        await self.send_and_receive(change)
+        new_state = await self.send_and_receive(lock)
+        self.active_channel = channel.channel
+
+        return new_state
+
+    async def settle(self, starting_state: AVS47Data, settle_delay: float) -> bool:
+        """
+        Settle the value on the channel. Return whether settling was successful
+
+        Args:
+            new_state: The current state of the AVS Channel after changing
+            settle_delay: Maximum time to wait for the channel to settle
+        """
+        # Store the starting state f the channel
+        new_state = starting_state
+        channel: AVS47ChannelState = self.channel_states[new_state.bits.channel]
+
+        # Wait for the settling delay
+        settling_delay = timedelta(seconds=settle_delay)
+        settling_start = datetime.now()
+
+        while (datetime.now() - settling_start) < settling_delay:
+            # Double check that the readout channel is correct. If not, restart the scan
+            # after a few seconds
+            if new_state.bits.channel != channel.channel:
+                logger.error(
+                    "AVS channel changed unexpectedly. Expected: %d, reading: %d",
+                    channel.channel,
+                    new_state.bits.channel,
+                )
+                return False
+
+            # Check if the sensor range has changed, and if so, reset settling time
+            if new_state.bits.input_range != channel.input_range:
+                self.settling_start = datetime.now()
+
+            # Update the channel config with the latest values
+            channel = replace(
+                channel,
+                input_range=new_state.bits.input_range,
+                resistance=new_state.bits.resistance,
+            )
+            self.channel_states[channel.channel] = channel
+
+            # Wait some time and read out a new value from the AVS
+            await asyncio.sleep(1)
+            new_state = await self.send_and_receive()
+
+        return True
+
+    async def read_resistance(self, average_count: int, average_delay: float) -> Optional[float]:
+        """
+        Read resistance on the currently configured channel. Assumes that the value is settled.
+        """
+        resistance = 0.0
+        channel = self.channel_states[self.active_channel]
+        delay = timedelta(seconds=average_delay)
+
+        # State is settled - readout value
+        next_sample_time = datetime.now() + delay
+        for count in range(average_count):
+            # This time we sleep at the start
+            await asyncio.sleep((next_sample_time - datetime.now()).total_seconds())
+            next_sample_time = datetime.now() + delay
+
+            # Read a valud from the AVS
+            new_state = await self.send_and_receive()
+
+            # Double check that scan range/channel hasn't changed
+            if (
+                new_state.bits.channel != channel.channel
+                or new_state.bits.input_range != channel.input_range
+            ):
+                logger.warning(
+                    "Value for channel %d was unstable during read. Skippping...",
+                    channel.channel,
+                )
+                return None
+
+            channel = replace(channel, resistance=new_state.bits.resistance)
+            self.channel_states[channel.channel] = channel
+            logger.debug(
+                "AVS channel %d resistance is %sΩ (sample %d of %d)",
+                channel.channel,
+                si_format(new_state.bits.resistance, 3),
+                count + 1,
+                average_count,
+            )
+            resistance += new_state.bits.resistance
+
+        return resistance / average_count
+
+    def resistance_to_temperature(
+        self, resistance: float, cal_name: str, channel_num: int = -1
+    ) -> Optional[float]:
+        """
+        Convert a sensor reading to a temperature using the given calibration name
+        """
+        # State is read out, convert the value
+        if cal_name in CALIBRATIONS:
+            temperature = CALIBRATIONS[cal_name](resistance)
+
+            if temperature is not None:
+                logger.info(
+                    "AVS Channel %d temperature is: %sK (Resistance: %sΩ)",
+                    channel_num,
+                    si_format(temperature, 3),
+                    si_format(resistance, 3),
+                )
+                return temperature
+            else:
+                logger.info(
+                    "AVS Channel %d temperature out of range (Resistance: %sΩ)",
+                    channel_num,
+                    si_format(resistance, 3),
+                )
+        else:
+            raise KeyError(
+                f"Calibration {cal_name} for channel {channel_num} is not unknown. Valid values are: {VALID_CALS}."
+            )
+        return None
+
     def start_scan(self):
         """
         Start auto scan
@@ -274,6 +407,21 @@ class AVS47:
             else:
                 # Scanner is already running
                 return
+
+        # Validate that channel config is valid
+        for channel_num, channel in self.config.items():
+            if channel.CALIBRATION not in CALIBRATIONS:
+                raise ValueError(
+                    f"Invalid calibration {channel.CALIBRATION} for channel {channel_num}. Valid cals are: {VALID_CALS}"
+                )
+            if channel.AVERAGE_COUNT < 1:
+                raise ValueError(
+                    f"Average count of {channel.AVERAGE_COUNT} for channel {channel_num} must be greater than 1."
+                )
+            if channel.AVERAGE_DELAY < 0.01:
+                raise ValueError(
+                    f"Average delay {si_format(channel.AVERAGE_DELAY)}s to small. Minimum average delay is 10 ms"
+                )
 
         # Start scan task
         logger.info("Starting AVS scan task")
@@ -342,122 +490,35 @@ class AVS47:
                     channel_config = self.config[channel.channel]
 
                     # Check if we need to change the channel
-                    failed = False
                     if self.active_channel != channel.channel:
-                        logger.debug("Changing channel to %d", channel.channel)
-                        # Set channel to active
-                        change, lock = channel.channel_change
-                        await self.send_and_receive(change)
-                        new_state = await self.send_and_receive(lock)
-                        self.active_channel = channel.channel
+                        starting_state = await self.set_channel(channel.channel)
+                        settle_success = await self.settle(
+                            starting_state, channel_config.SETTLE_DELAY
+                        )
 
-                        # Wait for the settling delay
-                        settling_delay = timedelta(seconds=channel_config.SETTLE_DELAY)
-                        settling_start = datetime.now()
-
-                        while (datetime.now() - settling_start) < settling_delay:
-                            # Double check that the readout channel is correct. If not, restart the scan
-                            # after a few seconds
-                            if new_state.bits.channel != channel.channel:
-                                logger.error(
-                                    "AVS channel changed unexpectedly. Expected: %d, reading: %d",
-                                    channel.channel,
-                                    new_state.bits.channel,
-                                )
-                                logger.error("Restarting scan in 5 seconds ")
-                                failed = True
-                                await asyncio.sleep(5)
-                                break
-
-                            # Check if the sensor range has changed, and if so, reset settling time
-                            if new_state.bits.input_range != channel.input_range:
-                                self.settling_start = datetime.now()
-
-                            # Update the channel config with the latest values
-                            channel = replace(
-                                channel,
-                                input_range=new_state.bits.input_range,
-                                resistance=new_state.bits.resistance,
-                            )
-                            self.channel_states[channel.channel] = channel
-
-                            # Wait some time and read out a new value from the AVS
-                            await asyncio.sleep(1)
-                            new_state = await self.send_and_receive()
-
-                    # If the scan failed for whatever reason, then don't read value
-                    if failed:
-                        continue
+                        # If we failed to settle, skip the channel
+                        if not settle_success:
+                            logger.warning("Failed to settle on channel %d. Skipping...")
+                            continue
 
                     # State is settled - readout value
-                    resistance = 0.0
-                    next_sample_time = datetime.now() + timedelta(
-                        seconds=channel_config.AVERAGE_DELAY
+                    resistance = await self.read_resistance(
+                        channel_config.AVERAGE_COUNT, channel_config.AVERAGE_DELAY
                     )
-                    for count in range(channel_config.AVERAGE_COUNT):
-                        # This time we sleep at the start
-                        await asyncio.sleep((next_sample_time - datetime.now()).total_seconds())
-                        next_sample_time = datetime.now() + timedelta(
-                            seconds=channel_config.AVERAGE_DELAY
-                        )
-                        new_state = await self.send_and_receive()
-
-                        # Double check that scan range/channel hasn't changed
-                        if (
-                            new_state.bits.channel != channel.channel
-                            or new_state.bits.input_range != channel.input_range
-                        ):
-                            logger.warning(
-                                "Value for channel %d was unstable during read. Skippping...",
-                                channel.channel,
-                            )
-                            failed = True
-                            break
-
-                        channel = replace(channel, resistance=new_state.bits.resistance)
-                        self.channel_states[channel.channel] = channel
-                        logger.debug(
-                            "AVS channel %d resistance is %sΩ",
-                            channel.channel,
-                            si_format(new_state.bits.resistance, 3),
-                        )
-                        resistance += new_state.bits.resistance
-
-                    # Don't store value if readout failed
-                    if failed:
+                    if resistance is None:
+                        # Read failed - continue on to next channel
                         continue
 
                     # State is read out, convert the value
-                    resistance /= channel_config.AVERAGE_COUNT
-                    if channel_config.CALIBRATION in CALIBRATIONS:
-                        temperature = CALIBRATIONS[channel_config.CALIBRATION](resistance)
-
-                        if temperature is not None:
-                            logger.info(
-                                "AVS Channel %d Temperature is: %sK (Resistance: %sΩ)",
-                                channel.channel,
-                                si_format(temperature, 3),
-                                si_format(resistance, 3),
-                            )
-                            new_temperatures[channel.channel] = temperature
-                        else:
-                            logger.info(
-                                "AVS Channel %d Temperature out of range (Resistance: %sΩ)",
-                                channel.channel,
-                                si_format(resistance, 3),
-                            )
-                    else:
-                        # Invalid calibration
-                        logger.warning(
-                            "Calibration %s for channel %d is not unknown. Valid values are: %s.",
-                            channel_config.CALIBRATION,
-                            channel.channel,
-                            VALID_CALS,
-                        )
+                    temperature = self.resistance_to_temperature(
+                        resistance, channel_config.CALIBRATION, channel.channel
+                    )
+                    if temperature is not None:
+                        new_temperatures[channel.channel] = temperature
 
                 # Mark scan complete
                 if self.scan_complete is True:
-                    logger.warning("Next AVS scan completed before previous value uploaded.")
+                    logger.warning("Next AVS scan completed before previous value handled.")
                 self.temperatures = new_temperatures
                 self.scan_complete = True
         # Scan ended
