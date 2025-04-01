@@ -124,6 +124,8 @@ class AVS47ChannelConfig(JSONWizard):
     # Average points <AVERAGE_COUNT> times with <AVERAGE_DELAY> seconds between each point
     AVERAGE_COUNT: int = 3
     AVERAGE_DELAY: float = 1.0
+    # Allow quick settle - break if the last 4 points are within 1% of the sensor range
+    QUICK_SETTLE: bool = True
 
 
 @dataclass()
@@ -146,6 +148,9 @@ class AVS47Config(UploaderConfig, JSONWizard):
             4: AVS47ChannelConfig("MC_PT", "PT1000"),
         }
     )
+    # Quick Settle points - break out of settle if N points are within this value
+    QUICK_SETTLE_TOLERANCE: float = 0.01
+    QUICK_SETTLE_POINTS: int = 4
 
 
 @dataclass()

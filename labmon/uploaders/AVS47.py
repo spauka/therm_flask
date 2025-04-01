@@ -1,6 +1,7 @@
 from dataclasses import dataclass, replace
 import sys
 import logging
+from collections import deque
 from datetime import datetime, timedelta
 from typing import Optional
 import ctypes
@@ -13,7 +14,7 @@ from labmon.config.config import AVS47ChannelConfig
 from ..utility.calibrations import CALIBRATIONS, VALID_CALS
 from ..utility.timers import enable_high_res_timer
 from ..utility.retry import retry
-from ..utility.si_prefix import si_format
+from ..utility.si_prefix import si_format, si_parse
 from ..config import AVS47Config
 from .uploader import Uploader
 
@@ -197,6 +198,8 @@ class AVS47:
         config: dict[int, AVS47ChannelConfig],
         address: int = 1,
         bitbang_delay: float = 0.001,
+        quick_settle_tolerance: float = 0.01,
+        quick_settle_points: int = 4,
     ):
         self.port = serial_port
         self.address = address
@@ -238,6 +241,9 @@ class AVS47:
                     excitation=excitation,
                 )
             )
+        self.quick_settle_tolerance = quick_settle_tolerance
+        self.quick_settle_points = quick_settle_points
+        self.quick_settle: deque[float] = deque(maxlen=quick_settle_points)
 
     def close(self):
         """
@@ -294,6 +300,7 @@ class AVS47:
         # Store the starting state f the channel
         new_state = starting_state
         channel: AVS47ChannelState = self.channel_states[new_state.bits.channel]
+        self.quick_settle.clear()
 
         # Wait for the settling delay
         settling_delay = timedelta(seconds=settle_delay)
@@ -321,6 +328,22 @@ class AVS47:
                 resistance=new_state.bits.resistance,
             )
             self.channel_states[channel.channel] = channel
+
+            # If we have enabled quick settle, check if all points are within 1% of range
+            if self.config[channel.channel].QUICK_SETTLE:
+                self.quick_settle.append(new_state.bits.resistance)
+                if len(self.quick_settle) == self.quick_settle_points:
+                    minval, maxval = min(self.quick_settle), max(self.quick_settle)
+                    val_range = maxval - minval
+                    try:
+                        input_range = si_parse(R_INPUT_RANGE[new_state.bits.input_range])[0]
+                        if val_range < (input_range * self.quick_settle_tolerance):
+                            return True
+                    except ValueError:
+                        logger.warning(
+                            "Unable to parse input range: %s",
+                            R_INPUT_RANGE[new_state.bits.input_range],
+                        )
 
             # Wait some time and read out a new value from the AVS
             await asyncio.sleep(1)
@@ -622,7 +645,12 @@ class AVS47Monitor(Uploader[AVS47Config]):
         """
         Try opening a connection to the sample instrument
         """
-        instr = AVS47(self.config.SERIAL_PORT, self.config.SENSORS, address=self.config.ADDRESS)
+        instr = AVS47(
+            self.config.SERIAL_PORT,
+            self.config.SENSORS,
+            address=self.config.ADDRESS,
+            quick_settle_points=self.config.QUICK_SETTLE_POINTS,
+        )
         await instr.startup()
         logger.info("Connected to AVS47 with address: %d", instr.address)
         instr.start_scan()
