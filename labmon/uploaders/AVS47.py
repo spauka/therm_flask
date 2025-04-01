@@ -242,6 +242,10 @@ class AVS47:
                 )
             )
         self.quick_settle_tolerance = quick_settle_tolerance
+        if quick_settle_points <= 1:
+            raise ValueError(
+                "Quick settle points must be greater than 1. Got %d", quick_settle_points
+            )
         self.quick_settle_points = quick_settle_points
         self.quick_settle: deque[float] = deque(maxlen=quick_settle_points)
 
