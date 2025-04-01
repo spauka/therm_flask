@@ -100,7 +100,7 @@ def split(value: int | float) -> tuple[float, int]:
 
     See :func:`si_format` for more examples.
     """
-    if value == 0 or value == 0.0:
+    if value in (0, 0.0):
         return 0.0, 0
 
     expof10 = math.log10(abs(value))

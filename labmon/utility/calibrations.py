@@ -43,7 +43,7 @@ def powpolylog_res_to_temp(R: float, cal: SensorCalibration) -> Optional[float]:
     """
     Convert a resistance in Ohms to K
     """
-    if not (cal.valid_resistance_range[0] <= R <= cal.valid_resistance_range[1]):
+    if not cal.valid_resistance_range[0] <= R <= cal.valid_resistance_range[1]:
         logger.debug(
             "Resistance out of range. %s not in (%s, %s)",
             si_format(R),
@@ -52,7 +52,7 @@ def powpolylog_res_to_temp(R: float, cal: SensorCalibration) -> Optional[float]:
         )
         return None
     T = 10 ** poly(log10(R), cal.coefficients, cal.domain)
-    if not (cal.valid_temperature_range[0] <= T <= cal.valid_temperature_range[1]):
+    if not cal.valid_temperature_range[0] <= T <= cal.valid_temperature_range[1]:
         logger.debug(
             "Temperature out of range. %sK not in (%sK, %sK)",
             si_format(T),
@@ -67,7 +67,7 @@ def polylog_res_to_temp(R: float, cal: SensorCalibration) -> Optional[float]:
     """
     Convert a resistance in Ohms to K
     """
-    if not (cal.valid_resistance_range[0] <= R <= cal.valid_resistance_range[1]):
+    if not cal.valid_resistance_range[0] <= R <= cal.valid_resistance_range[1]:
         logger.debug(
             "Resistance out of range. %s not in (%s, %s)",
             si_format(R),
@@ -76,7 +76,7 @@ def polylog_res_to_temp(R: float, cal: SensorCalibration) -> Optional[float]:
         )
         return None
     T = poly(log10(R), cal.coefficients, cal.domain)
-    if not (cal.valid_temperature_range[0] <= T <= cal.valid_temperature_range[1]):
+    if not cal.valid_temperature_range[0] <= T <= cal.valid_temperature_range[1]:
         logger.debug(
             "Temperature out of range. %sK not in (%sK, %sK)",
             si_format(T),

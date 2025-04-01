@@ -175,8 +175,13 @@ class AVS47ChannelState:
             input_range=input_range,
             input_select=INPUT_SELECT["Measure"],
         )
-        lock_state = change_state.copy()
-        lock_state.remote = 0
+        lock_state = AVS47DataStruct(
+            remote=0,
+            channel=self.channel,
+            excitation=excitation,
+            input_range=input_range,
+            input_select=INPUT_SELECT["Measure"],
+        )
 
         return AVS47Data(bits=change_state), AVS47Data(bits=lock_state)
 
@@ -307,7 +312,7 @@ class AVS47:
 
             # Check if the sensor range has changed, and if so, reset settling time
             if new_state.bits.input_range != channel.input_range:
-                self.settling_start = datetime.now()
+                settling_start = datetime.now()
 
             # Update the channel config with the latest values
             channel = replace(
@@ -375,25 +380,25 @@ class AVS47:
         if cal_name in CALIBRATIONS:
             temperature = CALIBRATIONS[cal_name](resistance)
 
-            if temperature is not None:
-                logger.info(
-                    "AVS Channel %d temperature is: %sK (Resistance: %sΩ)",
-                    channel_num,
-                    si_format(temperature, 3),
-                    si_format(resistance, 3),
-                )
-                return temperature
-            else:
+            if temperature is None:
                 logger.info(
                     "AVS Channel %d temperature out of range (Resistance: %sΩ)",
                     channel_num,
                     si_format(resistance, 3),
                 )
-        else:
-            raise KeyError(
-                f"Calibration {cal_name} for channel {channel_num} is not unknown. Valid values are: {VALID_CALS}."
+                return None
+            logger.info(
+                "AVS Channel %d temperature is: %sK (Resistance: %sΩ)",
+                channel_num,
+                si_format(temperature, 3),
+                si_format(resistance, 3),
             )
-        return None
+            return temperature
+
+        raise KeyError(
+            f"Calibration {cal_name} for channel {channel_num} is not unknown. "
+            f"Valid values are: {VALID_CALS}."
+        )
 
     def start_scan(self):
         """
@@ -412,15 +417,18 @@ class AVS47:
         for channel_num, channel in self.config.items():
             if channel.CALIBRATION not in CALIBRATIONS:
                 raise ValueError(
-                    f"Invalid calibration {channel.CALIBRATION} for channel {channel_num}. Valid cals are: {VALID_CALS}"
+                    f"Invalid calibration {channel.CALIBRATION} for channel {channel_num}. "
+                    f"Valid cals are: {VALID_CALS}"
                 )
             if channel.AVERAGE_COUNT < 1:
                 raise ValueError(
-                    f"Average count of {channel.AVERAGE_COUNT} for channel {channel_num} must be greater than 1."
+                    f"Average count of {channel.AVERAGE_COUNT} for channel {channel_num} "
+                    "must be greater than 1."
                 )
             if channel.AVERAGE_DELAY < 0.01:
                 raise ValueError(
-                    f"Average delay {si_format(channel.AVERAGE_DELAY)}s to small. Minimum average delay is 10 ms"
+                    f"Average delay {si_format(channel.AVERAGE_DELAY)}s to small. "
+                    "Minimum average delay is 10 ms"
                 )
 
         # Start scan task
@@ -481,7 +489,10 @@ class AVS47:
                     # Load channel config
                     if channel.channel not in self.config:
                         logger.error(
-                            "Channel %d not configured, but is enabled. Please edit the config file. Skipping....",
+                            (
+                                "Channel %d not configured, but is enabled. "
+                                "Please edit the config file. Skipping...."
+                            ),
                             channel.channel,
                         )
                         channel = replace(channel, enabled=False)
