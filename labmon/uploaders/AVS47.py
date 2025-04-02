@@ -235,7 +235,7 @@ class AVS47:
                 excitation = EXCITATION["UNK"]
             self.channel_states.append(
                 AVS47ChannelState(
-                    enabled=(i in config),
+                    enabled=(i in config and config[i].ENABLED),
                     channel=i,
                     input_range=INPUT_RANGE["UNK"],
                     excitation=excitation,

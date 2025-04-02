@@ -117,6 +117,8 @@ class LeidenUploadConfig(UploaderConfig, JSONWizard):
 class AVS47ChannelConfig(JSONWizard):
     SENSOR: str = "Four_K_RuO"
     CALIBRATION: str = "PT1000"
+    # Channel state
+    ENABLED: bool = True
     # Excitation for this channel
     EXCITATION: str = "30uV"
     # Wait this long after reaching the final range
